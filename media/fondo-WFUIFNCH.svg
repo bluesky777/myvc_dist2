@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000" preserveAspectRatio="xMidYMid slice" role="presentation">
+  <defs>
+    <linearGradient id="lienzo" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#dff6ee"/>
+      <stop offset="45%" stop-color="#a9e2d3"/>
+      <stop offset="100%" stop-color="#79cfc2"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity=".55"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="sol" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f7d774" stop-opacity=".5"/>
+      <stop offset="100%" stop-color="#f2c14e" stop-opacity=".22"/>
+    </linearGradient>
+    <linearGradient id="coral" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f6a99a" stop-opacity=".45"/>
+      <stop offset="100%" stop-color="#ef8b7b" stop-opacity=".18"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1600" height="1000" fill="url(#lienzo)"/>
+
+  <!-- Resplandor de arriba a la izquierda: da la sensación de luz sin dibujar nada -->
+  <ellipse cx="380" cy="140" rx="700" ry="480" fill="url(#halo)"/>
+
+  <!-- Figuras. Todas por debajo del 12% de opacidad: se notan en el hueco entre columnas y no
+       compiten con las publicaciones, que es lo que se mira. -->
+  <g>
+    <circle cx="1290" cy="250" r="240" fill="url(#sol)"/>
+    <circle cx="1180" cy="760" r="300" fill="#ffffff" opacity=".14"/>
+    <circle cx="215" cy="820" r="190" fill="url(#coral)"/>
+
+    <!-- Un anillo y un cuarto de arco, como los del papel doblado -->
+    <circle cx="700" cy="880" r="150" fill="none" stroke="#ffffff" stroke-width="26" opacity=".16"/>
+    <path d="M1600 620 A 300 300 0 0 0 1300 920" fill="none" stroke="#ffffff" stroke-width="34" opacity=".13"/>
+
+    <!-- Cuadrado redondeado, girado -->
+    <rect x="880" y="80" width="230" height="230" rx="56" fill="#ffffff" opacity=".12" transform="rotate(-18 995 195)"/>
+
+    <!-- Media luna: un círculo al que otro le come un lado -->
+    <path d="M120 300 a 175 175 0 1 0 0 -1 z M120 300 a 175 175 0 1 1 0 1 z" fill="none"/>
+    <circle cx="60" cy="470" r="180" fill="#ffffff" opacity=".1"/>
+  </g>
+</svg>

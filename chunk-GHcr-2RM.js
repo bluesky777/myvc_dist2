@@ -1,0 +1,1 @@
+function u(e,n){if(!e||n.length===0)return!1;let o=(e.roles??[]).map(r=>r.name.toLowerCase());return n.some(r=>o.includes(r.toLowerCase()))}function i(e){return e?e.tipo===`Profesor`?e.persona_id:e.profesor_id??null:null}function l(e,n){let o=i(e);return o!==null&&n!==null&&n!==void 0&&Number(n)===Number(o)}export{l as n,u as r,i as t};

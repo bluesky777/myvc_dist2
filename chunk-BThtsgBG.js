@@ -1,0 +1,1 @@
+function a(e,r){return e.find(o=>o.numero_periodo===r)??e[r-1]}function u(e,r,o){if(o)return!0;let n=a(e,r);return n?n.profes_pueden_editar_notas!=0:!1}function d(e,r,o){if(o)return!0;let n=a(e,r);return n?n.profes_pueden_nivelar!=0:!1}export{u as n,d as t};

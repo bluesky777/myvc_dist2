@@ -1,0 +1,247 @@
+# Apache, para la aplicacion NUEVA.
+#
+# ────────────────────────────────────────────────────────────────────────────────
+# POR QUE EXISTE ESTE FICHERO, Y POR QUE NO ES UNA COPIA DEL DE LA VIEJA
+#
+# `app/public/.htaccess` son 24 KB de HTML5 Boilerplate escritos para otra aplicacion
+# en otra decada, y se despliegan hoy en los 16 colegios --en `up/`, y ahi siguen--.
+# `app2/public/` NO LLEVABA NINGUNO, y con `up2/` eso es MAS grave, no menos: `up2/`
+# es carpeta NUEVA, asi que alli no hay ningun `.htaccess` heredado que valga. Sin
+# este fichero, `up2/` nace sin el bloqueo de los ficheros ocultos -- el que en `up/`
+# hoy si funciona, pero porque lo pusieron hace una decada y no porque nadie lo
+# repita.
+#
+# Y no es teorico: `myvc_dist` se despliega POR `git pull`, o sea que **el `.git/` del
+# colegio esta dentro de la raiz que sirve Apache**. Medido contra Apache de verdad y
+# el build de verdad, sin este fichero:
+#
+#     GET /.git/HEAD   200   ref: refs/heads/main
+#     GET /.env        200   APP_KEY=secreto
+#
+# y con el, 403 los dos.
+#
+# Ese agujero NO depende de como se resuelvan las rutas: la almohadilla arregla el F5
+# y lo deja igual. Por eso este fichero va aparte y va ya.
+#
+# LO QUE NO ESTA AQUI ESTA QUITADO A PROPOSITO. Del boilerplate se cayeron:
+#
+#   X-UA-Compatible ...... IE no existe y Angular 22 no lo soporta.
+#   AddType de flash, video, audio, crx/oex/xpi/safariextz ....... el build emite
+#                          js, css, svg, woff2, ico, html y gif -- contado, no supuesto --
+#                          y `/private/etc/apache2/mime.types` ya los conoce TODOS,
+#                          `font/woff2` incluido. Declararlos otra vez es ruido.
+#   CORS de imagenes y fuentes ... la aplicacion y sus recursos salen del MISMO host;
+#                          la API tambien (`location.hostname + '/8myvc/public/api/'`).
+#                          No hay peticion entre origenes que autorizar.
+#   P3P, parpadeo de IE, los bloques de SSL ..... ya venian comentados: no hacian nada.
+#
+# Lo que SI esta, esta porque se puede justificar de una en una. Y todo lo de aqui es
+# un SUBCONJUNTO del fichero que ya corre en los 16 colegios, o sea que ninguna linea
+# es una apuesta: todas estan probadas en produccion.
+#
+# LA REESCRITURA DE LAS RUTAS ESTA AL FINAL DE ESTE FICHERO. Este comentario decia lo
+# contrario --"no esta aqui, va en su propio commit"-- porque se escribio antes de que la
+# decision existiera; la reescritura llego despues y el comentario se quedo. Se corrige al
+# mover la aplicacion a `up2/`, que es cuando alguien lo volvio a leer. Ver OLA-3.md §5.
+
+
+# ##############################################################################
+# # SEGURIDAD                                                                  #
+# ##############################################################################
+
+# Sin esto, Apache lista el contenido de cualquier carpeta que no tenga indice.
+<IfModule mod_autoindex.c>
+    Options -Indexes
+</IfModule>
+
+# Apache, con MultiViews, contesta `/alumnos` con `alumnos.html` si existe: adivina.
+# Para una aplicacion de una sola pagina eso es justo lo que no se quiere.
+Options -MultiViews
+
+# ESTA ES LA REGLA QUE SE PIERDE HOY SI ESTE FICHERO NO EXISTE.
+# Bloquea todo lo que empiece por punto: `.htaccess`, `.git/`, `.env`.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{SCRIPT_FILENAME} -d [OR]
+    RewriteCond %{SCRIPT_FILENAME} -f
+    RewriteRule "(^|/)\." - [F]
+</IfModule>
+
+# Ficheros de trabajo que no deberian llegar a un servidor -- pero llegan: el
+# repositorio `myvc_dist` tiene HOY `images/MyVc-1.psd` y `book-library-back.psd`
+# versionados. La sintaxis es la de Apache 2.2 a proposito: es la que corre en los
+# colegios ahora mismo, o sea que esta probada alli. No se moderniza a ciegas.
+<FilesMatch "(^#.*#|\.(bak|config|dist|fla|inc|ini|log|psd|sh|sql|sw[op])|~)$">
+    Order allow,deny
+    Deny from all
+    Satisfy All
+</FilesMatch>
+
+
+# ##############################################################################
+# # TEXTO Y CODIFICACION                                                       #
+# ##############################################################################
+
+# La aplicacion esta entera en castellano. Sin esto, un servidor mal configurado
+# sirve los acentos como basura y no hay forma de verlo hasta que se ve.
+AddDefaultCharset utf-8
+
+<IfModule mod_mime.c>
+    AddCharset utf-8 .css .js .json .svg
+</IfModule>
+
+
+# ##############################################################################
+# # RENDIMIENTO                                                                #
+# ##############################################################################
+
+# DOS NOMBRES PARA LO MISMO, Y NO ES REDUNDANCIA. `mime.types` del sistema mapea
+# `.js` a `text/javascript`; el boilerplate de la vieja lo forzaba a
+# `application/javascript` con un `AddType` que aqui se quito por innecesario. Al
+# quitarlo, una lista que solo dijera `application/javascript` deja de casar y
+# **la compresion se apaga en silencio**: medido, el `main.js` viajaba entero, 151.467
+# bytes, sin `Content-Encoding`. Se ponen los dos nombres. Lo mismo abajo, en la cache.
+#
+# Comprimir NO es opcional aqui: el arranque son 605 KB en crudo y 182 KB
+# comprimidos. Sin `mod_deflate` el colegio se descarga los 605 KB.
+<IfModule mod_deflate.c>
+    <IfModule mod_filter.c>
+        AddOutputFilterByType DEFLATE text/javascript \
+                                      application/javascript \
+                                      application/json \
+                                      image/svg+xml \
+                                      text/css \
+                                      text/html \
+                                      text/plain
+    </IfModule>
+</IfModule>
+
+# El build pone una huella en el nombre de cada fichero (`main-UUCJ76JT.js`), asi que
+# un `.js` o un `.css` NUNCA cambia de contenido sin cambiar de nombre: cachearlo un
+# año es correcto y es lo que hace que la segunda visita no descargue nada.
+#
+# `index.html` A CERO SEGUNDOS, Y ES LA LINEA IMPORTANTE DE ESTE BLOQUE. Es el unico
+# fichero que NO lleva huella, y es el que dice como se llaman los demas. Si se
+# cachea, el navegador pide los trozos del despliegue ANTERIOR -- que ya no existen --
+# y la aplicacion arranca en blanco despues de cada subida, solo para quien ya
+# hubiera entrado antes. Es un fallo que no se ve probando en limpio.
+<IfModule mod_expires.c>
+    ExpiresActive on
+    ExpiresDefault                          "access plus 1 month"
+    ExpiresByType text/html                 "access plus 0 seconds"
+    ExpiresByType application/json          "access plus 0 seconds"
+    ExpiresByType text/css                  "access plus 1 year"
+    ExpiresByType text/javascript           "access plus 1 year"
+    ExpiresByType application/javascript    "access plus 1 year"
+    ExpiresByType image/svg+xml             "access plus 1 month"
+    ExpiresByType image/gif                 "access plus 1 month"
+    ExpiresByType image/x-icon              "access plus 1 week"
+    ExpiresByType font/woff2                "access plus 1 month"
+</IfModule>
+
+# Con fechas de caducidad tan largas, el ETag sobra y ademas rompe la cache cuando
+# hay mas de un servidor detras. Viene del fichero de la vieja, tal cual.
+<IfModule mod_headers.c>
+    Header unset ETag
+</IfModule>
+FileETag None
+
+
+# ##############################################################################
+# # ERRORES -- Y POR QUE AQUI NO HAY `ErrorDocument`                           #
+# ##############################################################################
+
+# La vieja lleva `ErrorDocument 404 /404.html` y despliega un `404.html` de 3,5 KB:
+# la pagina «Page Not Found :(» del boilerplate, en INGLES.
+#
+# Aqui no hace falta ninguna de las dos cosas, y ponerlas seria peor:
+#
+#   - Con la reescritura del final de este fichero, NADA dentro de `up/` puede dar
+#     404: lo que existe se sirve, y lo que no, lo contesta `index.html`. Lo unico
+#     que sigue dando 403 es el bloqueo de ficheros ocultos, que es otro codigo.
+#   - Y de las rutas que no reconoce ya se encarga la aplicacion: `app.routes.ts`
+#     acaba en `{ path: '**', redirectTo: 'panel' }`.
+#
+# O sea que un `ErrorDocument` aqui apuntaria a un fichero que no existe, para un
+# caso que no ocurre, en un idioma que no es el de la aplicacion. Fuera.
+
+
+# ##############################################################################
+# # LA `www.` DEL PRINCIPIO                                                    #
+# ##############################################################################
+
+# Copiada TAL CUAL de la vieja, y esto es «que quede como estaba»: hoy corre en los
+# 16 colegios y quitarla cambiaria el comportamiento de los que usen `www.`, que no
+# sabemos cuales son.
+#
+# Y un aviso para quien la lea con prisa: **redirige a `http://` y NO baja a nadie de
+# HTTPS**. Esta guardada por `%{HTTPS} !=on`, o sea que en un colegio con HTTPS la
+# condicion no se cumple y la regla no llega a correr nunca.
+<IfModule mod_rewrite.c>
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+    RewriteRule ^ http://%1%{REQUEST_URI} [R=301,L]
+</IfModule>
+
+
+# ##############################################################################
+# # LAS RUTAS DE LA APLICACION  (decision C -- ver OLA-3.md §5)                #
+# ##############################################################################
+
+# La aplicacion NUEVA usa rutas de camino (`/panel/alumnos`); la vieja usaba la
+# almohadilla (`/#/alumnos`). Con la almohadilla Apache solo veia `/` y esto no hacia
+# falta. Con rutas de camino Apache recibe la ruta, no encuentra ningun fichero asi, y
+# contesta el `ErrorDocument 404` de arriba.
+#
+# El sintoma no sale probando a mano: entrar por la raiz funciona y navegar funciona
+# --lo hace el router, en el navegador-- y se rompe LA PRIMERA VEZ QUE ALGUIEN PULSA
+# F5, o abre un marcador, o pincha un enlace que le han pasado.
+#
+# ─────────────────────────────────────────────────────────────────────────────────
+# SI LA APLICACION SE MUEVE DE SITIO, HAY QUE CAMBIAR `/up2/` EN LAS DOS LINEAS
+# MARCADAS ABAJO. Y NADA MAS.
+#
+# LA NUEVA VIVE EN `up2/`, AL LADO DE LA VIEJA, NO ENCIMA. Decision del usuario del
+# 2026-08-24, y cambia la naturaleza del despliegue: ya no es una sustitucion. La
+# vieja se queda en `up/` sirviendo lo de siempre --`myvc_front_2` sigue en `plus/`--
+# y la nueva estrena carpeta. Las tres cosas que eso arregla de golpe:
+#
+#   - No hay corte. El dia del despliegue nadie pierde nada, porque `up/` no se toca.
+#   - Lo que este roto en la vieja el dia de subir deja de bloquear: sigue estando
+#     roto exactamente igual, en su sitio, y no impide estrenar la nueva.
+#   - Apagar `app/` deja de ser un evento y pasa a ser una fecha que se elige.
+#
+# `up/` esta documentado en `8myvc/docs/DESPLIEGUE-REFERENCIA.md:25`. `up2/` NO lo
+# esta todavia: es carpeta nueva y hay que crearla en los dieciseis. Mientras eso no
+# este escrito alli, este comentario es la unica fuente.
+# ─────────────────────────────────────────────────────────────────────────────────
+#
+# ESTO NO ARREGLA LA PANTALLA EN BLANCO. `app2` se construye con `<base href="/">`,
+# asi que servida desde `up/` pide sus trozos a la raiz del dominio y se lleva once
+# 404 --medido en Chrome: titulo puesto, cuerpo vacio, sin `app-root`--. Eso se
+# arregla construyendo con `--base-href /up2/`. Son cosas distintas y las dos hacen
+# falta: esta regla es el F5, aquello es que no arranca nunca.
+#
+# VA AL FINAL DEL FICHERO Y NO ES DECORACION. Las reglas de mod_rewrite corren en el
+# orden escrito, y la de aqui corta el resto. Puesta ANTES del bloque de seguridad se
+# salta el bloqueo de los ficheros ocultos: medido, `/.htaccess` pasaba de 403 a 200.
+# Si alguien sube este bloque, reabre ese agujero.
+#
+# La forma es la de `myvc_front_2/src/.htaccess`, que lleva desplegada en `plus/` mas
+# de un año: no se invento nada aqui.
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /up2/
+#   ^^^^^^^^^^^^^^^^ (1 de 2) el sitio donde vive la aplicacion
+
+    RewriteRule ^index\.html$ - [L]
+
+    # Existe de verdad -> se sirve tal cual. Sin estas dos condiciones, la regla de
+    # abajo se traga los .js, el CSS y las imagenes --el logo del colegio incluido--
+    # y la aplicacion arranca EN BLANCO, que es peor que el 404 porque no dice nada.
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule . /up2/index.html [L]
+#                 ^^^^ (2 de 2)
+</IfModule>

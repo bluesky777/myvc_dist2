@@ -1,0 +1,1 @@
+var t=[[/á/g,`a`],[/â/g,`a`],[/é/g,`e`],[/è/g,`e`],[/í/g,`i`],[/ì/g,`i`],[/ó/g,`o`],[/ú/g,`u`],[/ü/g,`u`],[/ç/g,`c`]];function o(e){let n=String(e??``).toLowerCase();for(let[g,r]of t)n=n.replace(g,r);return n}export{o as t};

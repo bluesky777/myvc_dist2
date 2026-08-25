@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" width="1200" height="900" role="img" aria-label="Salon de clase con tablero y estudiantes">
+  <defs>
+    <linearGradient id="pared" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f7efe2"/><stop offset="100%" stop-color="#e8dbc7"/>
+    </linearGradient>
+    <linearGradient id="piso" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c49a6c"/><stop offset="100%" stop-color="#a97c52"/>
+    </linearGradient>
+    <linearGradient id="tablero" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#356152"/><stop offset="100%" stop-color="#25473c"/>
+    </linearGradient>
+    <radialGradient id="luz" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#fff8e0" stop-opacity=".8"/><stop offset="100%" stop-color="#fff8e0" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1200" height="900" fill="url(#pared)"/>
+  <rect y="600" width="1200" height="300" fill="url(#piso)"/>
+  <g stroke="#00000012" stroke-width="3">
+    <path d="M0 690 H1200 M0 780 H1200 M300 600 V900 M600 600 V900 M900 600 V900"/>
+  </g>
+
+  <!-- Ventanal -->
+  <rect x="880" y="120" width="270" height="330" rx="8" fill="#f4f1ea"/>
+  <rect x="898" y="138" width="234" height="294" fill="#a8d5ee"/>
+  <circle cx="1080" cy="200" r="34" fill="#fff5cf"/>
+  <path d="M898 380 q60 -60 120 -20 q50 34 114 4 v68 H898 Z" fill="#7fb069"/>
+  <path d="M1015 138 V432 M898 285 H1132" stroke="#f4f1ea" stroke-width="12"/>
+  <ellipse cx="1010" cy="330" rx="360" ry="420" fill="url(#luz)"/>
+
+  <!-- Tablero -->
+  <rect x="150" y="150" width="620" height="310" rx="10" fill="#8a6242"/>
+  <rect x="166" y="166" width="588" height="278" rx="6" fill="url(#tablero)"/>
+  <g stroke="#eef6f1" stroke-width="6" stroke-linecap="round" fill="none" opacity=".9">
+    <path d="M210 226 h190 M210 264 h132 M210 302 h206 M210 340 h96"/>
+    <path d="M480 330 l60 -104 l60 104 z"/>
+    <path d="M540 226 v104"/>
+    <circle cx="672" cy="288" r="44"/>
+    <path d="M672 244 v88 M628 288 h88"/>
+    <path d="M210 392 h300"/>
+  </g>
+  <rect x="150" y="460" width="620" height="18" rx="6" fill="#6d4a30"/>
+  <rect x="210" y="464" width="70" height="8" rx="4" fill="#f2f2ef"/>
+
+  <!-- Profesora -->
+  <g transform="translate(830 610)">
+    <path d="M-52 -8 l52 -12 l52 12 l14 200 h-132 z" fill="#3d6f8e"/>
+    <circle cx="0" cy="-58" r="42" fill="#e2ab84"/>
+    <path d="M-44 -66 q10 -52 44 -52 q36 0 44 52 q-16 -22 -44 -22 q-30 0 -44 22 z" fill="#4a3327"/>
+    <path d="M-52 10 q-70 -60 -108 -132" stroke="#e2ab84" stroke-width="26" stroke-linecap="round" fill="none"/>
+    <path d="M-166 -128 l24 -26" stroke="#f2f2ef" stroke-width="12" stroke-linecap="round"/>
+  </g>
+
+  <!-- Pupitres -->
+  <g>
+    <g transform="translate(230 700)">
+      <rect x="-100" y="0" width="200" height="22" rx="8" fill="#d9c4a3"/>
+      <rect x="-86" y="22" width="14" height="120" fill="#b39875"/><rect x="72" y="22" width="14" height="120" fill="#b39875"/>
+      <circle cx="0" cy="-84" r="40" fill="#c78a5a"/>
+      <path d="M-44 -96 q6 -46 44 -46 q38 0 44 46 q-22 -18 -44 -18 q-24 0 -44 18z" fill="#2b2019"/>
+      <path d="M-58 -46 l58 -14 l58 14 l10 46 h-136 z" fill="#e05a47"/>
+      <rect x="-40" y="-8" width="80" height="12" rx="4" fill="#f6f4ef"/>
+    </g>
+    <g transform="translate(600 700)">
+      <rect x="-100" y="0" width="200" height="22" rx="8" fill="#d9c4a3"/>
+      <rect x="-86" y="22" width="14" height="120" fill="#b39875"/><rect x="72" y="22" width="14" height="120" fill="#b39875"/>
+      <circle cx="0" cy="-84" r="40" fill="#8a5a3c"/>
+      <path d="M-42 -104 q42 -34 84 6 q-6 -40 -42 -40 q-38 0 -42 34z" fill="#241a14"/>
+      <path d="M-58 -46 l58 -14 l58 14 l10 46 h-136 z" fill="#3fa796"/>
+      <path d="M-30 -6 l30 -18 l30 18 v14 h-60z" fill="#f6f4ef"/>
+    </g>
+    <g transform="translate(390 812)">
+      <rect x="-118" y="0" width="236" height="24" rx="8" fill="#e0cbaa"/>
+      <circle cx="0" cy="-92" r="44" fill="#eac09a"/>
+      <path d="M-46 -108 q10 -48 46 -48 q36 0 46 48 q-20 -20 -46 -20 q-28 0 -46 20z" fill="#6b4a2a"/>
+      <path d="M-64 -50 l64 -16 l64 16 l12 50 h-152 z" fill="#f0b429"/>
+      <path d="M0 -66 v-30" stroke="#eac09a" stroke-width="20" stroke-linecap="round" transform="rotate(24)"/>
+    </g>
+  </g>
+</svg>

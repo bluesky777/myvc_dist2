@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" width="1200" height="900" role="img" aria-label="Estudiantes jugando en las canchas del colegio">
+  <defs>
+    <linearGradient id="cieloc" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4ea9dd"/><stop offset="70%" stop-color="#a7d8f0"/><stop offset="100%" stop-color="#dff0f8"/>
+    </linearGradient>
+    <linearGradient id="cancha" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e08b4c"/><stop offset="100%" stop-color="#c96f33"/>
+    </linearGradient>
+    <radialGradient id="solc" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#fff8d6" stop-opacity="1"/><stop offset="100%" stop-color="#fff8d6" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1200" height="900" fill="url(#cieloc)"/>
+  <circle cx="200" cy="140" r="180" fill="url(#solc)"/>
+  <circle cx="200" cy="140" r="56" fill="#fff4c6"/>
+  <g fill="#ffffff" opacity=".7">
+    <ellipse cx="760" cy="130" rx="96" ry="34"/><ellipse cx="840" cy="120" rx="66" ry="26"/><ellipse cx="690" cy="140" rx="56" ry="22"/>
+  </g>
+
+  <!-- Arboles y cerca del fondo -->
+  <g>
+    <circle cx="90" cy="430" r="66" fill="#3f7a3c"/><rect x="80" y="470" width="20" height="70" fill="#7a5236"/>
+    <circle cx="1120" cy="415" r="72" fill="#37703a"/><rect x="1110" y="460" width="20" height="80" fill="#7a5236"/>
+    <circle cx="330" cy="440" r="52" fill="#4a8c46"/><rect x="322" y="475" width="16" height="60" fill="#7a5236"/>
+  </g>
+  <rect y="500" width="1200" height="80" fill="#6ba85f"/>
+  <g stroke="#ffffff" stroke-width="4" opacity=".45">
+    <path d="M0 505 H1200 M0 545 H1200"/>
+    <path d="M60 500 V580 M180 500 V580 M300 500 V580 M420 500 V580 M540 500 V580 M660 500 V580 M780 500 V580 M900 500 V580 M1020 500 V580 M1140 500 V580"/>
+  </g>
+
+  <!-- Cancha -->
+  <path d="M0 580 H1200 V900 H0 Z" fill="url(#cancha)"/>
+  <g stroke="#fdf6ec" stroke-width="7" fill="none" opacity=".85">
+    <path d="M60 620 H1140 M0 760 H1200"/>
+    <path d="M600 620 V900"/>
+    <ellipse cx="600" cy="760" rx="150" ry="66"/>
+  </g>
+
+  <!-- Canasta -->
+  <g>
+    <rect x="1010" y="300" width="16" height="300" fill="#6b7b86"/>
+    <rect x="900" y="250" width="130" height="92" rx="6" fill="#fdf6ec" stroke="#c3ccd2" stroke-width="6"/>
+    <rect x="940" y="286" width="52" height="42" fill="none" stroke="#e0543f" stroke-width="6"/>
+    <path d="M918 344 h56" stroke="#e0543f" stroke-width="7"/>
+    <path d="M920 348 l8 34 M934 348 l4 34 M950 348 l0 34 M964 348 l-4 34 M972 348 l-8 34" stroke="#fdf6ec" stroke-width="4"/>
+  </g>
+
+  <!-- Balon en el aire -->
+  <g transform="translate(770 300)">
+    <circle r="34" fill="#e2762f" stroke="#8d4319" stroke-width="4"/>
+    <path d="M-34 0 h68 M0 -34 v68 M-24 -24 q24 24 0 48 M24 -24 q-24 24 0 48" stroke="#8d4319" stroke-width="4" fill="none"/>
+  </g>
+
+  <!-- Chicos jugando -->
+  <g transform="translate(640 720)">
+    <!-- saltando -->
+    <circle cx="0" cy="-190" r="34" fill="#8a5a3c"/>
+    <path d="M-38 -204 q38 -32 76 4 q-8 -36 -38 -36 q-34 0 -38 32z" fill="#221812"/>
+    <path d="M-44 -152 l44 -12 l44 12 l10 84 h-108 z" fill="#f0b429"/>
+    <path d="M-44 -142 q-58 -46 -74 -118" stroke="#8a5a3c" stroke-width="24" stroke-linecap="round" fill="none"/>
+    <path d="M44 -142 q52 -40 66 -100" stroke="#8a5a3c" stroke-width="24" stroke-linecap="round" fill="none"/>
+    <path d="M-24 -68 l-26 76 M22 -68 l30 62" stroke="#3f4d63" stroke-width="26" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(380 780)">
+    <circle cx="0" cy="-176" r="34" fill="#e0ab84"/>
+    <path d="M-36 -186 q6 -44 36 -44 q32 0 36 44 q-18 -18 -36 -18 q-20 0 -36 18z" fill="#5c3a1e"/>
+    <path d="M-42 -140 l42 -12 l42 12 l10 80 h-104 z" fill="#3fa796"/>
+    <path d="M-42 -132 q-56 26 -70 -20" stroke="#e0ab84" stroke-width="22" stroke-linecap="round" fill="none"/>
+    <path d="M42 -132 q54 -14 62 -66" stroke="#e0ab84" stroke-width="22" stroke-linecap="round" fill="none"/>
+    <path d="M-20 -60 l-34 64 M18 -60 l20 66" stroke="#3f4d63" stroke-width="24" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(900 800)">
+    <circle cx="0" cy="-166" r="32" fill="#c78a5a"/>
+    <path d="M-34 -178 q10 -42 34 -42 q30 0 34 42 q-16 -16 -34 -16 q-20 0 -34 16z" fill="#2b2019"/>
+    <path d="M-40 -132 l40 -12 l40 12 l8 76 h-96 z" fill="#e0543f"/>
+    <path d="M-40 -124 q-48 34 -66 -6" stroke="#c78a5a" stroke-width="22" stroke-linecap="round" fill="none"/>
+    <path d="M40 -124 q46 26 44 74" stroke="#c78a5a" stroke-width="22" stroke-linecap="round" fill="none"/>
+    <path d="M-18 -56 l-14 62 M16 -56 l24 58" stroke="#3f4d63" stroke-width="24" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(180 840)">
+    <circle cx="0" cy="-150" r="30" fill="#eac09a"/>
+    <path d="M-32 -160 q8 -40 32 -40 q28 0 32 40 q-16 -14 -32 -14 q-18 0 -32 14z" fill="#6b4a2a"/>
+    <path d="M-36 -118 l36 -10 l36 10 l8 70 h-88 z" fill="#7a5fc0"/>
+    <path d="M-36 -110 q-44 -30 -52 -70" stroke="#eac09a" stroke-width="20" stroke-linecap="round" fill="none"/>
+    <path d="M36 -110 q42 -32 48 -72" stroke="#eac09a" stroke-width="20" stroke-linecap="round" fill="none"/>
+  </g>
+
+  <!-- Sombras -->
+  <g fill="#00000018">
+    <ellipse cx="640" cy="740" rx="72" ry="14"/><ellipse cx="380" cy="852" rx="64" ry="13"/>
+    <ellipse cx="900" cy="866" rx="60" ry="12"/>
+  </g>
+</svg>

@@ -1,0 +1,1 @@
+import{dr as ii}from"./chunk-Cfv2bcu2.js";var n=`images/Logo_MyVc_Header.gif`;var r=`images/Logo_Colegio_Header.gif`;function a(){let o=ii(n),e=new Image;return e.onload=()=>o.set(r),e.src=r,o}export{a as t};

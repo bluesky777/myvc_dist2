@@ -1,0 +1,1 @@
+import{Gn as fe,Wt as T}from"./chunk-Cfv2bcu2.js";import{kt as b0}from"./chunk-C6IQ2aNY.js";var i=`votos`;var a=class e{api=T(b0);resultados(n){return this.api.put(`${i}/show`,n)}emitir(n){return this.api.post(`${i}/store`,n)}static ɵfac=function(u){return new(u||e)};static ɵprov=fe({token:e,factory:e.ɵfac,providedIn:`root`})};export{a as t};

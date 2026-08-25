@@ -1,0 +1,1 @@
+function f(n,r,u){if(!n)return[];if(r==null)return n;let e=String(r);return n.filter(t=>String(t[u])!==e)}export{f as t};

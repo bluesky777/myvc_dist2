@@ -1,0 +1,1 @@
+var c=[`ene`,`feb`,`mar`,`abr`,`may`,`jun`,`jul`,`ago`,`sep`,`oct`,`nov`,`dic`];function i(e){let r=/^(\d{4})-(\d\d)-(\d\d)[ T](\d\d):(\d\d)/.exec(e??``);if(!r)return e??``;let[,a,d,o,t,s]=r,n=Number(t??`0`),u=n%12===0?12:n%12;return`${Number(o??`1`)} ${c[Number(d??`1`)-1]} ${a??``}, ${u}:${s??`00`} ${n<12?`a. m.`:`p. m.`}`}export{i as t};

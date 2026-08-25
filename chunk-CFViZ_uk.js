@@ -1,0 +1,1 @@
+import{Gn as fe,dr as ii}from"./chunk-Cfv2bcu2.js";var o=class e{_year=ii(null);year=this._year.asReadonly();poner(n){this._year.set(n)}get(){return this._year()}static ɵfac=function(t){return new(t||e)};static ɵprov=fe({token:e,factory:e.ɵfac,providedIn:`root`})};export{o as t};
