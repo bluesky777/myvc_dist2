@@ -1,1 +1,0 @@
-import{Gn as fe,Ur as pu,Wt as T}from"./chunk-Cfv2bcu2.js";import{t as i$1}from"./chunk-DfSgCIQF2.js";var i=class e{api=T(i$1);cacheados;contratados(){return this.cacheados??=this.api.listar().pipe(pu({bufferSize:1,refCount:!1})),this.cacheados}static ɵfac=function(n){return new(n||e)};static ɵprov=fe({token:e,factory:e.ɵfac,providedIn:`root`})};export{i as t};

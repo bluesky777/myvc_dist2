@@ -1,0 +1,1 @@
+import{Ct as Or,Vn as de,u as C}from"./chunk-BdrK-Qjw.js";var r=`casb.micolevirtual.com`;var a=class o{documento=C(Or);esSimonBolivar(){return this.documento.location.hostname===r}static ɵfac=function(c){return new(c||o)};static ɵprov=de({token:o,factory:o.ɵfac,providedIn:`root`})};export{a as t};

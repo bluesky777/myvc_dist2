@@ -1,0 +1,1 @@
+import{Vn as de,u as C}from"./chunk-BdrK-Qjw.js";import{t as Tt}from"./chunk-BsYeOiak.js";import{t as M}from"./chunk-B6An_WvM.js";var n=class r{modal=C(Tt);confirmar(o){return this.modal.abrir({componente:M,size:o.size,datos:o,autoFocus:`dialog`})}static ɵfac=function(c){return new(c||r)};static ɵprov=de({token:r,factory:r.ɵfac,providedIn:`root`})};export{n as t};

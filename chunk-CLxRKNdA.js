@@ -1,1 +1,0 @@
-import{Gn as fe,Wt as T}from"./chunk-Cfv2bcu2.js";import{t as Tt}from"./chunk-D4x976Mk.js";import{t as M}from"./chunk-Dpf0zAhb.js";var n=class r{modal=T(Tt);confirmar(o){return this.modal.abrir({componente:M,size:o.size,datos:o,autoFocus:`dialog`})}static ɵfac=function(c){return new(c||r)};static ɵprov=fe({token:r,factory:r.ɵfac,providedIn:`root`})};export{n as t};
