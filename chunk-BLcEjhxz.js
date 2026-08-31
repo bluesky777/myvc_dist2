@@ -1,0 +1,1 @@
+import{Ci as yi}from"./chunk-CUki99Ij.js";var n=`images/Logo_MyVc_Header.gif`;var r=`images/Logo_Colegio_Header.gif`;function a(){let o=yi(n),e=new Image;return e.onload=()=>o.set(r),e.src=r,o}export{a as t};

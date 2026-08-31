@@ -1,0 +1,1 @@
+import{Hn as de,h as C}from"./chunk-CUki99Ij.js";import{Ln as s5}from"./chunk-D6N6lByl.js";var i=`votos`;var a=class e{api=C(s5);resultados(n){return this.api.put(`${i}/show`,n)}emitir(n){return this.api.post(`${i}/store`,n)}static ɵfac=function(u){return new(u||e)};static ɵprov=de({token:e,factory:e.ɵfac,providedIn:`root`})};export{a as t};

@@ -1,0 +1,1 @@
+import{q as Ib}from"./chunk-CUki99Ij.js";function o(r){let n=parseFloat(String(r));return Number.isNaN(n)?``:String(Math.round(n))}var e=class r{transform(n){return o(n)}static ɵfac=function(i){return new(i||r)};static ɵpipe=Ib({name:`nota`,type:r,pure:!0})};export{o as n,e as t};

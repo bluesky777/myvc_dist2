@@ -1,0 +1,1 @@
+import{Hn as de,h as C}from"./chunk-CUki99Ij.js";import{t as c}from"./chunk-CKcDCkPy.js";import{t as i}from"./chunk-BRoMySxx2.js";var n=class r{api=C(i);cache=c(()=>this.api.listar());contratados(){return this.cache.obtener()}static ɵfac=function(i){return new(i||r)};static ɵprov=de({token:r,factory:r.ɵfac,providedIn:`root`})};export{n as t};

@@ -1,0 +1,1 @@
+function r(n,o){return String(n??``)===String(o??``)}function e(n,o){if(r(o,n.confirmada)){n.estadoDeGuardado=void 0;return}if(n.falloCon!==void 0&&r(o,n.falloCon)){n.estadoDeGuardado=`fallo`;return}n.estadoDeGuardado=`pendiente`}function d(n,o,a){n.falloCon=o,e(n,a)}function t(n,o,a){n.confirmada=o,n.falloCon=void 0,e(n,a)}export{e as n,t as r,d as t};
