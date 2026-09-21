@@ -1,1 +1,0 @@
-import{Xn as de,dt as Lr,h as C}from"./chunk-DbTv7sS8.js";var r=`casb.micolevirtual.com`;var a=class o{documento=C(Lr);esSimonBolivar(){return this.documento.location.hostname===r}static ɵfac=function(c){return new(c||o)};static ɵprov=de({token:o,factory:o.ɵfac,providedIn:`root`})};export{a as t};

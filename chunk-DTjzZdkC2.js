@@ -1,0 +1,1 @@
+import{Zn as de,g as C}from"./chunk-D8PD5RG7.js";import{t as c}from"./chunk-BEzH4kRW.js";var a=`notas-perdidas`;var i=class n{api=C(c);deProfesor(o){return this.api.put(`${a}/profesor-grupos`,o)}todos(o){return this.api.put(`${a}/todos`,o)}static ɵfac=function(s){return new(s||n)};static ɵprov=de({token:n,factory:n.ɵfac,providedIn:`root`})};export{i as t};

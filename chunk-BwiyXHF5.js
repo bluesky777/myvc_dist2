@@ -1,1 +1,0 @@
-import{Xn as de,h as C}from"./chunk-DbTv7sS8.js";import{t as c}from"./chunk-B0Fitt3F.js";var i=`votos`;var a=class e{api=C(c);resultados(n){return this.api.put(`${i}/show`,n)}emitir(n){return this.api.post(`${i}/store`,n)}static ɵfac=function(u){return new(u||e)};static ɵprov=de({token:e,factory:e.ɵfac,providedIn:`root`})};export{a as t};
