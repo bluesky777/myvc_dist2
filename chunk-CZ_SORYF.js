@@ -1,0 +1,1 @@
+function c(){let e=getComputedStyle(document.documentElement).colorScheme,t=e.includes(`dark`),r=e.includes(`light`);if(t&&!r)return!0;if(!t)return!1;try{return window.matchMedia(`(prefers-color-scheme: dark)`).matches}catch{return!1}}export{c as t};

@@ -1,0 +1,1 @@
+function o(t,i){let r=t.length,e=Number(i);if(Number.isNaN(e)||e===r)return{crear:0,quitar:[]};if(e>r)return{crear:e-r,quitar:[]};let c=r-e,n=[];for(let a=0;a<c;a++){let u=t[r-a-1];u&&n.push(u.id)}return{crear:0,quitar:n}}export{o as t};

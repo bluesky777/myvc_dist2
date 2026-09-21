@@ -1,0 +1,1 @@
+var n=`ponderado`;function e(o){return o===`competencias`?`competencias`:n}function i(o){return e(o?.modelo_evaluacion)}function l(o){return e(o?.modelo_evaluacion)}function u(o){return l(o)===`competencias`}function a(o){return o==null?!1:`modelo_evaluacion`in o&&o.modelo_evaluacion!==void 0}function t(o){return i(o)===`competencias`}export{u as i,l as n,t as r,a as t};

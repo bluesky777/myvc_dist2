@@ -1,0 +1,1 @@
+function e(n){return`${n.apellidos??``} ${n.nombres??``}`.trim()||`(sin nombre)`}export{e as t};

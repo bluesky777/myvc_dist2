@@ -1,0 +1,94 @@
+/*
+ * LAS FUENTES DE LOS TEMAS, AUTOALOJADAS. *(2026-09-17)*
+ *
+ * ESTE FICHERO NO PASA POR EL EMPAQUETADOR A PROPÓSITO: vive en `public/`, que Angular copia
+ * tal cual. Por eso sus `url()` son RELATIVAS y sin barra inicial -- y eso no es un detalle
+ * de estilo, es el fallo latente que `src/styles.scss` dejó documentado cuando se cayó
+ * `Material Icons`:
+ *
+ *     una url() de CSS NO se resuelve contra <base href="/up2/">
+ *
+ * Se resuelve contra la URL de ESTA hoja. Como la hoja se sirve en `/up2/fuentes/fuentes.css`,
+ * `url('outfit.woff2')` cae en `/up2/fuentes/outfit.woff2`, que es donde está. Con barra
+ * inicial pediría la raíz del dominio y daría 404 en los dieciséis colegios menos en el que se
+ * probara -- que es exactamente como se rompía la fuente vieja sin que nadie lo notara.
+ *
+ * NO HAY CDN. La regla del proyecto es autoalojar: dieciséis colegios sirviendo desde su propio
+ * host, alguno con la salida capada. Los ficheros se bajaron de Google Fonts una vez y viajan
+ * en el despliegue.
+ *
+ * ────────────────────────────────────────────────────────────────────────────────────────────
+ * UN FICHERO POR FAMILIA, NO UNO POR PESO: SON FUENTES VARIABLES
+ *
+ * Se bajaron los dos pesos de cada familia y **los ocho ficheros resultaron ser cuatro**: el
+ * sha256 de `outfit-300` y `outfit-500` era el mismo, y así en las cuatro. Google sirve el
+ * fichero variable y deja que el eje `wght` haga el peso. Comprobado por hash, no supuesto.
+ *
+ * Así que cada `@font-face` declara un RANGO en `font-weight`. El navegador interpola dentro de
+ * él: pedir 350 o 620 da un peso real, no el más cercano de una lista. Son 152 KB en total en
+ * vez de 286.
+ *
+ * ────────────────────────────────────────────────────────────────────────────────────────────
+ * `font-display: swap` — LA PETICIÓN DEL USUARIO, LITERAL
+ *
+ * Pidió que *«el sistema inicial cargue sin importar que la fuente no haya sido descargada por
+ * el navegador, luego se cambia sola mientras ya el usuario está navegando»*. Eso es `swap` y
+ * nada más: el texto se pinta **inmediatamente** con la pila del sistema y se cambia solo
+ * cuando la fuente llega. Cero espera en blanco, ni un milisegundo.
+ *
+ * Y es lo que hace que el colegio con la salida capada no se quede sin aplicación: si el
+ * `.woff2` nunca llega, la pantalla se queda en la pila del sistema **y funciona**. Antes de
+ * `swap` el valor por defecto es `auto`, que en Chrome son 3 segundos de texto INVISIBLE.
+ *
+ * Y SÓLO SE DESCARGA LA QUE SE USA. Un `@font-face` que nadie nombra no se pide: quien esté en
+ * «Cristal» baja Outfit y Jakarta (58 KB) y no toca las de «Tinta», y al revés. Los cuatro
+ * ficheros están en el despliegue; ningún usuario se los baja todos.
+ */
+
+/* ── Cristal: Outfit para títulos y cifras, Plus Jakarta Sans para interfaz ───────────── */
+
+@font-face {
+	font-family: 'Outfit';
+	font-style: normal;
+	font-weight: 100 900;
+	font-display: swap;
+	src: url('outfit.woff2') format('woff2');
+	unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+		U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,
+		U+FEFF, U+FFFD;
+}
+
+@font-face {
+	font-family: 'Plus Jakarta Sans';
+	font-style: normal;
+	font-weight: 200 800;
+	font-display: swap;
+	src: url('jakarta.woff2') format('woff2');
+	unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+		U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,
+		U+FEFF, U+FFFD;
+}
+
+/* ── Tinta: Newsreader para titulares, Source Sans 3 para interfaz ────────────────────── */
+
+@font-face {
+	font-family: 'Newsreader';
+	font-style: normal;
+	font-weight: 200 800;
+	font-display: swap;
+	src: url('newsreader.woff2') format('woff2');
+	unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+		U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,
+		U+FEFF, U+FFFD;
+}
+
+@font-face {
+	font-family: 'Source Sans 3';
+	font-style: normal;
+	font-weight: 200 900;
+	font-display: swap;
+	src: url('sourcesans.woff2') format('woff2');
+	unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+		U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,
+		U+FEFF, U+FFFD;
+}

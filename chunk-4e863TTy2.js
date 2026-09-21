@@ -1,0 +1,1 @@
+import{Yt as Sb}from"./chunk-DbTv7sS8.js";function o(r){let n=parseFloat(String(r));return Number.isNaN(n)?``:String(Math.round(n))}var e=class r{transform(n){return o(n)}static ɵfac=function(i){return new(i||r)};static ɵpipe=Sb({name:`nota`,type:r,pure:!0})};export{o as n,e as t};
