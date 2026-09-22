@@ -1,1 +1,0 @@
-import{Zn as de,g as C}from"./chunk-D8PD5RG7.js";import{t as c}from"./chunk-BEzH4kRW.js";var i=class n{api=C(c);deGrupo(t,r){return this.api.put(`notas-actuales-alumnos/${t}`,r)}static ɵfac=function(r){return new(r||n)};static ɵprov=de({token:n,factory:n.ɵfac,providedIn:`root`})};export{i as t};

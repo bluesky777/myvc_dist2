@@ -1,0 +1,1 @@
+import{tt as K}from"./chunk-DbTv7sS8.js";function i(a,e={}){let l=e.filter===void 0||e.filter===!1?56:84;return K({field:a,headerName:`Id`,width:l,minWidth:l,flex:0,filter:!1,editable:!1},e)}export{i as t};
