@@ -1,0 +1,1 @@
+function e(n){return n===1||n===!0||n===`1`}function t(n){return e(n?.profes_pueden_editar_plantilla)}function a(n){return e(n?.profes_pueden_editar_plantilla)}export{t as n,a as t};
