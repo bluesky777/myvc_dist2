@@ -1,0 +1,1 @@
+function e(n){return n.userData}function o(n){let r=e(n);return n.foto_nombre||n.imagen_nombre||r?.foto_nombre||r?.imagen_nombre||null}function i(n){return!n||n===`N/A`||n.startsWith(`default_`)?null:n}function a(n){return i(o(n))}function u(n){let r=t=>String(t??``).trim().charAt(0).toUpperCase();return r(n.apellidos)+r(n.nombres)||`·`}export{u as i,i as n,o as r,a as t};
