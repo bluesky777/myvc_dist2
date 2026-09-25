@@ -1,1 +1,0 @@
-import{$ as Ii,qn as de}from"./chunk-Ban1fvpR.js";var o=class e{_year=Ii(null);year=this._year.asReadonly();poner(n){this._year.set(n)}get(){return this._year()}static ɵfac=function(t){return new(t||e)};static ɵprov=de({token:e,factory:e.ɵfac,providedIn:`root`})};export{o as t};

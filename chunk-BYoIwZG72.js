@@ -1,1 +1,0 @@
-import{qn as de,x as C}from"./chunk-Ban1fvpR.js";import{t as c}from"./chunk-D3RPvZIz.js";var p=class e{api=C(c);RECURSO=`buscar`;porCampo(r,o){return this.api.put(`${this.RECURSO}/por-${r}`,{texto_a_buscar:o})}static ɵfac=function(o){return new(o||e)};static ɵprov=de({token:e,factory:e.ɵfac,providedIn:`root`})};export{p as t};
