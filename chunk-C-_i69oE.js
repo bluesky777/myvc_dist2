@@ -1,0 +1,1 @@
+import{f as C,tr as fe}from"./chunk-DuQxIqyG.js";import{t as c}from"./chunk-tjoBSpaX.js";var p=class e{api=C(c);RECURSO=`buscar`;porCampo(r,o){return this.api.put(`${this.RECURSO}/por-${r}`,{texto_a_buscar:o})}static ɵfac=function(o){return new(o||e)};static ɵprov=fe({token:e,factory:e.ɵfac,providedIn:`root`})};export{p as t};
