@@ -42,7 +42,7 @@
 # LA REESCRITURA DE LAS RUTAS ESTA AL FINAL DE ESTE FICHERO. Este comentario decia lo
 # contrario --"no esta aqui, va en su propio commit"-- porque se escribio antes de que la
 # decision existiera; la reescritura llego despues y el comentario se quedo. Se corrige al
-# mover la aplicacion a `up2/`, que es cuando alguien lo volvio a leer. Ver OLA-3.md §5.
+# mover la aplicacion a `up2/`, que es cuando alguien lo volvio a leer. Ver docs/planes/OLA-3.md §5.
 
 
 # ##############################################################################
@@ -185,7 +185,7 @@ FileETag None
 
 
 # ##############################################################################
-# # LAS RUTAS DE LA APLICACION  (decision C -- ver OLA-3.md §5)                #
+# # LAS RUTAS DE LA APLICACION  (decision C -- ver docs/planes/OLA-3.md §5)                #
 # ##############################################################################
 
 # La aplicacion NUEVA usa rutas de camino (`/panel/alumnos`); la vieja usaba la

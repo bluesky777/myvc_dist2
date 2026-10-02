@@ -1,1 +1,0 @@
-import{f as C,tr as fe}from"./chunk-DuQxIqyG.js";import{t as c}from"./chunk-tjoBSpaX.js";var e=`contratos`;var i=class n{api=C(c);listar(){return this.api.get(e)}crear(r){return this.api.post(e,r)}eliminar(r){return this.api.delete(`${e}/destroy/${r}`)}static ɵfac=function(s){return new(s||n)};static ɵprov=fe({token:n,factory:n.ɵfac,providedIn:`root`})};export{i as t};

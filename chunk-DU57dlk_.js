@@ -1,1 +1,0 @@
-import{f as C,tr as fe}from"./chunk-DuQxIqyG.js";import{t as c}from"./chunk-tjoBSpaX.js";var a=`notas-perdidas`;var i=class n{api=C(c);deProfesor(o){return this.api.put(`${a}/profesor-grupos`,o)}todos(o){return this.api.put(`${a}/todos`,o)}static ɵfac=function(s){return new(s||n)};static ɵprov=fe({token:n,factory:n.ɵfac,providedIn:`root`})};export{i as t};

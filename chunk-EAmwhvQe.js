@@ -1,0 +1,1 @@
+import{Vr as pe,bi as wi}from"./chunk-ChxOwJOz.js";var o=class e{_year=wi(null);year=this._year.asReadonly();poner(n){this._year.set(n)}get(){return this._year()}static ɵfac=function(t){return new(t||e)};static ɵprov=pe({token:e,factory:e.ɵfac,providedIn:`root`})};export{o as t};

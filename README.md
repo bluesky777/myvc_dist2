@@ -10,7 +10,7 @@ aplicación vieja y sigue funcionando igual.
 ## Desplegar
 
 El procedimiento, con el bucle de los dieciséis y la cuenta que el bucle no alcanza,
-está en `DESPLIEGUE-UP2.md` de `myvc_front`.
+está en `docs/despliegue/DESPLIEGUE-UP2.md` de `myvc_front`.
 
 ## El logo del colegio
 

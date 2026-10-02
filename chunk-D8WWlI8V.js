@@ -1,1 +1,0 @@
-import{Et as Ob}from"./chunk-DuQxIqyG.js";import{t as e}from"./chunk-BRf-81DI.js";var p=class e$1{transform(r){return r?e.imagenes+`perfil/`+r:``}static ɵfac=function(n){return new(n||e$1)};static ɵpipe=Ob({name:`perfil`,type:e$1,pure:!0})};export{p as t};

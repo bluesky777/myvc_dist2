@@ -1,1 +1,0 @@
-import{S as Di,tr as fe}from"./chunk-DuQxIqyG.js";var o=class e{_year=Di(null);year=this._year.asReadonly();poner(n){this._year.set(n)}get(){return this._year()}static ɵfac=function(t){return new(t||e)};static ɵprov=fe({token:e,factory:e.ɵfac,providedIn:`root`})};export{o as t};
