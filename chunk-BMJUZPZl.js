@@ -1,0 +1,1 @@
+var e=typeof globalThis.requestAnimationFrame==`function`?globalThis.requestAnimationFrame:globalThis.setTimeout;var i=typeof globalThis.requestAnimationFrame==`function`?globalThis.cancelAnimationFrame:globalThis.clearTimeout;export{i as n,e as t};
