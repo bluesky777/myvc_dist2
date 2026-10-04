@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Taller de fracciones</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grandstander:wght@700;900&family=Lexend:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="juego.css">
+</head>
+<body>
+<div id="gl"></div>
+
+<header class="hud" id="hud">
+  <button class="hb" id="bAtras" aria-label="Volver">&#8249;</button>
+  <div class="hcard htit"><b id="hNombre">Taller</b><div class="dots" id="hDots"></div></div>
+  <button class="hb" id="bAyuda" aria-label="Cómo se juega">?</button>
+  <div class="hcard hstar" id="hEstrellas"></div>
+</header>
+
+<div class="reto" id="reto"></div>
+<footer class="ctl" id="controles"></footer>
+<section class="hub" id="hub"></section>
+<div class="toast" id="toast" role="status"></div>
+<div class="velo" id="velo"><div class="panel" id="panel"></div></div>
+
+<section class="inicio" id="inicio">
+  <div class="icard">
+    <p class="kick" id="iGrados"></p>
+    <h1 id="iTitulo"></h1>
+    <p id="iFrase"></p>
+    <button class="btn pri grande" id="bJugar" disabled>Cargando…</button>
+    <a class="lnk" href="../index.html">Volver a los juegos</a>
+  </div>
+</section>
+
+<script src="../puente.js"></script>
+<script src="datos.js"></script>
+<script src="juego.js"></script>
+</body>
+</html>

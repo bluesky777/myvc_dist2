@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Carrera del curso</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grandstander:wght@700;900&family=Lexend:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="juego.css">
+</head>
+<body>
+<div id="gl"></div>
+
+<div id="cargando" class="cargando"><div class="ctit">Carrera del curso</div><div id="cmsg">Preparando la pista…</div></div>
+
+<!-- HUD de carrera -->
+<div id="hud" class="hud oculto">
+  <div class="puesto"><b id="hPuesto">1.º</b><span id="hDe">de 6</span></div>
+  <div class="hmid">
+    <div class="vuelta" id="hVuelta">Vuelta 1/2</div>
+    <div class="tira" id="tira"></div>
+  </div>
+  <div class="hbtns">
+    <button class="hb" id="bPausa" aria-label="Pausa"><svg viewBox="0 0 24 24" width="20" height="20"><rect x="6" y="5" width="4" height="14" rx="1.5" fill="currentColor"/><rect x="14" y="5" width="4" height="14" rx="1.5" fill="currentColor"/></svg></button>
+  </div>
+</div>
+<div id="velo" class="velo oculto"><b id="hVel">0</b><span>km/h</span><i id="hRacha"></i></div>
+<div id="aviso" class="aviso"></div>
+
+<!-- Panel de preguntas -->
+<div id="panel" class="panel oculto">
+  <div class="pcab">
+    <span class="ptag" id="pTag">Tabla del 7</span>
+    <button class="ptexto oculto" id="bTexto">Ver el texto</button>
+  </div>
+  <div class="pq" id="pq">7 × 8 = ?</div>
+  <div class="ops" id="ops"></div>
+</div>
+
+<!-- Pantallas -->
+<div id="inicio" class="capa oculto">
+  <div class="tarjeta inicio">
+    <div class="marca"><svg viewBox="0 0 40 40" width="38" height="38"><rect width="40" height="40" rx="12" fill="var(--colegio)"/><path d="M11 29V11h4l1 2h12l-2 7 2 7H16l-1 2z" fill="#fff"/><path d="M16 13h4v4h-4zm8 0h3l-1 4h-2zm-4 4h4v4h-4zm-4 4h4v4h-4zm8 0h2l1 4h-3z" fill="var(--ink)"/></svg><h1>Carrera del curso</h1></div>
+    <p class="frase" id="frase"></p>
+    <div class="paso">1. Elige qué practicar</div>
+    <div class="modos">
+      <button class="modo" data-modo="tablas"><b>Tablas</b><span>Multiplica rápido</span></button>
+      <button class="modo" data-modo="lectura"><b>Lectura</b><span>Lee y responde</span></button>
+    </div>
+    <div id="optTablas" class="chips"></div>
+    <div id="optLectura" class="lecturas oculto"></div>
+    <div class="paso">2. Elige tu corredor</div>
+    <div id="animales" class="animales"></div>
+    <div class="marcaP" id="marcaP"></div>
+    <button class="jugar" id="bJugar">Jugar</button>
+    <a class="volver" href="../index.html">Volver a los juegos</a>
+  </div>
+</div>
+
+<div id="leer" class="capa oculto">
+  <div class="tarjeta leer">
+    <div class="ptag" id="lGrado"></div>
+    <h2 id="lTitulo"></h2>
+    <div class="texto" id="lTexto"></div>
+    <button class="jugar" id="bLeido">¡Ya lo leí, a correr!</button>
+  </div>
+</div>
+
+<div id="cuenta" class="cuenta oculto"><b id="cNum">3</b><span id="cTip"></span></div>
+
+<div id="pausa" class="capa oculto">
+  <div class="tarjeta chica">
+    <h2>Pausa</h2>
+    <p>La carrera te espera. Nadie avanza mientras tanto.</p>
+    <button class="jugar" id="bSeguir">Seguir</button>
+    <button class="sec" id="bSalir">Salir al inicio</button>
+  </div>
+</div>
+
+<div id="fin" class="final oculto">
+  <div class="tarjeta fin">
+    <div class="estrellas" id="fEst"></div>
+    <h2 id="fTit">¡Llegaste!</h2>
+    <p class="fsub" id="fSub"></p>
+    <ol class="tabla" id="fTabla"></ol>
+    <div class="botones">
+      <button class="jugar" id="bOtra">Otra carrera</button>
+      <a class="sec" href="../index.html">Volver a los juegos</a>
+    </div>
+  </div>
+</div>
+
+<script src="../puente.js"></script>
+<script src="datos.js"></script>
+<script src="juego.js"></script>
+</body>
+</html>

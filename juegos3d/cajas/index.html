@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cajas de Palabras</title>
+<style>
+  :root { color-scheme: dark; }
+  html, body { height: 100%; margin: 0; padding: 0; background: #14213D; overflow: hidden; }
+  body { font-family: "Nunito", system-ui, sans-serif; -webkit-tap-highlight-color: transparent; touch-action: none; user-select: none; -webkit-user-select: none; }
+  #juego { position: fixed; inset: 0; background: radial-gradient(ellipse at center, #1E2F57 0%, #14213D 70%); }
+  #juego canvas { display: block; border-radius: 6px; box-shadow: 0 10px 40px rgba(0, 0, 0, .45); }
+  #aviso-carga { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; color: #BFD3FF; font: 700 24px "Baloo 2", system-ui, sans-serif; letter-spacing: .02em; }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800&display=swap">
+</head>
+<body>
+<div id="juego"></div>
+<div id="aviso-carga">Cargando Cajas de Palabras…</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.80.1/phaser.min.js"></script>
+<script src="js/registro.js"></script>
+<script src="js/iconos.js"></script>
+<script src="js/mundos/jardin.js"></script>
+<script src="js/mundos/arrecife.js"></script>
+<script src="js/mundos/espacio.js"></script>
+<script src="js/mundos/hielo.js"></script>
+<script src="js/mundos/babilonia.js"></script>
+<script src="js/mundos/cielo.js"></script>
+<script src="js/motor-base.js"></script>
+<script src="js/motor-menu.js"></script>
+<script src="js/motor-sitios.js"></script>
+<script src="js/motor-nivel.js"></script>
+<script src="js/motor-subida.js"></script>
+<script src="js/motor-accion.js"></script>
+<script src="js/motor-hud.js"></script>
+<script src="js/motor.js"></script>
+</body>
+</html>

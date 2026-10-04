@@ -1,0 +1,1 @@
+import{Vr as pe,p as C}from"./chunk-ChxOwJOz.js";import{i as m}from"./chunk-Bpypqqz02.js";import{t as M}from"./chunk-BYxBDNG42.js";var n=class r{modal=C(m);confirmar(o){return this.modal.abrir({componente:M,size:o.size,datos:o,autoFocus:`dialog`})}static ɵfac=function(c){return new(c||r)};static ɵprov=pe({token:r,factory:r.ɵfac,providedIn:`root`})};export{n as t};

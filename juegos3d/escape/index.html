@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Sala de escape</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grandstander:wght@700;900&family=Lexend:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="juego.css">
+</head>
+<body>
+<div id="gl"></div>
+
+<!-- Inicio: elegir sala -->
+<section id="inicio" class="capa">
+  <div class="caja-inicio">
+    <div class="sello" aria-hidden="true"><svg viewBox="0 0 64 64"><circle cx="32" cy="26" r="13" fill="none" stroke="currentColor" stroke-width="6"/><rect x="12" y="30" width="40" height="28" rx="7" fill="currentColor"/><circle cx="32" cy="42" r="4.5" fill="#fffdf7"/><rect x="30" y="44" width="4" height="8" rx="2" fill="#fffdf7"/></svg></div>
+    <h1>Sala de escape</h1>
+    <p class="lema">Resuelve los retos de tu clase, junta las piezas del código y abre la puerta.</p>
+    <div id="salas" class="salas" role="radiogroup" aria-label="Elige una sala"></div>
+    <button id="btnJugar" class="btn grande">Jugar</button>
+    <a class="volver" href="../index.html">← Volver a los juegos</a>
+    <p id="cargando" class="cargando">Preparando la sala…</p>
+  </div>
+</section>
+
+<!-- HUD -->
+<header id="hud" class="hud" hidden>
+  <div class="tarjeta">
+    <div class="sala-nombre" id="hudSala"></div>
+    <div class="marcas"><span id="hudTiempo" title="Tiempo">0:00</span><span id="hudPuntos" title="Puntaje">0 pts</span></div>
+  </div>
+  <div class="hbtns">
+    <button class="hb" id="btnAyuda" aria-label="Cómo se juega">?</button>
+    <button class="hb" id="btnSalir" aria-label="Salir al inicio">✕</button>
+  </div>
+</header>
+<button id="girarIzq" class="girar izq" aria-label="Girar a la izquierda" hidden>‹</button>
+<button id="girarDer" class="girar der" aria-label="Girar a la derecha" hidden>›</button>
+<footer id="inventario" class="inventario" hidden aria-live="polite"></footer>
+<div id="aviso" class="aviso" hidden></div>
+
+<!-- Hoja de reto -->
+<div id="velo" class="velo" hidden></div>
+<section id="hoja" class="hoja" tabindex="-1" hidden role="dialog" aria-modal="true" aria-labelledby="hojaTitulo">
+  <div class="agarre"></div>
+  <div class="hoja-cab">
+    <span id="hojaTipo" class="chip"></span>
+    <h2 id="hojaTitulo"></h2>
+  </div>
+  <p id="hojaEnunciado" class="enunciado"></p>
+  <div id="hojaCuerpo"></div>
+  <p id="hojaPista" class="pista" hidden></p>
+  <p id="hojaMsg" class="msg" aria-live="assertive"></p>
+  <div class="hoja-pie">
+    <button id="btnCerrar" class="btn suave">Volver a la sala</button>
+    <button id="btnPista" class="btn pista-btn">Pista (−30)</button>
+  </div>
+</section>
+
+<!-- Ayuda / intro -->
+<section id="panel" class="panel" hidden role="dialog" aria-modal="true">
+  <h2 id="panelTitulo"></h2>
+  <p id="panelTexto"></p>
+  <ul class="como">
+    <li><b>Mira</b> arrastrando el dedo o el ratón.</li>
+    <li><b>Toca</b> lo que brilla y resuelve su reto.</li>
+    <li><b>Abre</b> la puerta con las piezas que juntes.</li>
+  </ul>
+  <button id="panelBtn" class="btn grande">Entrar</button>
+</section>
+
+<!-- Final -->
+<section id="final" class="capa final" hidden>
+  <div class="caja-inicio">
+    <h1 id="finTitulo">¡Escapaste!</h1>
+    <p id="finMsg" class="lema"></p>
+    <div id="finEstrellas" class="estrellas"></div>
+    <div class="cifras">
+      <div><b id="finPuntos">0</b><span>puntos</span></div>
+      <div><b id="finTiempo">0:00</b><span>tiempo</span></div>
+      <div><b id="finPistas">0</b><span>pistas</span></div>
+    </div>
+    <p id="finRecord" class="record"></p>
+    <div class="acciones">
+      <button id="btnOtraVez" class="btn grande">Jugar otra vez</button>
+      <button id="btnOtraSala" class="btn suave">Otra sala</button>
+    </div>
+    <a class="volver" href="../index.html">← Volver a los juegos</a>
+  </div>
+</section>
+
+<script src="datos.js"></script>
+<script src="../puente.js"></script>
+<script src="juego.js"></script>
+</body>
+</html>

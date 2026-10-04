@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Vuelo por Colombia</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grandstander:wght@700;900&family=Lexend:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="juego.css">
+</head>
+<body>
+<div id="gl"></div>
+
+<div class="hud" id="hud" hidden>
+  <button class="hb" id="bMenu" aria-label="Pausa y misiones"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>
+  <div class="mision" id="mision">
+    <div class="mtop"><span id="mNum">Misión 1</span><span class="mreloj" id="mReloj">0 s</span></div>
+    <div class="mtxt" id="mTxt"></div>
+  </div>
+</div>
+<div class="lado" id="lado" hidden>
+  <canvas id="mini" width="136" height="150" aria-label="Mapa pequeño"></canvas>
+  <div class="chip" id="chip"><i></i><span>Región Andina</span></div>
+</div>
+<div id="labels"></div>
+<div id="flecha" hidden><svg viewBox="0 0 40 40" width="40" height="40"><path d="M20 3 L34 34 L20 26 L6 34 Z" fill="#ffc23a" stroke="#15304d" stroke-width="2.5" stroke-linejoin="round"/></svg><span id="flechaTxt">Pista</span></div>
+<button id="bAterrizar" class="btn grande" hidden>Aterrizar en <b></b></button>
+<div class="tip" id="tip" hidden></div>
+<div id="joy" hidden><i></i></div>
+
+<section class="sheet" id="card" hidden>
+  <div class="ctag" id="cTag">Región Caribe</div>
+  <h2 id="cTit">¡Llegaste!</h2>
+  <p class="cdato" id="cDato"></p>
+  <div class="cpreg" id="cPreg"></div>
+  <div class="cops" id="cOps"></div>
+  <div class="cfin" id="cFin" hidden>
+    <div class="estrellas" id="cEst"></div>
+    <p id="cMsg"></p>
+    <button class="btn" id="bSig">Siguiente misión</button>
+  </div>
+</section>
+
+<section class="pantalla" id="inicio">
+  <div class="panel">
+    <div class="kicker">Ciencias sociales · 3.º a 9.º</div>
+    <h1>Vuelo por Colombia</h1>
+    <p class="frase" id="iFrase"></p>
+    <button class="btn grande" id="bJugar">Jugar</button>
+    <p class="como" id="iComo"></p>
+    <div class="lista" id="iLista"></div>
+    <a class="volver" href="../index.html">Volver a los juegos</a>
+  </div>
+</section>
+
+<section class="pantalla" id="pausa" hidden>
+  <div class="panel">
+    <h2>Pausa</h2>
+    <p class="como" id="pComo"></p>
+    <button class="btn grande" id="bSeguir">Seguir volando</button>
+    <div class="lista" id="pLista"></div>
+    <a class="volver" href="../index.html">Volver a los juegos</a>
+  </div>
+</section>
+
+<section class="pantalla" id="final" hidden>
+  <div class="panel">
+    <div class="kicker">¡Viaje completo!</div>
+    <h1 id="fTit">Recorriste Colombia</h1>
+    <div class="estrellas grande" id="fEst"></div>
+    <p class="frase" id="fMsg"></p>
+    <button class="btn grande" id="bOtra">Jugar otra vez</button>
+    <a class="volver fuerte" href="../index.html">Volver a los juegos</a>
+  </div>
+</section>
+
+<div id="carga"><div><b>Vuelo por Colombia</b><span id="cargaMsg">Cargando el mapa…</span></div></div>
+
+<script src="../puente.js"></script>
+<script src="datos.js"></script>
+<script src="juego.js"></script>
+</body>
+</html>
