@@ -481,6 +481,8 @@ function soltar(e) {
   if (fue) { velYaw = 0; const id = tocado(e.clientX, e.clientY); if (id) tocar(id); }
 }
 cv.addEventListener('pointerup', soltar);
+/* sin esto, el clic que el navegador inventa tras el toque cae en el velo del reto recién abierto y lo cierra */
+cv.addEventListener('touchend', e => e.preventDefault(), { passive: false });
 cv.addEventListener('pointercancel', () => { arr = null; });
 function girar(s) { yawMeta = cercano(yawMeta + s * Math.PI / 4, yaw); velYaw = 0; }
 $('#girarIzq').onclick = () => girar(1); $('#girarDer').onclick = () => girar(-1);
@@ -530,7 +532,11 @@ function mostrarPanel(titulo, texto, boton) {
   pausaIntro = true; $('#panelTitulo').textContent = titulo; $('#panelTexto').textContent = texto; $('#panelBtn').textContent = boton;
   $('#panel').hidden = false; $('#velo').hidden = false; $('#panelBtn').focus();
 }
-$('#panelBtn').onclick = () => { $('#panel').hidden = true; $('#velo').hidden = true; pausaIntro = false; };
+$('#panelBtn').onclick = () => {
+  $('#panel').hidden = true; $('#velo').hidden = true; pausaIntro = false;
+  /* se entra mirando la puerta; el aviso dice cómo llegar a los retos */
+  if (enJuego && est && !Object.values(est.objs).some(o => o.resuelto)) aviso('Gira con las flechas y toca lo que tiene «?», o su nombre abajo.', 4200);
+};
 $('#btnAyuda').onclick = () => mostrarPanel('Cómo se juega', sala.intro, 'Seguir');
 $('#btnSalir').onclick = salirAlInicio;
 $('#btnJugar').onclick = () => empezar(salaIdx);
@@ -547,6 +553,11 @@ function pintarInventario(nuevo) {
     return `<div class="${cls}" data-id="${o.objeto}" title="${esc(o.nombre)}"><span class="ic">${ic}</span><span class="nom">${nom}</span></div>`;
   });
   $('#inventario').innerHTML = chips.join('');
+  /* las piezas que faltan también son botones: giran hacia su objeto y abren el reto */
+  $('#inventario').querySelectorAll('.pieza:not(.tiene)').forEach(el => {
+    el.style.pointerEvents = 'auto'; el.style.cursor = 'pointer';
+    el.onclick = () => { if (enJuego && !hojaAbierta()) tocar(el.dataset.id); };
+  });
   $('#inventario').querySelectorAll('.pieza.nota.tiene').forEach(el => {
     el.style.pointerEvents = 'auto'; el.style.cursor = 'pointer';
     el.onclick = () => aviso(objetoDe(el.dataset.id).premio.texto, 6000);
