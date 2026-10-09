@@ -1,0 +1,34 @@
+/*
+ * LAS FUENTES DEL DÍA DE ELECCIÓN *(2026-10-07)*: Bricolage Grotesque para lo grande --títulos,
+ * números, nombres-- y Figtree para el resto. Las pide `votaciones/escenario/` y sólo esa pantalla:
+ * el resto de la aplicación no las nombra, así que nadie más las baja.
+ *
+ * Mismas reglas que `fuentes.css`, y por los mismos motivos: autoalojadas --dieciséis colegios, alguno
+ * con la salida capada--, `url()` RELATIVAS sin barra inicial --se resuelven contra esta hoja, no
+ * contra `<base href>`--, ficheros variables con el peso en rango, y `font-display: swap`: si el
+ * `.woff2` no llega, la elección se vota igual con la pila del sistema.
+ *
+ * Bajadas de Google Fonts el 2026-10-07, sólo el corte `latin` (tildes y eñes van dentro).
+ */
+
+@font-face {
+	font-family: 'Bricolage Grotesque';
+	font-style: normal;
+	font-weight: 500 800;
+	font-display: swap;
+	src: url('bricolage.woff2') format('woff2');
+	unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+		U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,
+		U+FEFF, U+FFFD;
+}
+
+@font-face {
+	font-family: 'Figtree';
+	font-style: normal;
+	font-weight: 400 700;
+	font-display: swap;
+	src: url('figtree.woff2') format('woff2');
+	unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+		U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,
+		U+FEFF, U+FFFD;
+}

@@ -52,6 +52,11 @@
 
     create() {
       const W = M.ANCHO, H = M.ALTO;
+      // Phaser reusa la misma instancia al volver de un nivel: sin esto el menú sigue «saliendo»
+      // y con el panel de niveles de la vez anterior, y no deja elegir nada.
+      this.saliendo = false;
+      this.panelNivel = null;
+      this.navNiveles = null;
       this.cameras.main.fadeIn(350, 20, 33, 61);
       const cielo = this.add.graphics();
       cielo.fillGradientStyle(0x6EC3F5, 0x6EC3F5, 0xD4F1FF, 0xD4F1FF, 1);

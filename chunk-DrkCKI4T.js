@@ -1,0 +1,1 @@
+import{Vr as pe,bi as wi}from"./chunk-ChxOwJOz.js";var e=class a{apuntado=wi(null);mensaje=this.apuntado.asReadonly();apuntar(t){this.apuntado.set(t)}limpiar(){this.apuntado.set(null)}static ɵfac=function(i){return new(i||a)};static ɵprov=pe({token:a,factory:a.ɵfac,providedIn:`root`})};export{e as t};

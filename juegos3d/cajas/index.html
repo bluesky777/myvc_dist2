@@ -19,7 +19,9 @@
 <body>
 <div id="juego"></div>
 <div id="aviso-carga">Cargando Cajas de Palabras…</div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.80.1/phaser.min.js"></script>
+<!-- Phaser 3.80.1 servido desde aquí y no desde cdnjs: el juego corre en el origen del token
+     (auditoría §4, 8 oct 2026). Copia comprobada contra el SRI de cdnjs. -->
+<script src="phaser.min.js"></script>
 <script src="js/registro.js"></script>
 <script src="js/iconos.js"></script>
 <script src="js/mundos/jardin.js"></script>

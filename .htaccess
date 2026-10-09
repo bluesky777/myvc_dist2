@@ -143,6 +143,15 @@ AddDefaultCharset utf-8
 # hay mas de un servidor detras. Viene del fichero de la vieja, tal cual.
 <IfModule mod_headers.c>
     Header unset ETag
+
+    # CSP EN MODO SOLO-INFORME (auditoría A-6, 8 oct 2026). El navegador NO bloquea nada:
+    # avisa de lo que habría bloqueado a `8myvc/public/api/csp-informe`, que lo apunta en
+    # `storage/logs/csp.log` del colegio. Con esa lista se escribe la CSP que sí bloquea.
+    # De entrada ya se sabe que avisará del `onload` en línea que mete el `inlineCritical`
+    # de Angular en la hoja de estilos de `index.html`.
+    # Hasta que el colegio tenga el backend de `fix/auditoria-lote-2`, ese receptor no existe
+    # y los avisos se pierden en un 404: no rompe nada, sólo no se apuntan.
+    Header always set Content-Security-Policy-Report-Only "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; frame-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; report-uri /8myvc/public/api/csp-informe"
 </IfModule>
 FileETag None
 
