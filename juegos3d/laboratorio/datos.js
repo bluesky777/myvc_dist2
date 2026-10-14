@@ -1,8 +1,8 @@
-/* Laboratorio de ciencias — contenido pedagógico.
+/* Eureka — contenido pedagógico.
    Un docente puede cambiar textos, retos y preguntas sin tocar juego.js.
    En app2 este objeto vendrá de la API. */
 window.DATOS_LABORATORIO = {
-  titulo: 'Laboratorio de ciencias',
+  titulo: 'Eureka',
   frase: 'Arma un circuito, explora el sistema solar y mezcla sustancias como en un laboratorio de verdad.',
   comoSeJuega: 'Arrastra la mesa para girarla y pellizca (o usa la rueda) para acercarte. Toca un experimento para entrar.',
 

@@ -1,4 +1,4 @@
-/* Taller de fracciones y sólidos — motor 3D (three r128, sin build).
+/* Pizzamática — motor 3D (three r128, sin build).
    Tres estaciones sobre mesas de un taller: fracciones (cortar y servir), sólidos (redes y conteo) y volumen (cubitos).
    Los retos vienen de window.DATOS_GEOMETRIA (datos.js). */
 (function () {
@@ -11,6 +11,7 @@ const easeIO = k => k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
 const rebote = k => { const n = 7.5625, d = 2.75; if (k < 1 / d) return n * k * k; if (k < 2 / d) return n * (k -= 1.5 / d) * k + .75; if (k < 2.5 / d) return n * (k -= 2.25 / d) * k + .9375; return n * (k -= 2.625 / d) * k + .984375; };
 const KEYS = ['fracciones', 'solidos', 'volumen'];
 const azar = a => a[Math.floor(Math.random() * a.length)];
+const SON = window.Sonido || new Proxy({}, { get: () => () => {} });
 
 /* ---------- progreso ---------- */
 const CLAVE = 'juegos3d.geometria';
@@ -196,7 +197,7 @@ const fracTxt = (a, b) => a + '/' + b;
 const plantilla = (s, v) => String(s || '').replace(/\{(\w+)\}/g, (m, k) => v[k] !== undefined ? v[k] : m);
 const estrellasHTML = n => [0, 1, 2].map(i => `<i class="${i < n ? 'on' : ''}">★</i>`).join('');
 let toastT = 0;
-function toast(msg, tipo) { const t = ui.toast; t.innerHTML = msg; t.className = 'toast ' + (tipo || ''); void t.offsetWidth; t.classList.add('ver'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('ver'), 3200); }
+function toast(msg, tipo) { if (tipo === 'mal') SON.fx('mal'); else if (msg) SON.fx('aviso'); const t = ui.toast; t.innerHTML = msg; t.className = 'toast ' + (tipo || ''); void t.offsetWidth; t.classList.add('ver'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('ver'), 3200); }
 function setReto(html) { ui.reto.innerHTML = html; }
 function setControles(html) { ui.ctl.innerHTML = html; reencuadrar(); }
 function abrirPanel(html, acciones) {
@@ -246,16 +247,17 @@ const VISTA_HUB = { t: new V3(0, 1.3, -.4), rx: 13.6, ry: 3.6, rxv: 4.6, ryv: 4,
 function irHub() {
   G++; quitarModo(); pantalla = 'hub'; estAct = null;
   setReto(''); ui.ctl.innerHTML = ''; ui.hub.classList.remove('oculto'); ui.hud.classList.remove('oculto');
-  pintarHub(); actualizarHud(); vista = VISTA_HUB; reencuadrar(1.1);
+  pintarHub(); actualizarHud(); vista = VISTA_HUB; reencuadrar(1.1); SON.musica('taller');
   if (todoHecho() && !prog.visto.final) { prog.visto.final = 1; guardar(); setTimeout(panelFinal, 1200); }
 }
 function panelFinal() {
+  SON.fx('final');
   const tot = KEYS.reduce((s, k) => s + estrellasDe(k), 0), max = KEYS.reduce((s, k) => s + niveles(k).length * 3, 0);
   const n = Math.round(3 * tot / max);
   abrirPanel(`<div class="pstar">${estrellasHTML(n)}</div><h2>¡Terminaste el taller!</h2><p>Ganaste <b>${tot}</b> de ${max} estrellas en las tres estaciones.</p><div class="pbtns"><a class="btn pri" href="../index.html" data-p="x" style="text-decoration:none;display:grid;place-items:center">Volver a los juegos</a><button class="btn" data-p="seguir">Seguir en el taller</button></div>`, {});
 }
 function entrarEstacion(k) {
-  pantalla = 'estacion'; estAct = k; ui.hub.classList.add('oculto');
+  pantalla = 'estacion'; estAct = k; ui.hub.classList.add('oculto'); SON.fx('entrar'); SON.musica('estacion');
   const n = niveles(k).findIndex((_, i) => !(prog[k][i] > 0));
   iniciarNivel(n < 0 ? 0 : n);
   if (!prog.visto[k]) { prog.visto[k] = 1; guardar(); mostrarComo(k); }
@@ -270,10 +272,11 @@ function iniciarNivel(i) {
 function ganar(n, msg) {
   const k = estAct, i = nivAct, g0 = G;
   prog[k][i] = Math.max(prog[k][i] || 0, n); guardar(); actualizarHud();
-  confeti(); modo && (modo.terminado = true);
+  confeti(); modo && (modo.terminado = true); SON.fx('bien'); SON.fx('confeti');
   setTimeout(() => {
     if (g0 !== G) return;
     const ultimo = i === niveles(k).length - 1;
+    SON.fx(ultimo ? 'estacion' : 'estrellas', { n });
     if (ultimo) {
       abrirPanel(`<div class="pstar">${estrellasHTML(n)}</div><h2>¡Estación completa!</h2><p>${msg || ''}<br>En ${D.estaciones[k].nombre} llevas <b>★ ${estrellasDe(k)}</b> de ${niveles(k).length * 3}.</p><div class="pbtns"><button class="btn pri" data-p="hub">Volver al taller</button><button class="btn" data-p="rep">Repetir este reto</button><a class="lnk" href="../index.html">Volver a los juegos</a></div>`, { hub: irHub, rep: () => iniciarNivel(i) });
     } else {
@@ -475,18 +478,19 @@ function modoFracciones(nv, g0) {
       if (!vivo()) return;
       if (forma === 'chocolate') { cuch.position.set(c0.x + L, .9, c0.z - .72); cuch.rotation.set(0, -PI / 2, 0); }
       else { cuch.position.set(c0.x, .9, c0.z); cuch.rotation.set(0, L, 0); }
+      SON.fx('cuchillo');
       await anim(.13, q => { cuch.position.y = .9 - (.9 - alto) * easeO(q); });
       await anim(.1, q => { cuch.position.y = alto + (.9 - alto) * q; });
     }
     if (!vivo()) return;
     cuch.visible = false; cortada = true;
-    ponerComida(k);
+    ponerComida(k); SON.fx('separar', { n: k });
     comida.piezas.forEach(p => { p.userData.anim = true; const a = p.position.clone(); const b0 = tablaG.position.clone().setY(.12); p.position.copy(b0.add(p.userData.off(0))); const s = p.position.clone(); anim(.35, q => p.position.lerpVectors(s, a, easeO(q))).then(() => { p.userData.anim = false; }); });
     ocupado = false; pintar();
   }
   async function mover(p) {
     if (ocupado) return;
-    p.userData.servida = !p.userData.servida; p.userData.anim = true;
+    p.userData.servida = !p.userData.servida; p.userData.anim = true; SON.fx('pieza', { servida: p.userData.servida });
     const a = p.position.clone(), b = sitio(p);
     infoPlato();
     await anim(.36, q => { p.position.lerpVectors(a, b, easeIO(q)); p.position.y += Math.sin(q * PI) * .7; });
@@ -494,7 +498,7 @@ function modoFracciones(nv, g0) {
   }
   m.accion = a => {
     if (m.terminado) return;
-    if (a === 'menos' || a === 'mas') { nSel = clamp(nSel + (a === 'mas' ? 1 : -1), 2, 12); ponerGuias(); pintar(); }
+    if (a === 'menos' || a === 'mas') { nSel = clamp(nSel + (a === 'mas' ? 1 : -1), 2, 12); ponerGuias(); pintar(); SON.fx('paso', { sube: a === 'mas' }); }
     else if (a === 'cortar') cortar();
     else if (a === 'otra') { if (ocupado) return; cortada = false; ponerComida(1); ponerGuias(); ubicar(); pintar(); }
     else if (a === 'devolver') comida.piezas.forEach(p => { if (p.userData.servida) mover(p); });
@@ -680,6 +684,7 @@ function modoSolidos(nv, g0) {
   };
   async function plegar(to, dur = 1.3) {
     const from = S.fold, gx = giro.x, gx2 = to < .5 ? .95 : .38; ocupado = true;
+    SON.fx('plegar', { dur, cierra: to > .5 });
     irVista(vistaS(to < .5), dur);
     await anim(dur, k => { S.setFold(from + (to - from) * k); giro.x = gx + (gx2 - gx) * easeIO(k); });
     ocupado = false;
@@ -702,6 +707,7 @@ function modoSolidos(nv, g0) {
     const contar = () => { const b = ui.ctl.querySelector('[data-cont]'); if (b) b.textContent = marcadas.length; };
     function marcar(o) {
       const i = marcadas.indexOf(o);
+      SON.fx('marcar', { n: i >= 0 ? marcadas.length - 1 : marcadas.length + 1, quitar: i >= 0 });
       if (i >= 0) { marcadas.splice(i, 1); o.material.color.setHex(o.userData.cara !== undefined ? o.userData.base : 0x15304d); if (o.userData.num) { liberar(o.userData.num); o.userData.num = null; } marcadas.forEach((x, k) => { if (x.userData.num) { liberar(x.userData.num); x.userData.num = null; } numerar(x, k + 1); }); }
       else { marcadas.push(o); o.material.color.setHex(o.userData.cara !== undefined ? 0xffd25e : 0xffb020); numerar(o, marcadas.length); const s0 = o.scale.clone(); anim(.25, k => o.scale.copy(s0).multiplyScalar(1 + Math.sin(k * PI) * .25)).then(() => o.scale.copy(s0)); }
       contar();
@@ -751,7 +757,7 @@ function modoSolidos(nv, g0) {
     giro.x = .95; P.root.rotation.set(giro.x, giro.y, 0); P.setFold(0);
     const prev = S; S = P; irVista(vistaS(true), .5);
     await esperar(.6); if (!vivo()) return;
-    irVista(vistaS(false), 1.8);
+    irVista(vistaS(false), 1.8); SON.fx('plegar', { dur: 1.8, cierra: true });
     await anim(1.8, k => { P.setFold(k); giro.x = .95 - .57 * easeIO(k); }); if (!vivo()) return;
     if (o.ok) { btn.classList.add('bien'); ocupado = false; ganar(Math.max(1, 3 - errores), `Esa red arma ${nombre}.`); return; }
     errores++; btn.classList.add('mal'); btn.disabled = true;
@@ -816,7 +822,7 @@ function modoVolumen(nv, g0) {
     const c = (x + z + y) % 2 ? new T.Color(COL_CAPA[y % COL_CAPA.length]).offsetHSL(0, 0, .07).getHex() : COL_CAPA[y % COL_CAPA.length];
     const mesh = malla(geo('cubito', () => new T.BoxGeometry(U * .94, U * .94, U * .94)), M(c), 0, 0, 0);
     const p = pos(x, y, z); mesh.position.copy(p); mesh.position.y += 1.4; mesh.visible = false; cubosG.add(mesh); cubos[k3(x, y, z)] = mesh;
-    const go = () => { if (!vivo()) return; mesh.visible = true; anim(.34, k => { mesh.position.y = p.y + 1.4 * (1 - rebote(k)); }); };
+    const go = () => { if (!vivo()) return; mesh.visible = true; SON.fx('cubito', { y }); anim(.34, k => { mesh.position.y = p.y + 1.4 * (1 - rebote(k)); }); };
     demora ? esperar(demora).then(go) : go();
     return true;
   }
@@ -824,8 +830,8 @@ function modoVolumen(nv, g0) {
   function filaLlena(y, z) { for (let x = 0; x < L; x++) if (!cubos[k3(x, y, z)]) return false; return true; }
   function capaLlena(y) { for (let z = 0; z < W; z++) if (!filaLlena(y, z)) return false; return true; }
   function revisarAvisos() {
-    if (!avisos.fila) for (let y = 0; y < H && !avisos.fila; y++) for (let z = 0; z < W; z++) if (filaLlena(y, z)) { avisos.fila = 1; cartel(`fila de ${L}`, new V3(L * U / 2 + .6, (y + .5) * U + .3, (z + .5) * U - W * U / 2)); break; }
-    if (!avisos.capa) for (let y = 0; y < H; y++) if (capaLlena(y)) { avisos.capa = 1; cartel(`capa: ${L} × ${W} = ${L * W}`, new V3(-L * U / 2 - .2, (y + 1) * U + .25, -W * U / 2 - .1)); break; }
+    if (!avisos.fila) for (let y = 0; y < H && !avisos.fila; y++) for (let z = 0; z < W; z++) if (filaLlena(y, z)) { avisos.fila = 1; SON.fx('fila'); cartel(`fila de ${L}`, new V3(L * U / 2 + .6, (y + .5) * U + .3, (z + .5) * U - W * U / 2)); break; }
+    if (!avisos.capa) for (let y = 0; y < H; y++) if (capaLlena(y)) { avisos.capa = 1; SON.fx('capa'); cartel(`capa: ${L} × ${W} = ${L * W}`, new V3(-L * U / 2 - .2, (y + 1) * U + .25, -W * U / 2 - .1)); break; }
     const capas = Array.from({ length: H }, (_, y) => capaLlena(y)).filter(Boolean).length;
     const el = ui.ctl.querySelector('[data-capas]'); if (el) el.textContent = `${capas} de ${H}`;
     return capas;
@@ -856,7 +862,7 @@ function modoVolumen(nv, g0) {
       if (a === 'uno') { const p = siguiente(); if (p) poner(...p); tras(); }
       else if (a === 'fila') { const p = siguiente(); if (!p) return; let d = 0; for (let x = p[0]; x < L; x++) { poner(x, p[1], p[2], d); d += .06; } tras(); }
       else if (a === 'capa') { const p = siguiente(); if (!p) return; let d = 0; for (let z = 0; z < W; z++) for (let x = 0; x < L; x++) if (poner(x, p[1], z, d)) d += .04; tras(); }
-      else if (a === 'vaciar') { vaciar(); revisarAvisos(); }
+      else if (a === 'vaciar') { if (puestos()) SON.fx('vaciar'); vaciar(); revisarAvisos(); }
       else if (a[0] === 'r') {
         const v = +a.slice(1);
         if (v === V()) { formula(); ganar(Math.max(1, 3 - errores), `Caben <b>${V()}</b> cubitos: ${L} × ${W} × ${H} = ${V()}. Ese es el volumen de la caja.`); }
@@ -885,7 +891,7 @@ function modoVolumen(nv, g0) {
     m.accion = async a => {
       if (m.terminado || ocupado) return;
       const d = { m10: -10, m1: -1, p1: 1, p10: 10 }[a];
-      if (d) { valor = clamp(valor + d, 0, 300); const s = ui.ctl.querySelector('[data-v]'); if (s) s.textContent = valor; return; }
+      if (d) { SON.fx('paso', { sube: d > 0 }); valor = clamp(valor + d, 0, 300); const s = ui.ctl.querySelector('[data-v]'); if (s) s.textContent = valor; return; }
       if (a === 'ok') {
         if (!valor) { toast('Primero escribe tu predicción con − y +.'); return; }
         ocupado = true; ui.ctl.querySelectorAll('button').forEach(b => { b.disabled = true; });
@@ -907,7 +913,7 @@ function modoVolumen(nv, g0) {
   setReto(plantilla(tx.altura, { v: VOL, l: L, w: W }));
   m.accion = async a => {
     if (m.terminado || ocupado) return;
-    if (a === 'm' || a === 'p') { H = clamp(H + (a === 'p' ? 1 : -1), 1, 9); vaciar(); liberar(carteles); carteles = new T.Group(); g.add(carteles); construirCaja(); pintar(); irVista(vistaV(), .5); return; }
+    if (a === 'm' || a === 'p') { SON.fx('crecer', { sube: a === 'p' }); H = clamp(H + (a === 'p' ? 1 : -1), 1, 9); vaciar(); liberar(carteles); carteles = new T.Group(); g.add(carteles); construirCaja(); pintar(); irVista(vistaV(), .5); return; }
     if (a === 'ok') {
       ocupado = true; vaciar(); ui.ctl.querySelectorAll('button').forEach(b => { b.disabled = true; });
       const cab = Math.min(VOL, V()); const dur = llenarTodo(cab, Math.min(.06, 2.2 / cab));
@@ -950,6 +956,7 @@ resize(); irVista(VISTA_HUB, 0); bucle();
 const listo = () => { const b = $('#bJugar'); b.disabled = false; b.textContent = 'Jugar'; };
 (document.fonts && document.fonts.ready ? Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 2500))]) : Promise.resolve()).then(listo);
 $('#bJugar').addEventListener('click', () => { ui.inicio.classList.add('oculto'); ui.hud.classList.remove('oculto'); irHub(); });
+SON.boton($('#bSonido')); SON.mezclador($('#iSonido')); SON.musica('taller');
 
 window.__juego = {
   estado: () => ({ pantalla, estacion: estAct, nivel: nivAct, estrellas: Object.fromEntries(KEYS.map(k => [k, estrellasDe(k)])), modo: modo && modo.info && modo.info() }),

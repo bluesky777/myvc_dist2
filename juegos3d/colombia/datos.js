@@ -1,9 +1,9 @@
-/* Vuelo por Colombia — contenido pedagógico y geografía del mapa.
+/* Vuelo Cóndor — contenido pedagógico y geografía del mapa.
    Coordenadas en grados [longitud, latitud] (oeste y sur negativos), aproximadas.
    Un docente puede cambiar misiones, datos y preguntas sin tocar el motor.
    En cada pregunta, `correcta` es el índice de la opción buena (el juego las baraja al mostrarlas). */
 window.DATOS_COLOMBIA = {
-  titulo: 'Vuelo por Colombia',
+  titulo: 'Vuelo Cóndor',
   frase: 'Conoce las regiones, las capitales y los ríos de Colombia volando sobre el mapa.',
   comoSeJuega: 'Arrastra el dedo (o usa las flechas) para girar y acelerar. Cumple la misión de arriba: llega a la región, aterriza en la ciudad o pasa por los aros del río.',
 

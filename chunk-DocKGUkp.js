@@ -1,0 +1,1 @@
+import{d as C,hi as ue}from"./chunk-CbtPUO1T.js";import{t as c}from"./chunk-L6kB8Ypj.js";var o=class e{api=C(c);del(r){return r?this.api.get(`informes/membrete`,{year_id:r}):this.api.get(`informes/membrete`)}static ɵfac=function(m){return new(m||e)};static ɵprov=ue({token:e,factory:e.ɵfac,providedIn:`root`})};export{o as t};

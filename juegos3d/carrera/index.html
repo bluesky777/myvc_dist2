@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Carrera del curso</title>
+<title>Turbo Saber</title>
 <link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,21 +13,40 @@
 <body>
 <div id="gl"></div>
 
-<div id="cargando" class="cargando"><div class="ctit">Carrera del curso</div><div id="cmsg">Preparando la pista…</div></div>
+<div id="cargando" class="cargando"><div class="ctit">Turbo Saber</div><div id="cmsg">Preparando la pista…</div></div>
 
 <!-- HUD de carrera -->
 <div id="hud" class="hud oculto">
   <div class="puesto"><b id="hPuesto">1.º</b><span id="hDe">de 6</span></div>
+  <div class="hcod"><span>Código</span><b id="hCodigo"></b></div>
   <div class="hmid">
     <div class="vuelta" id="hVuelta">Vuelta 1/2</div>
     <div class="tira" id="tira"></div>
   </div>
   <div class="hbtns">
+    <button class="hb ter" id="bTerminar" type="button">Terminar</button>
+    <button class="hb bson" id="bSonido" type="button" aria-pressed="false" aria-label="Silenciar"></button>
     <button class="hb" id="bPausa" aria-label="Pausa"><svg viewBox="0 0 24 24" width="20" height="20"><rect x="6" y="5" width="4" height="14" rx="1.5" fill="currentColor"/><rect x="14" y="5" width="4" height="14" rx="1.5" fill="currentColor"/></svg></button>
   </div>
 </div>
 <div id="velo" class="velo oculto"><b id="hVel">0</b><span>km/h</span><i id="hRacha"></i></div>
 <div id="aviso" class="aviso"></div>
+<div id="feed" class="feed" aria-live="polite"></div>
+<div id="flash" class="flash"></div>
+<div id="redAviso" class="redaviso oculto" role="status"></div>
+
+<!-- Tablero del docente: posiciones con foto, para proyectar -->
+<aside id="tablero" class="tablero oculto" aria-label="Posiciones">
+  <div class="tcab"><b>Posiciones</b><span id="tCuenta"></span></div>
+  <ol id="tabla2" class="tabla2"></ol>
+</aside>
+
+<!-- Poder: se gana respondiendo; se usa tocándolo o con Espacio -->
+<button id="bPoder" class="poder oculto" type="button" aria-label="Poder: responde bien para ganarlo">
+  <span class="pico" id="pIco"></span>
+  <span class="pinfo"><b id="pNom">Llena la barra</b><span class="pips" id="pPips"></span></span>
+  <kbd class="tecla">Espacio</kbd>
+</button>
 
 <!-- Panel de preguntas -->
 <div id="panel" class="panel oculto">
@@ -42,8 +61,10 @@
 <!-- Pantallas -->
 <div id="inicio" class="capa oculto">
   <div class="tarjeta inicio">
-    <div class="marca"><svg viewBox="0 0 40 40" width="38" height="38"><rect width="40" height="40" rx="12" fill="var(--colegio)"/><path d="M11 29V11h4l1 2h12l-2 7 2 7H16l-1 2z" fill="#fff"/><path d="M16 13h4v4h-4zm8 0h3l-1 4h-2zm-4 4h4v4h-4zm-4 4h4v4h-4zm8 0h2l1 4h-3z" fill="var(--ink)"/></svg><h1>Carrera del curso</h1></div>
+    <div class="marca"><svg viewBox="0 0 40 40" width="38" height="38"><rect width="40" height="40" rx="12" fill="var(--colegio)"/><path d="M11 29V11h4l1 2h12l-2 7 2 7H16l-1 2z" fill="#fff"/><path d="M16 13h4v4h-4zm8 0h3l-1 4h-2zm-4 4h4v4h-4zm-4 4h4v4h-4zm8 0h2l1 4h-3z" fill="var(--ink)"/></svg><h1>Turbo Saber</h1><button class="hb bson" id="bSonidoM" type="button" aria-pressed="false" aria-label="Silenciar"></button></div>
     <p class="frase" id="frase"></p>
+    <div id="invita" class="invitas oculto" aria-live="polite"></div>
+    <div class="icols"><div class="icol">
     <div class="paso">1. Elige qué practicar</div>
     <div class="modos">
       <button class="modo" data-modo="tablas"><b>Tablas</b><span>Multiplica rápido</span></button>
@@ -53,9 +74,26 @@
     <div id="optLectura" class="lecturas oculto"></div>
     <div class="paso">2. Elige tu corredor</div>
     <div id="animales" class="animales"></div>
+    </div><div class="icol">
+    <div class="paso">3. Elige la pista</div>
+    <div id="optPistas"></div>
     <div class="marcaP" id="marcaP"></div>
     <button class="jugar" id="bJugar">Jugar</button>
+    <div id="multi" class="multi oculto">
+      <button id="bGrupo" class="congrupo oculto" type="button">
+        <svg viewBox="0 0 48 48" width="40" height="40" aria-hidden="true"><circle cx="17" cy="17" r="7" fill="currentColor"/><circle cx="33" cy="19" r="6" fill="currentColor" opacity=".6"/><path d="M4 38c1-8 6-12 13-12s12 4 13 12z" fill="currentColor"/><path d="M28 38c0-4-1-7-3-9 2-2 5-3 8-3 6 0 10 4 11 12z" fill="currentColor" opacity=".6"/></svg>
+        <span><b>Jugar con mi grupo</b><small>Proyectas la carrera y tus estudiantes entran desde su pantalla</small></span>
+      </button>
+      <button id="codigoAbrir" class="enlace oculto" type="button">¿Tu profe te dio un código?</button>
+      <form id="codigoForm" class="codigof oculto" autocomplete="off">
+        <input id="codigoIn" maxlength="4" autocapitalize="characters" spellcheck="false" placeholder="ABCD" aria-label="Código de la sala">
+        <button class="ir" type="submit">Entrar</button>
+        <span id="codigoMsg" class="cmsg" aria-live="polite"></span>
+      </form>
+    </div>
+    <div class="sonido" data-sonido="sin-boton"></div>
     <a class="volver" href="../index.html">Volver a los juegos</a>
+    </div></div>
   </div>
 </div>
 
@@ -68,19 +106,33 @@
   </div>
 </div>
 
+<!-- Sala multijugador: grupo, sala de espera, avisos (la llena multijugador.js) -->
+<div id="sala" class="capa oculto"><div class="tarjeta sala" id="salaCaja"></div></div>
+
+<!-- Vista de la pista: recorrido de cámara antes de jugar -->
+<div id="vista" class="vista oculto">
+  <div class="vrot" aria-live="polite"><b id="vNom"></b><span id="vRas"></span></div>
+  <div class="vayuda" id="vAyuda"></div>
+  <div class="vbtns"><button class="sec" id="vVolver" type="button">Volver</button><button class="jugar" id="vJugar" type="button">Jugar aquí</button></div>
+</div>
+<div id="vFundido" class="vfundido"></div>
+<div id="intro" class="intro oculto"><div class="vrot"><b id="iNom"></b><span id="iRas"></span></div><span id="iSaltar" class="isaltar">Toca para saltar</span></div>
+
 <div id="cuenta" class="cuenta oculto"><b id="cNum">3</b><span id="cTip"></span></div>
 
 <div id="pausa" class="capa oculto">
   <div class="tarjeta chica">
     <h2>Pausa</h2>
-    <p>La carrera te espera. Nadie avanza mientras tanto.</p>
+    <p id="pausaTx">La carrera te espera. Nadie avanza mientras tanto.</p>
     <button class="jugar" id="bSeguir">Seguir</button>
     <button class="sec" id="bSalir">Salir al inicio</button>
+    <div class="sonido" data-sonido></div>
   </div>
 </div>
 
 <div id="fin" class="final oculto">
   <div class="tarjeta fin">
+    <div class="ftor oculto" id="fTorneo"></div>
     <div class="estrellas" id="fEst"></div>
     <h2 id="fTit">¡Llegaste!</h2>
     <p class="fsub" id="fSub"></p>
@@ -88,12 +140,16 @@
     <div class="botones">
       <button class="jugar" id="bOtra">Otra carrera</button>
       <a class="sec" href="../index.html">Volver a los juegos</a>
+      <button class="sec oculto" id="bCerrar" type="button">Cerrar sala</button>
     </div>
   </div>
 </div>
 
 <script src="../puente.js"></script>
 <script src="datos.js"></script>
+<script src="pistas.js"></script>
+<script src="poderes.js"></script>
+<script src="sonido.js"></script>
 <script src="juego.js"></script>
 </body>
 </html>

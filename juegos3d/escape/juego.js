@@ -1,9 +1,10 @@
-/* Sala de escape — motor. El contenido (salas, retos, premios) vive en datos.js. */
+/* Escape Room — motor. El contenido (salas, retos, premios) vive en datos.js. */
 (function () {
 'use strict';
 
 const DATOS = window.DATOS_ESCAPE || { salas: [] };
 const $ = s => document.querySelector(s);
+const SON = window.Sonido || new Proxy({}, { get: () => () => {} });
 const CLAVE = 'juegos3d.escape';
 const PUNTOS_OBJ = 100, CASTIGO_FALLO = 15, CASTIGO_PISTA = 30, MIN_OBJ = 20, CASTIGO_CODIGO = 10, BONO_TIEMPO = 50;
 
@@ -484,7 +485,7 @@ cv.addEventListener('pointerup', soltar);
 /* sin esto, el clic que el navegador inventa tras el toque cae en el velo del reto recién abierto y lo cierra */
 cv.addEventListener('touchend', e => e.preventDefault(), { passive: false });
 cv.addEventListener('pointercancel', () => { arr = null; });
-function girar(s) { yawMeta = cercano(yawMeta + s * Math.PI / 4, yaw); velYaw = 0; }
+function girar(s) { yawMeta = cercano(yawMeta + s * Math.PI / 4, yaw); velYaw = 0; SON.fx('girar'); }
 $('#girarIzq').onclick = () => girar(1); $('#girarDer').onclick = () => girar(-1);
 
 addEventListener('keydown', e => {
@@ -520,17 +521,17 @@ function empezar(i) {
   $('#inicio').hidden = true; $('#final').hidden = true;
   ['#hud', '#inventario', '#girarIzq', '#girarDer'].forEach(s => { $(s).hidden = false; });
   $('#hudSala').textContent = sala.titulo;
-  enJuego = true; pintarHud(); pintarInventario();
+  enJuego = true; pintarHud(); pintarInventario(); SON.musica('misterio'); SON.ambiente(1);
   mostrarPanel(sala.titulo, sala.intro + ' Tienes ' + sala.objetos.length + ' objetos por revisar.', 'Entrar');
 }
 function salirAlInicio() {
   enJuego = false; cerrarHoja(true); $('#panel').hidden = true;
   ['#hud', '#inventario', '#girarIzq', '#girarDer', '#aviso'].forEach(s => { $(s).hidden = true; });
-  $('#final').hidden = true; $('#inicio').hidden = false; pintarSalas();
+  $('#final').hidden = true; $('#inicio').hidden = false; pintarSalas(); SON.musica('misterio'); SON.ambiente(0.5);
 }
 function mostrarPanel(titulo, texto, boton) {
   pausaIntro = true; $('#panelTitulo').textContent = titulo; $('#panelTexto').textContent = texto; $('#panelBtn').textContent = boton;
-  $('#panel').hidden = false; $('#velo').hidden = false; $('#panelBtn').focus();
+  $('#panel').hidden = false; $('#velo').hidden = false; $('#panelBtn').focus(); SON.fx('hoja');
 }
 $('#panelBtn').onclick = () => {
   $('#panel').hidden = true; $('#velo').hidden = true; pausaIntro = false;
@@ -592,16 +593,16 @@ function msg(t, tipo) { const m = $('#hojaMsg'); m.textContent = t; m.className 
 function abrirReto(id) {
   const o = objetoDe(id), r = o.reto, e = est.objs[id];
   abrirHoja(NOMBRE_TIPO[r.tipo] || 'Reto', o.nombre, r.enunciado);
-  hojaCtx = { id, tipo: r.tipo };
+  hojaCtx = { id, tipo: r.tipo }; SON.fx('hoja'); SON.fx('reto', { obj: id });
   const cuerpo = $('#hojaCuerpo');
   const bp = $('#btnPista'); bp.hidden = !r.pista; bp.disabled = e.pista; bp.textContent = e.pista ? 'Pista usada' : 'Pista (−' + CASTIGO_PISTA + ')';
   if (e.pista && r.pista) { $('#hojaPista').textContent = r.pista; $('#hojaPista').hidden = false; }
   bp.onclick = () => {
-    if (e.pista) return; e.pista = true; bp.disabled = true; bp.textContent = 'Pista usada';
+    if (e.pista) return; e.pista = true; bp.disabled = true; bp.textContent = 'Pista usada'; SON.fx('pista');
     $('#hojaPista').textContent = r.pista; $('#hojaPista').hidden = false; pintarHud();
   };
-  const fallo = (t) => { e.fallos++; msg((t || 'Casi. Inténtalo otra vez.') + ' (−' + CASTIGO_FALLO + ')', 'mal'); pintarHud(); };
-  const acierto = () => premiar(id);
+  const fallo = (t) => { SON.fx('mal'); e.fallos++; msg((t || 'Casi. Inténtalo otra vez.') + ' (−' + CASTIGO_FALLO + ')', 'mal'); pintarHud(); };
+  const acierto = ya => { if (ya !== true) SON.fx('bien'); premiar(id); };
 
   if (r.tipo === 'opcion' || r.tipo === 'vf') {
     const ops = r.tipo === 'vf' ? ['Verdadero', 'Falso'] : r.opciones;
@@ -609,7 +610,7 @@ function abrirReto(id) {
       `<button class="opcion" data-i="${i}">${r.tipo === 'vf' ? '' : `<span class="l">${'ABCDEFGH'[i]}</span>`}<span>${esc(t)}</span></button>`).join('') + '</div>';
     cuerpo.querySelectorAll('.opcion').forEach(b => b.onclick = () => {
       const i = +b.dataset.i, bien = r.tipo === 'vf' ? (i === 0) === !!r.respuesta : i === r.respuesta;
-      if (bien) { b.classList.add('bien'); cuerpo.querySelectorAll('.opcion').forEach(x => { x.disabled = true; }); setTimeout(acierto, 550); }
+      if (bien) { b.classList.add('bien'); cuerpo.querySelectorAll('.opcion').forEach(x => { x.disabled = true; }); SON.fx('bien'); setTimeout(() => acierto(true), 550); }
       else { b.classList.add('mal'); b.disabled = true; fallo(r.tipo === 'vf' ? 'No es así. Piénsalo de nuevo.' : null); }
     });
     hojaCtx.teclas = k => { const i = r.tipo === 'vf' ? ({ v: 0, f: 1 })[k] : 'abcdefgh'.indexOf(k); const b = cuerpo.querySelector(`.opcion[data-i="${i}"]`); if (b && !b.disabled) b.click(); };
@@ -628,8 +629,8 @@ function abrirReto(id) {
       cuerpo.innerHTML = `<div class="orden-zona ${puesto.length ? '' : 'vacia'}">` + puesto.map((v, j) => `<button class="ficha" data-p="${j}"><span class="n">${j + 1}</span>${esc(r.opciones[v])}</button>`).join('') + '</div>'
         + '<div class="fichas">' + dispo.filter(v => !puesto.includes(v)).map(v => `<button class="ficha" data-d="${v}">${esc(r.opciones[v])}</button>`).join('') + '</div>'
         + `<button class="btn comprobar" ${puesto.length === n ? '' : 'disabled style="opacity:.5"'}>Comprobar</button>`;
-      cuerpo.querySelectorAll('[data-d]').forEach(b => b.onclick = () => { puesto.push(+b.dataset.d); pintar(); });
-      cuerpo.querySelectorAll('[data-p]').forEach(b => b.onclick = () => { puesto.splice(+b.dataset.p, 1); pintar(); });
+      cuerpo.querySelectorAll('[data-d]').forEach(b => b.onclick = () => { SON.fx('ficha'); puesto.push(+b.dataset.d); pintar(); });
+      cuerpo.querySelectorAll('[data-p]').forEach(b => b.onclick = () => { SON.fx('ficha'); puesto.splice(+b.dataset.p, 1); pintar(); });
       cuerpo.querySelector('.comprobar').onclick = () => {
         if (puesto.length < n) return;
         const bien = puesto.filter((v, i) => v === i).length;
@@ -659,6 +660,7 @@ function teclado(cuerpo, cfg) {
     txt = ''; setTimeout(pintar, 350);
   };
   const pulsar = k => {
+    SON.fx('tecla', { k });
     if (k === '⌫') txt = txt.slice(0, -1);
     else if (k === 'ok') { if (txt) cfg.alProbar(txt, mal); return; }
     else if (k === '−') txt = txt.startsWith('−') ? txt.slice(1) : '−' + txt;
@@ -681,7 +683,7 @@ function teclaHoja(e) {
 
 function premiar(id) {
   const o = objetoDe(id), e = est.objs[id], p = o.premio || {};
-  e.resuelto = true; e.puntos = puntosObj(e); pintarHud();
+  e.resuelto = true; e.puntos = puntosObj(e); pintarHud(); SON.fx('abrir', { obj: id }); SON.fx('premio', { tipo: p.tipo });
   const ic = p.tipo === 'digito' ? `<div class="grande-ic">${esc(p.valor)}</div>` : p.tipo === 'llave' ? `<div class="grande-ic llave">${SVG_LLAVE}</div>` : p.tipo === 'pista' ? '<div class="grande-ic nota">!</div>' : '';
   const que = p.tipo === 'digito' ? `Encontraste el dígito <b>${esc(p.valor)}</b>.` : p.tipo === 'llave' ? 'Encontraste una <b>llave</b>.' : p.tipo === 'pista' ? `Encontraste una nota: <b>«${esc(p.texto)}»</b>` : '';
   $('#hojaTipo').textContent = '+' + e.puntos + ' pts';
@@ -697,10 +699,10 @@ function premiar(id) {
   setTimeout(() => { const b = $('#btnSeguir'); if (b) b.focus({ preventScroll: true }); }, 250);
 }
 function celebrar(id) {
-  estallar(OBJ[id].foco); if (OBJ[id].extra) OBJ[id].extra();
+  estallar(OBJ[id].foco); if (OBJ[id].extra) OBJ[id].extra(); SON.fx('chispas');
   pintarInventario(id);
   if (!faltan().length) {
-    marcaPuerta.visible = true;
+    marcaPuerta.visible = true; SON.fx('listo');
     setTimeout(() => aviso('¡Tienes todas las piezas! Ve a la puerta.', 3200), 500);
   } else {
     const n = Object.values(est.objs).filter(x => !x.resuelto).length;
@@ -713,18 +715,19 @@ function tocarPuerta() {
   const f = faltan();
   mirarA('puerta', !f.length);
   if (f.length) {
+    SON.fx('cerrada');
     const dig = ordenCodigo().length;
     aviso('La puerta pide ' + dig + ' dígitos' + (pideLlave() ? ' y una llave' : '') + '. Te ' + (f.length === 1 ? 'falta 1 pieza.' : 'faltan ' + f.length + ' piezas.'), 3200);
     return;
   }
   const ord = ordenCodigo(), ver = !sala.puerta || sala.puerta.mostrarOrden !== false;
   abrirHoja('La puerta', 'Código de salida', (pideLlave() ? 'La llave ya giró. ' : '') + 'Escribe el código de ' + ord.length + ' dígitos.' + (ver ? '' : ' ¿En qué orden van? Busca la pista.'));
-  hojaCtx = { id: 'puerta' }; $('#btnPista').hidden = true;
+  hojaCtx = { id: 'puerta' }; $('#btnPista').hidden = true; SON.fx('hoja');
   teclado($('#hojaCuerpo'), { casillas: ord.map((o, i) => ver ? o.nombre.replace(/^(El|La|Los|Las) /, '') : String(i + 1)), ok: 'Abrir', alProbar: (txt, mal) => {
     const bueno = ord.map(o => o.premio.valor).join('');
     if (txt.length < ord.length) { msg('Faltan dígitos.', 'mal'); return; }
     if (txt === bueno) { cerrarHoja(true); escapar(); }
-    else { est.fallosCodigo++; pintarHud(); mal(); msg('Ese código no abre. Revisa el orden. (−' + CASTIGO_CODIGO + ')', 'mal'); }
+    else { SON.fx('codigoMal'); est.fallosCodigo++; pintarHud(); mal(); msg('Ese código no abre. Revisa el orden. (−' + CASTIGO_CODIGO + ')', 'mal'); }
   } });
   // lo que juntó, a la vista mientras escribe (en PC la hoja tapa el inventario)
   const tengo = sala.objetos.filter(o => o.premio && est.objs[o.objeto].resuelto && o.premio.tipo !== 'llave').sort((a, b) => (a.premio.tipo === 'pista') - (b.premio.tipo === 'pista'));
@@ -736,6 +739,7 @@ function escapar() {
   est.salio = true; enJuego = false; marcaPuerta.visible = false;
   ['#girarIzq', '#girarDer', '#inventario'].forEach(s => { $(s).hidden = true; });
   mirarA('puerta'); pitchMeta = 0; OBJ.puerta.meta = 1; estallar(OBJ.puerta.foco);
+  SON.fx('puerta'); SON.ambiente(0.3);
   setTimeout(final, 2900);
 }
 function final() {
@@ -755,6 +759,7 @@ function final() {
   $('#finPistas').textContent = Object.values(est.objs).filter(e => e.pista).length;
   $('#finRecord').textContent = (aTiempo ? 'Bono por tiempo: +' + BONO_TIEMPO + '. ' : '') + (mejor && ant ? '¡Nuevo récord!' : !mejor ? 'Tu récord: ' + ant.puntos + ' pts' : '');
   $('#final').hidden = false; $('#btnOtraVez').focus();
+  SON.fx('fanfarria', { n: estrellas }); SON.musica('victoria'); SON.ambiente(0);
 }
 
 /* ---------------- bucle ---------------- */
@@ -795,6 +800,7 @@ document.addEventListener('visibilitychange', () => {
 });
 
 pintarSalas();
+SON.boton($('#btnSonido')); SON.mezclador($('#iSonido')); SON.mezclador($('#pSonido')); SON.musica('misterio'); SON.ambiente(0.5);
 $('#cargando').hidden = true;
 cuadroAnim();
 

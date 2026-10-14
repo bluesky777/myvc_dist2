@@ -1,9 +1,10 @@
-/* Vuelo por Colombia — motor. El contenido (misiones, datos, mapa) vive en datos.js. */
+/* Vuelo Cóndor — motor. El contenido (misiones, datos, mapa) vive en datos.js. */
 (function () {
 'use strict';
 var D = window.DATOS_COLOMBIA, MAPA = D.mapa;
 var $ = function (s) { return document.querySelector(s); };
 var CLAVE = 'juegos3d.colombia';
+var SON = window.Sonido || new Proxy({}, { get: function () { return function () {}; } });
 
 if (!window.THREE) {
   $('#cargaMsg').textContent = 'No se pudo descargar el motor 3D. Revisa la conexión y vuelve a abrir el juego.';
@@ -449,19 +450,22 @@ function mostrarInicio() {
   $('#hud').hidden = $('#lado').hidden = true; $('#card').hidden = true; $('#bAterrizar').hidden = true; $('#flecha').hidden = true;
   var hechas = MIS.filter(function (m) { return J.progreso.estrellas[m.id]; }).length;
   $('#bJugar').textContent = hechas > 0 && hechas < MIS.length ? 'Seguir el viaje' : 'Jugar';
+  SON.pausa(false); SON.musica('menu');
 }
 function pausar() {
   if (J.pantalla !== 'vuelo') return;
   J.pantalla = 'pausa'; $('#pausa').hidden = false; pintarLista('#pLista'); joy.activo = false; $('#joy').hidden = true;
+  SON.pausa(true);
 }
 $('#bMenu').onclick = pausar;
-$('#bSeguir').onclick = function () { $('#pausa').hidden = true; J.pantalla = 'vuelo'; };
+$('#bSeguir').onclick = function () { $('#pausa').hidden = true; J.pantalla = 'vuelo'; SON.pausa(false); };
 $('#bJugar').onclick = function () {
   var i = MIS.findIndex(function (m) { return !J.progreso.estrellas[m.id]; });
   cerrarPantallas(); empezar(i < 0 ? 0 : i);
 };
 $('#bOtra').onclick = function () { cerrarPantallas(); empezar(0); };
 $('#bAterrizar').onclick = function () { aterrizar(); };
+SON.boton($('#bSonido')); SON.mezclador($('#iSonido')); SON.mezclador($('#pSonido'));
 
 /* Mapa pequeño */
 var mini = $('#mini'), mctx = mini.getContext('2d'), MW = mini.width, MH = mini.height, fondoMini;
@@ -538,7 +542,7 @@ function empezar(i) {
   $('#hud').hidden = $('#lado').hidden = false; $('#card').hidden = true;
   $('#mNum').textContent = 'Misión ' + (i + 1) + ' de ' + MIS.length;
   $('#mTxt').textContent = m.pide;
-  J.pantalla = 'vuelo';
+  J.pantalla = 'vuelo'; SON.pausa(false); SON.fx('despegue');
   if (i === 0 || !J.yaVolo) tip(como(), 6); else tip(m.pide, 3.5);
   J.yaVolo = true;
 }
@@ -557,6 +561,7 @@ function llegar(titulo, etiqueta, color) {
     ops.appendChild(b);
   });
   $('#card').hidden = false; $('#card').scrollTop = 0;
+  SON.fx('llegada');
 }
 function responder(k) {
   if (J.pantalla !== 'tarjeta' || !$('#cFin').hidden) return;
@@ -569,6 +574,7 @@ function responder(k) {
   est = Math.max(1, est);
   J.progreso.estrellas[m.id] = Math.max(J.progreso.estrellas[m.id] || 0, est);
   guardar();
+  SON.fx(bien ? 'bien' : 'mal'); SON.fx('estrellas', { n: est });
   var msg = bien ? '¡Respuesta correcta!' : 'La respuesta era: ' + m.pregunta.opciones[m.pregunta.correcta] + '.';
   if (J.t > m.tiempo) msg += ' Tardaste un poco: vuela más directo.';
   else if (J.errores > 0) msg += ' Aterrizaste antes en otra ciudad.';
@@ -591,11 +597,13 @@ function final() {
     p >= 0.6 ? 'Muy buen viaje. Repite las misiones con menos estrellas para completar el mapa.' :
     'Buen comienzo. Vuelve a volar las misiones para ganar más estrellas.';
   $('#final').hidden = false;
+  SON.fx('fanfarria'); SON.musica('menu');
 }
 function aterrizar() {
   if (J.pantalla !== 'vuelo' || !J.cerca) return;
   J.aterr = { c: J.cerca, t: 0, x0: P.x, z0: P.z, y0: P.y, fase: 'baja' };
   J.pantalla = 'aterrizando'; $('#bAterrizar').hidden = true; joy.activo = false; $('#joy').hidden = true;
+  SON.fx('aterrizar');
 }
 
 /* ---------- Bucle ---------- */
@@ -614,6 +622,7 @@ function camaraA(salto) {
 function paso() {
   raf = requestAnimationFrame(paso);
   var dt = Math.min(0.05, reloj.getDelta()); tiempo += dt;
+  SON.vuelo({ modo: J.pantalla, vel: P.vel, alto: P.y, giro: P.giro });
   if (Math.floor(tiempo * 30) !== Math.floor((tiempo - dt) * 30)) olas(tiempo);
   nubes.forEach(function (n, i) { n.position.x += dt * 0.25; if (n.position.x > toX(-67)) n.position.x = toX(-79); });
   CAPS.forEach(function (c) { c.cab.rotation.y += dt * 1.5; });
@@ -661,7 +670,7 @@ function volar(dt) {
     var hacia = Math.atan2(toX(-74) - P.x, -(toZ(4.5) - P.z));
     var dif = Math.atan2(Math.sin(hacia - P.rumbo), Math.cos(hacia - P.rumbo));
     P.rumbo += dif * Math.min(1, dt * 2);
-    if (!J.avisoBorde) { tip('Hasta aquí llega el mapa. ¡Da la vuelta!', 2.5); J.avisoBorde = true; setTimeout(function () { J.avisoBorde = false; }, 4000); }
+    if (!J.avisoBorde) { tip('Hasta aquí llega el mapa. ¡Da la vuelta!', 2.5); SON.fx('borde'); J.avisoBorde = true; setTimeout(function () { J.avisoBorde = false; }, 4000); }
   }
   var fx = Math.sin(P.rumbo), fz = -Math.cos(P.rumbo);
   var meta = Math.max(alturaVuelo(P.x, P.z), alturaVuelo(P.x + fx * 2, P.z + fz * 2));
@@ -673,6 +682,8 @@ function volar(dt) {
     var chip = $('#chip');
     chip.lastChild.textContent = reg ? D.regiones[reg].nombre : (esMar(lon, lat) ? (lat > 7 ? 'Mar Caribe' : 'Océano Pacífico') : 'Fuera de Colombia');
     chip.firstChild.style.background = reg ? D.regiones[reg].color : (esMar(lon, lat) ? '#7fd0dc' : '#e6dcc3');
+    SON.musica(reg || 'mar', J.t < 0.5 ? 0 : 1.5);
+    if (reg && J.t > 1) SON.fx('region');
   }
 
   /* ciudad bajo el avión */
@@ -680,7 +691,7 @@ function volar(dt) {
   CAPS.forEach(function (c) { var dx = c.x - P.x, dz = c.z - P.z, d = Math.sqrt(dx * dx + dz * dz); if (d < dmin) { dmin = d; cerca = c; } });
   J.cerca = m.tipo === 'capital' ? cerca : null;
   var ba = $('#bAterrizar');
-  if (J.cerca) { ba.lastChild.textContent = J.cerca.d.ciudad; if (ba.hidden) { ba.hidden = false; quitarTip(); } } else if (!ba.hidden) ba.hidden = true;
+  if (J.cerca) { ba.lastChild.textContent = J.cerca.d.ciudad; if (ba.hidden) { ba.hidden = false; quitarTip(); SON.fx('cerca'); } } else if (!ba.hidden) ba.hidden = true;
 
   if (m.tipo === 'region' && reg === m.region) {
     var R = D.regiones[m.region];
@@ -693,12 +704,12 @@ function volar(dt) {
     if (a) {
       var dx = a.position.x - P.x, dz = a.position.z - P.z;
       if (Math.sqrt(dx * dx + dz * dz) < 1.6) {
-        J.sigAro++;
+        J.sigAro++; SON.fx('aro', { i: J.sigAro - 1 });
         if (J.sigAro >= aros.length) { llegar('¡Llegaste al final del ' + RIOS[m.rio].nombre.replace('Río', 'río') + '!', RIOS[m.rio].nombre, '#9fe0f5'); return; }
       }
     }
   }
-  if (!J.pista && m.tipo !== 'rio' && J.t > 35) { J.pista = true; tip('Sigue la flecha amarilla.', 3); }
+  if (!J.pista && m.tipo !== 'rio' && J.t > 35) { J.pista = true; tip('Sigue la flecha amarilla.', 3); SON.fx('pista'); }
   flecha();
 }
 function flecha() {
@@ -721,7 +732,7 @@ function bajar(dt) {
     if (k >= 1) {
       var m = mision();
       if (c.d.id === m.ciudad) { llegar(c.d.ciudad, 'Capital de ' + c.d.depto, D.regiones[c.d.region].color); return; }
-      J.errores++; J.pista = true;
+      J.errores++; J.pista = true; SON.fx('equivocada');
       tip('Esta es ' + c.d.ciudad + ', capital de ' + c.d.depto + '. No es la que buscas: sigue la flecha.', 4, true);
       A.fase = 'sube'; A.t = 0; A.y0 = P.y;
     }

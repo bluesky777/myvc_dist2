@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Sala de escape</title>
+<title>Escape Room</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grandstander:wght@700;900&family=Lexend:wght@400;500;600;700&display=swap">
@@ -16,10 +16,11 @@
 <section id="inicio" class="capa">
   <div class="caja-inicio">
     <div class="sello" aria-hidden="true"><svg viewBox="0 0 64 64"><circle cx="32" cy="26" r="13" fill="none" stroke="currentColor" stroke-width="6"/><rect x="12" y="30" width="40" height="28" rx="7" fill="currentColor"/><circle cx="32" cy="42" r="4.5" fill="#fffdf7"/><rect x="30" y="44" width="4" height="8" rx="2" fill="#fffdf7"/></svg></div>
-    <h1>Sala de escape</h1>
+    <h1>Escape Room</h1>
     <p class="lema">Resuelve los retos de tu clase, junta las piezas del código y abre la puerta.</p>
     <div id="salas" class="salas" role="radiogroup" aria-label="Elige una sala"></div>
     <button id="btnJugar" class="btn grande">Jugar</button>
+    <div id="iSonido"></div>
     <a class="volver" href="../index.html">← Volver a los juegos</a>
     <p id="cargando" class="cargando">Preparando la sala…</p>
   </div>
@@ -32,6 +33,7 @@
     <div class="marcas"><span id="hudTiempo" title="Tiempo">0:00</span><span id="hudPuntos" title="Puntaje">0 pts</span></div>
   </div>
   <div class="hbtns">
+    <button class="hb" id="btnSonido" aria-label="Silenciar"></button>
     <button class="hb" id="btnAyuda" aria-label="Cómo se juega">?</button>
     <button class="hb" id="btnSalir" aria-label="Salir al inicio">✕</button>
   </div>
@@ -69,6 +71,7 @@
     <li><b>Abre</b> la puerta con las piezas que juntes.</li>
   </ul>
   <button id="panelBtn" class="btn grande">Entrar</button>
+  <div id="pSonido"></div>
 </section>
 
 <!-- Final -->
@@ -93,6 +96,7 @@
 
 <script src="datos.js"></script>
 <script src="../puente.js"></script>
+<script src="sonido.js"></script>
 <script src="juego.js"></script>
 </body>
 </html>

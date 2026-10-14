@@ -1,11 +1,11 @@
-/* Carrera del curso — contenido pedagógico. Un docente puede editar este objeto; en app2 vendrá de la API.
+/* Turbo Saber — contenido pedagógico. Un docente puede editar este objeto; en app2 vendrá de la API.
    - rivales: los compañeros simulados (en app2 serán los del grupo en tiempo real).
    - tablas: qué tablas se ofrecen y hasta qué factor llegan.
    - lecturas: textos cortos con preguntas de opción múltiple; "correcta" es la posición (desde 0). */
 window.DATOS_CARRERA = {
-  titulo: 'Carrera del curso',
+  titulo: 'Turbo Saber',
   frase: 'Responde bien y tu corredor acelera. Practica las tablas o la lectura mientras compites con tu curso.',
-  comoSeJuega: 'Contesta las preguntas de abajo. Cada respuesta buena te da turbo; si fallas, frenas un poquito. ¡Llega primero a la meta!',
+  comoSeJuega: 'Contesta las preguntas de abajo. Cada respuesta buena te da turbo; si fallas, frenas un poquito. Con aciertos seguidos ganas poderes. ¡Llega primero a la meta!',
 
   vueltas: { tablas: 2, lectura: 2 },
 
@@ -81,9 +81,33 @@ window.DATOS_CARRERA = {
     lectura: { cada: [6, 11], acierto: [0.55, 0.85] }
   },
 
+  // Poderes: se ganan SÓLO respondiendo. Cada acierto llena la barra (uno rápido vale doble); fallar la vacía.
+  // Qué poder te toca depende del puesto: adelante defiendes (banano, burbuja), atrás atacas (caparazón, cohete).
+  poderes: {
+    activos: true,
+    cargaPara: 4,                      // puntos de barra para ganar un poder
+    rapida: { tablas: 3, lectura: 7 }, // segundos para que un acierto cuente como rápido
+    cargaRival: 4,                     // aciertos seguidos que necesita un compañero simulado
+    nombres: { banana: 'Cáscara de banano', caparazon: 'Caparazón', escudo: 'Burbuja', cohete: 'Cohete', alas: 'Alas', estrella: 'Estrella', iman: 'Imán', nube: 'Nube', fantasma: 'Fantasma' },
+    ayuda: {
+      banana: 'Suéltala atrás: el que la pise resbala.',
+      caparazon: 'Persigue al de adelante y lo hace girar.',
+      escudo: 'Te protege de un golpe.',
+      cohete: 'Un empujón extra hacia adelante.',
+      alas: 'Vuelas un ratico por encima de todo.',
+      estrella: 'Nadie te frena y vas más rápido.',
+      iman: 'Te jala hacia el de adelante.',
+      nube: 'Le llueve al primero y va más lento.',
+      fantasma: 'Los golpes te atraviesan.'
+    },
+    // segundos que dura cada recompensa (las reglas están en poderes.js)
+    dur: { alas: 3.5, estrella: 5, fantasma: 5, iman: 4, nube: 4 }
+  },
+
   mensajes: {
     bien: ['¡Turbo!', '¡Muy bien!', '¡Eso es!', '¡Volando!', '¡Correcto!'],
     mal: ['Casi. Era', 'Ups, era', 'La buena era'],
-    racha: '¡Racha de 3! Súper turbo'
+    racha: '¡Racha de 3! Súper turbo',
+    rapida: '¡Rapidísimo!'
   }
 };

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Microviaje</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grandstander:wght@700;900&family=Lexend:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="juego.css">
+</head>
+<body>
+<div id="gl"></div>
+
+<div class="hud" id="hud" hidden>
+  <button class="hb" id="bMenu" aria-label="Pausa y niveles"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>
+  <div class="mision" id="mision">
+    <div class="mtop"><span id="mNum">Misión 1</span><span class="mreloj" id="mReloj">0 s</span></div>
+    <div class="mtxt" id="mTxt"></div>
+    <div class="mpasos" id="mPasos" hidden></div>
+  </div>
+</div>
+<div class="lado" id="lado" hidden>
+  <button class="hb" id="bSonido" aria-label="Silenciar"></button>
+  <canvas id="mini" width="150" height="120" aria-label="Mapa de la célula"></canvas>
+</div>
+<div id="labels"></div>
+<div class="tip" id="tip" hidden></div>
+<div id="joy" hidden><i></i></div>
+<button id="bImpulso" hidden aria-label="Impulso"><span>Impulso</span><small>Espacio</small><i><b id="energia"></b></i></button>
+
+<section class="sheet" id="card" hidden>
+  <div class="ctag" id="cTag"></div>
+  <h2 id="cTit"></h2>
+  <p class="cdato" id="cDato"></p>
+  <div class="cpreg" id="cPreg"></div>
+  <div class="cops" id="cOps"></div>
+  <div class="cfin" id="cFin"><button class="btn" id="bSig">Siguiente</button></div>
+</section>
+
+<section class="pantalla" id="inicio">
+  <div class="panel">
+    <div class="kicker">Ciencias naturales · 6.º a 9.º</div>
+    <h1 id="iTit">Microviaje</h1>
+    <p class="frase" id="iFrase"></p>
+    <button class="btn grande" id="bJugar">Jugar</button>
+    <p class="como" id="iComo"></p>
+    <div class="niveles" id="iLista"></div>
+    <a class="volver" href="../index.html">Volver a los juegos</a>
+  </div>
+</section>
+
+<section class="pantalla" id="pausa" hidden>
+  <div class="panel">
+    <h2>Pausa</h2>
+    <p class="como" id="pComo"></p>
+    <button class="btn grande" id="bSeguir">Seguir nadando</button>
+    <div class="niveles" id="pLista"></div>
+    <a class="volver" href="../index.html">Volver a los juegos</a>
+  </div>
+</section>
+
+<section class="pantalla" id="final" hidden>
+  <div class="panel">
+    <div class="kicker" id="fKick">¡Nivel completo!</div>
+    <h1 id="fTit"></h1>
+    <div class="estrellas grande" id="fEst"></div>
+    <ul class="resumen" id="fRes"></ul>
+    <button class="btn grande" id="bSigNivel">Siguiente nivel</button>
+    <button class="btn suave" id="bOtra">Jugar otra vez</button>
+    <a class="volver fuerte" href="../index.html">Volver a los juegos</a>
+  </div>
+</section>
+
+<div id="carga"><div><b>Microviaje</b><span>Encogiendo al nanorobot…</span></div></div>
+
+<script src="../puente.js"></script>
+<script src="datos.js"></script>
+<script src="sonido.js"></script>
+<script src="juego.js"></script>
+</body>
+</html>

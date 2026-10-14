@@ -1,8 +1,8 @@
-/* Taller de fracciones y sólidos — contenido pedagógico.
+/* Pizzamática — contenido pedagógico.
    Un docente puede editar este objeto: el motor (juego.js) no tiene retos escritos dentro.
    En los textos, {pide}, {a}, {b} se cambian por la fracción dibujada y {solido} por el nombre del sólido. */
 window.DATOS_GEOMETRIA = {
-  titulo: 'Taller de fracciones y sólidos',
+  titulo: 'Pizzamática',
   grados: 'Matemáticas · 3.º a 8.º',
   frase: 'Corta pizzas, arma sólidos y llena cajas: aprende fracciones, figuras y volumen con tus manos.',
   como: 'Toca una mesa para entrar. Cada estación tiene retos que se ponen más difíciles. Gana hasta 3 estrellas en cada uno.',

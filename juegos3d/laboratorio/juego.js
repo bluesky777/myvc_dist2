@@ -1,4 +1,4 @@
-/* Laboratorio de ciencias — motor. El contenido vive en datos.js (window.DATOS_LABORATORIO). */
+/* Eureka — motor. El contenido vive en datos.js (window.DATOS_LABORATORIO). */
 (function () {
 'use strict';
 const D = window.DATOS_LABORATORIO, $ = s => document.querySelector(s);

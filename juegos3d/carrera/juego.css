@@ -54,6 +54,8 @@ h1,h2,.ctit{font-family:Grandstander,Lexend,sans-serif;font-weight:900;margin:0;
 /* Capas */
 .capa{position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:16px;overflow-y:auto;background:linear-gradient(rgba(21,48,77,.0),rgba(21,48,77,.35))}
 .tarjeta{background:var(--paper);border-radius:28px;box-shadow:0 30px 60px -24px rgba(21,48,77,.7);padding:20px;width:min(520px,100%)}
+/* el menú deja ver la pista detrás: vidrio esmerilado; las opciones de adentro siguen opacas para leerse */
+.tarjeta.inicio{background:color-mix(in srgb,var(--paper) 34%,transparent);-webkit-backdrop-filter:blur(5px) saturate(1.2);backdrop-filter:blur(5px) saturate(1.2);border:1px solid color-mix(in srgb,#fff 55%,transparent)}
 .tarjeta.chica{width:min(360px,100%);text-align:center;display:grid;gap:10px}
 .tarjeta.chica p{margin:0 0 6px}
 .marca{display:flex;align-items:center;gap:10px}
@@ -73,9 +75,9 @@ h1,h2,.ctit{font-family:Grandstander,Lexend,sans-serif;font-weight:900;margin:0;
 .lect b{font-weight:700}
 .lect span{font-size:12px;font-weight:700;color:var(--sea);white-space:nowrap}
 .lect.sel{border-color:var(--colegio);box-shadow:inset 0 0 0 1px var(--colegio)}
-.animales{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.animales{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
 .ani{border:3px solid transparent;border-radius:16px;background:var(--sand);padding:4px 0 6px;display:grid;justify-items:center;font-size:11px;font-weight:600}
-.ani canvas{width:46px;height:46px}
+.ani canvas{width:100%;max-width:46px;height:auto;aspect-ratio:1}
 .ani.sel{border-color:var(--colegio);background:#fff}
 .marcaP{font-size:13px;margin-top:12px;min-height:18px;color:var(--ink);opacity:.8}
 .jugar{display:block;width:100%;margin-top:12px;border:0;border-radius:18px;background:var(--colegio);color:#fff;font-family:Grandstander;font-weight:900;font-size:26px;padding:14px;box-shadow:0 6px 0 rgba(0,0,0,.18)}
@@ -101,7 +103,7 @@ h1,h2,.ctit{font-family:Grandstander,Lexend,sans-serif;font-weight:900;margin:0;
 .tarjeta.fin h2{text-align:center;font-size:clamp(28px,7vw,36px);margin-top:4px}
 .fsub{text-align:center;margin:6px 0 10px;font-size:14px;line-height:1.4}
 .fsub b{color:var(--colegio)}
-.tabla{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.tabla{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:minmax(0,1fr);gap:6px}
 .tabla li{display:flex;align-items:center;gap:10px;background:var(--sand);border-radius:14px;padding:6px 10px;font-size:14px}
 .tabla li.yo{background:#ffe4dc;font-weight:700}
 .tabla .n{font-family:Grandstander;font-weight:900;font-size:18px;width:28px}
@@ -123,3 +125,198 @@ h1,h2,.ctit{font-family:Grandstander,Lexend,sans-serif;font-weight:900;margin:0;
   .botones .jugar{font-size:20px;padding:12px}
 }
 .botones .jugar{margin-top:0}
+
+/* Poderes: botón abajo a la izquierda (encima del panel), registro de golpes y destello al recibir uno */
+.poder{position:fixed;left:12px;bottom:calc(var(--panel,0px) + 10px);z-index:7;display:flex;align-items:center;gap:10px;border:3px solid transparent;border-radius:22px;background:var(--paper);box-shadow:var(--sombra);padding:5px 12px 5px 5px;max-width:calc(100vw - 190px);text-align:left;transition:transform .12s,border-color .2s}
+.pico{width:50px;height:50px;border-radius:16px;background:var(--sand);display:grid;place-items:center;flex:none}
+.pico svg{width:40px;height:40px}
+.pinfo{display:grid;gap:5px;min-width:0}
+.pinfo b{font-size:13px;font-weight:700;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pips{display:flex;gap:4px}
+.pips i{width:16px;height:7px;border-radius:4px;background:#ead9b4;transition:background .2s}
+.pips i.on{background:var(--sun)}
+.pips.ayuda{display:block;font-size:11px;font-weight:500;opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.poder .tecla{display:none;font:600 11px Lexend,sans-serif;background:var(--ink);color:#fff;border-radius:7px;padding:3px 6px;flex:none}
+.poder.listo{border-color:var(--colegio);animation:latir 1.1s ease-in-out infinite}
+.poder.listo .pico{background:#fff}
+.poder.listo b{font-family:Grandstander;font-weight:900;font-size:17px;color:var(--ink)}
+.poder.vacio .pico svg{opacity:.45}
+.poder.gana{animation:ganar .5s cubic-bezier(.3,1.6,.5,1)}
+.poder:active{transform:scale(.95)}
+@media (hover:hover) and (pointer:fine){.poder.listo .tecla{display:block}}
+@keyframes latir{0%,100%{box-shadow:var(--sombra),0 0 0 0 rgba(255,194,58,.0)}50%{box-shadow:var(--sombra),0 0 0 7px rgba(255,194,58,.45)}}
+@keyframes ganar{0%{transform:scale(.6)}100%{transform:scale(1)}}
+
+.feed{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 70px);z-index:5;display:grid;justify-items:center;gap:6px;pointer-events:none;width:min(420px,calc(100% - 24px))}
+.fi{display:flex;align-items:center;gap:6px;background:rgba(255,253,247,.94);border-radius:999px;padding:3px 10px 3px 3px;box-shadow:var(--sombra);font-size:13px;font-weight:600;max-width:100%;animation:entra .3s cubic-bezier(.3,1.5,.5,1);transition:opacity .4s}
+.fi.sale{opacity:0}
+.fi .av{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:10px;font-weight:700;flex:none;border:2px solid #fff}
+.fi svg{width:24px;height:24px;flex:none}
+.fi span.tx{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fi.mio{background:var(--ink);color:#fff}
+.fi.contra{background:var(--coral);color:#fff}
+@keyframes entra{from{transform:translateY(-8px) scale(.9);opacity:0}}
+
+.flash{position:fixed;inset:0;z-index:4;pointer-events:none;opacity:0;background:radial-gradient(ellipse at center,rgba(255,106,77,0) 45%,rgba(255,106,77,.55) 100%)}
+.flash.ver{animation:destello .9s ease-out}
+@keyframes destello{0%{opacity:1}100%{opacity:0}}
+.tira .pt.golpe{animation:sacude .5s ease-in-out 3}
+@keyframes sacude{0%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-3px) rotate(-14deg)}75%{transform:translateY(2px) rotate(14deg)}}
+@media (max-width:420px){.poder{padding-right:10px}.pico{width:44px;height:44px}.pico svg{width:34px;height:34px}.pinfo b{font-size:12px}.poder.listo b{font-size:15px}}
+@media (prefers-reduced-motion:reduce){.poder.listo,.flash.ver,.tira .pt.golpe{animation:none}}
+
+/* ---------- Multijugador ---------- */
+.av{position:relative;overflow:hidden}
+.av img,.tira .pt img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit}
+.tira .pt{overflow:hidden}
+.hcod{display:none}
+.hb.ter{display:none;width:auto;padding:0 14px;font-weight:700;font-size:14px}
+body.red-tablero .puesto,body.red-tablero #bPausa{display:none}
+body.red-tablero .hb.ter{display:grid}
+body.red-tablero .hcod{display:flex;flex-direction:column;align-items:center;background:var(--ink);color:#fff;border-radius:18px;padding:4px 14px 6px;box-shadow:var(--sombra);flex:none}
+.hcod span{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.75}
+.hcod b{font-family:Grandstander;font-weight:900;font-size:26px;letter-spacing:.12em;line-height:1}
+.redaviso{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 70px);z-index:9;background:var(--ink);color:#fff;border-radius:999px;padding:8px 16px;font-weight:600;font-size:14px;box-shadow:var(--sombra)}
+.op.elegida{background:#fff;box-shadow:inset 0 0 0 3px var(--colegio),0 5px 0 #e2cfa6}
+
+/* puerta en el inicio */
+.invitas{display:grid;gap:8px;margin:12px 0 4px}
+.invita{display:flex;align-items:center;gap:12px;width:100%;border:3px solid var(--colegio);border-radius:20px;background:#fff;padding:8px 10px;text-align:left;box-shadow:0 5px 0 rgba(0,0,0,.08);animation:latir 1.6s ease-in-out infinite}
+.invita .av{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:16px;flex:none}
+.invita .itx{flex:1;min-width:0;display:grid}
+.invita .itx b{font-family:Grandstander;font-weight:900;font-size:20px;line-height:1.1}
+.invita .itx small{font-size:13px;opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.invita em{font-style:normal;background:var(--colegio);color:#fff;border-radius:14px;padding:10px 16px;font-family:Grandstander;font-weight:900;font-size:18px;flex:none}
+.multi{margin-top:4px}
+.congrupo{display:flex;align-items:center;gap:12px;width:100%;margin-top:10px;border:3px solid var(--colegio);border-radius:18px;background:#fff;color:var(--ink);padding:10px 14px;text-align:left}
+.congrupo svg{color:var(--colegio);flex:none}
+.congrupo b{display:block;font-family:Grandstander;font-weight:900;font-size:21px}
+.congrupo small{display:block;font-size:13px;opacity:.75;line-height:1.3}
+.enlace{display:block;margin:10px auto 0;border:0;background:none;color:var(--sea);font-weight:700;font-size:14px;text-decoration:underline;padding:6px}
+.codigof{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;align-items:center}
+.codigof input{flex:1;min-width:0;height:52px;border:2px solid #ead9b4;border-radius:14px;padding:0 14px;font:900 26px Grandstander,Lexend,sans-serif;letter-spacing:.3em;text-transform:uppercase;color:var(--ink);background:#fff}
+.codigof input:focus{outline:none;border-color:var(--colegio)}
+.codigof .ir{height:52px;border:0;border-radius:14px;background:var(--colegio);color:#fff;font-family:Grandstander;font-weight:900;font-size:20px;padding:0 18px}
+.codigof .cmsg{flex-basis:100%;font-size:13px;min-height:0}
+.codigof .cmsg:empty{display:none}
+
+/* tarjeta de sala: grupos, espera, avisos */
+.capa#sala{z-index:22;background:linear-gradient(rgba(21,48,77,.25),rgba(21,48,77,.55))}
+.tarjeta.sala{display:grid;gap:10px;text-align:center}
+.tarjeta.sala h2{font-size:clamp(26px,6.5vw,34px)}
+.tarjeta.sala .sub{margin:0;font-size:15px;line-height:1.4;opacity:.85}
+.tarjeta.sala .jugar,.tarjeta.sala .sec{margin-top:0}
+.grupos{display:grid;gap:8px;max-height:52vh;overflow-y:auto;text-align:left;font-size:14px}
+.grupo{display:flex;justify-content:space-between;align-items:center;gap:10px;border:2px solid #ead9b4;border-radius:16px;background:#fff;padding:12px 14px}
+.grupo b{font-family:Grandstander;font-weight:900;font-size:20px}
+.grupo span{font-size:12px;font-weight:700;color:var(--sea)}
+.grupo:hover,.grupo:focus-visible{border-color:var(--colegio)}
+.quien{display:flex;flex-direction:column;align-items:center;gap:6px;font-weight:700}
+.av.grande{width:72px;height:72px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:24px;font-weight:700;box-shadow:var(--sombra)}
+.cargador{width:44px;height:44px;margin:4px auto;border-radius:50%;border:5px solid #ead9b4;border-top-color:var(--colegio);animation:gira 1s linear infinite}
+@keyframes gira{to{transform:rotate(360deg)}}
+.tarjeta.sala .ptag{justify-self:center}
+.tarjeta.sala .texto{text-align:left;background:var(--sand);border-radius:16px;padding:12px 14px;max-height:34vh;overflow-y:auto;user-select:text;-webkit-user-select:text;font-size:16px;line-height:1.55}
+.tarjeta.sala .texto p{margin:6px 0 0}
+.cuantos{font-weight:700;font-size:14px;color:var(--sea);text-transform:uppercase;letter-spacing:.04em}
+.caras{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:10px 6px;max-height:40vh;overflow-y:auto;padding:4px}
+.cara{display:grid;justify-items:center;gap:4px;font-size:13px;font-weight:600;animation:entra .35s cubic-bezier(.3,1.5,.5,1)}
+.cara .av{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:17px;border:3px solid #fff;box-shadow:0 4px 10px -4px rgba(21,48,77,.5)}
+.cara span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cara.fuera{opacity:.4}
+.vacio{margin:8px 0;opacity:.75;font-size:15px}
+.tarjeta.sala.ancha{width:min(980px,100%);grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:24px;text-align:left;align-items:start}
+.sizq,.sder{display:grid;gap:10px}
+.sizq .paso{margin:0}
+.codigo{display:flex;gap:8px}
+.codigo b{flex:1;max-width:96px;aspect-ratio:3/4;display:grid;place-items:center;background:var(--ink);color:#fff;border-radius:18px;font-family:Grandstander;font-weight:900;font-size:clamp(40px,9vw,76px);box-shadow:0 6px 0 rgba(0,0,0,.2)}
+.prac{display:grid;gap:4px;font-size:13px;font-weight:700;color:var(--sea)}
+.practica{height:46px;border:2px solid #ead9b4;border-radius:14px;padding:0 10px;font:600 15px Lexend,sans-serif;color:var(--ink);background:#fff;max-width:100%}
+.sbtns{display:grid;grid-template-columns:2fr 1fr;gap:10px}
+.sbtns .jugar[disabled]{opacity:.45;cursor:default}
+@media (max-width:760px){.tarjeta.sala.ancha{grid-template-columns:1fr;text-align:center}.codigo{justify-content:center}.sbtns{grid-template-columns:1fr}}
+
+/* tablero proyectado: posiciones a la derecha (abajo en pantalla angosta) */
+.tablero{position:fixed;z-index:6;right:24px;top:84px;bottom:24px;width:340px;display:flex;flex-direction:column;background:rgba(255,253,247,.95);border-radius:24px;box-shadow:var(--sombra);padding:12px}
+.tcab{display:flex;justify-content:space-between;align-items:baseline;padding:2px 6px 8px}
+.tcab b{font-family:Grandstander;font-weight:900;font-size:22px}
+.tcab span{font-size:13px;font-weight:600;opacity:.7}
+.tabla2{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:minmax(0,1fr);gap:5px;overflow-y:auto;align-content:start}
+.tabla2 li{display:flex;align-items:center;gap:8px;background:var(--sand);border-radius:14px;padding:5px 10px;font-size:15px;transition:opacity .3s}
+.tabla2 .n{font-family:Grandstander;font-weight:900;font-size:18px;width:32px;flex:none}
+.tabla2 .av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:12px;font-weight:700;flex:none}
+.tabla2 .nom{flex:1;min-width:0;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tabla2 i{font-style:normal;font-size:12px;opacity:.7;white-space:nowrap;font-variant-numeric:tabular-nums}
+.tabla2 li.meta{background:#e3f4e9}
+.tabla2 li.meta i{opacity:1;font-weight:700;color:var(--leaf)}
+.tabla2 li.fuera{opacity:.45}
+.tabla2 li:nth-child(-n+3) .n{color:var(--colegio)}
+@media (max-width:899px){
+  .tablero{left:8px;right:8px;top:auto;bottom:8px;width:auto;max-height:34vh;padding:8px}
+  .tcab b{font-size:18px}
+  .tabla2 li{font-size:14px;padding:3px 8px}.tabla2 .av{width:28px;height:28px}
+}
+@media (prefers-reduced-motion:reduce){.invita{animation:none}}
+@media (max-width:420px){.invita .itx b{font-size:17px}.invita em{padding:8px 12px;font-size:16px}.invita .av{width:42px;height:42px}}
+
+/* Pistas: una carrera o torneo de 3 (inicio y sala del docente) */
+.selpistas{display:grid;gap:8px;text-align:left}
+.tmodo{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--sand);border-radius:16px;padding:4px}
+.tmodo button{border:0;border-radius:12px;background:transparent;padding:8px 6px;display:flex;align-items:center;justify-content:center;gap:6px;color:var(--ink);font:inherit;min-height:40px}
+.tmodo b{font-family:Grandstander;font-weight:900;font-size:17px}
+.tmodo span{font-size:12px;font-weight:600;opacity:.7}
+.tmodo button.sel{background:#fff;box-shadow:inset 0 0 0 2px var(--colegio),0 3px 10px -4px rgba(21,48,77,.5)}
+.pgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.pista{position:relative;border:3px solid transparent;border-radius:14px;background:var(--sand);padding:0 0 5px;overflow:hidden;display:grid;gap:4px;text-align:center;color:var(--ink);font:inherit;transition:transform .12s}
+.pista svg{display:block;width:100%;height:auto;aspect-ratio:16/9}
+.pista b{font-size:12px;font-weight:700;line-height:1.15;padding:0 4px;min-height:2.3em;display:grid;place-items:center}
+.pista.sel{border-color:var(--colegio);background:#fff}
+.pista:active{transform:scale(.97)}
+.pista .num{position:absolute;top:5px;left:5px;width:24px;height:24px;border-radius:50%;background:var(--colegio);color:#fff;font:900 15px/1 Grandstander,sans-serif;font-style:normal;display:none;place-items:center;box-shadow:0 0 0 2px #fff}
+.es-torneo .pista.sel .num{display:grid}
+.pdesc{display:flex;align-items:center;gap:8px;min-height:38px;font-size:13px;line-height:1.3}
+.pdesc .ptx{flex:1;min-width:0}
+.pdesc .ptx b{font-weight:700;color:var(--colegio)}
+.azar{display:none;border:2px solid var(--colegio);color:var(--colegio);background:#fff;border-radius:999px;padding:6px 12px;font:700 13px Lexend,sans-serif;flex:none}
+.es-torneo .azar{display:block}
+@media (hover:hover) and (pointer:fine){.pista:hover{border-color:#ead9b4}.pista.sel:hover{border-color:var(--colegio)}}
+.ftor{text-align:center;font-size:12px;font-weight:700;color:var(--sea);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+.tabla .mas{font-size:12px;font-weight:700;color:var(--leaf);min-width:28px;text-align:right;font-variant-numeric:tabular-nums}
+.tabla .t b{font-weight:700;opacity:1}
+.tarjeta.sala .selpistas .pista b{font-size:13px}
+@media (min-width:900px) and (min-height:560px){
+  .tarjeta.inicio{width:min(940px,100%)}
+  .icols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:start}
+  .icols .icol>.paso:first-child{margin-top:0}
+  .icols .pgrid{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+.ppista{display:grid;gap:6px}
+.ppista>span{font-size:13px;font-weight:700;color:var(--sea)}
+@media (min-width:761px){.tarjeta.sala.ancha .ppista{grid-column:1/-1}.tarjeta.sala.ancha .ppista .pgrid{grid-template-columns:repeat(7,minmax(0,1fr))}.tarjeta.sala.ancha .ppista .selpistas{grid-template-columns:minmax(0,260px) minmax(0,1fr);align-items:center}.tarjeta.sala.ancha .ppista .pgrid{grid-column:1/-1;order:3}}
+.botones .jugar small{display:block;font:600 13px/1.2 Lexend,sans-serif;opacity:.9;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Vista de la pista y sobrevuelo de entrada */
+.vista,.intro{position:fixed;inset:0;z-index:21;pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:calc(env(safe-area-inset-top,0px) + 14px) 16px calc(env(safe-area-inset-bottom,0px) + 16px)}
+.vrot{background:rgba(255,253,247,.92);border-radius:999px;padding:8px 18px;box-shadow:var(--sombra);display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;justify-content:center;max-width:100%;text-align:center}
+.vrot b{font-family:Grandstander;font-weight:900;font-size:clamp(18px,4.6vw,24px);color:var(--ink)}
+.vrot span{font-size:14px;color:var(--ink);opacity:.8}
+.vayuda{margin-top:auto;margin-bottom:10px;font-size:13px;font-weight:600;color:#fff;text-shadow:0 1px 3px rgba(21,48,77,.8)}
+.vbtns{pointer-events:auto;display:grid;grid-template-columns:1fr 1.4fr;gap:10px;width:min(440px,100%)}
+.vbtns .sec,.vbtns .jugar{margin:0;padding:13px;font-size:18px}
+.vbtns .sec{background:var(--paper);box-shadow:var(--sombra)}
+.vfundido{position:fixed;inset:0;z-index:25;background:#fffdf7;opacity:0;pointer-events:none;transition:opacity .35s ease}
+.vfundido.ver{opacity:1}
+.intro{justify-content:flex-start;gap:10px}
+.isaltar{margin-top:auto;font-size:13px;font-weight:700;color:#fff;background:rgba(21,48,77,.55);border-radius:999px;padding:6px 14px}
+.pcaja{position:relative;display:grid}
+.verp{position:absolute;top:5px;right:5px;display:none;align-items:center;gap:4px;border:0;border-radius:999px;background:rgba(21,48,77,.82);color:#fff;font:700 11px/1 Lexend,sans-serif;padding:5px 8px 5px 6px}
+.pcaja.sel .verp{display:flex}
+@media (hover:hover) and (pointer:fine){.verp:hover{background:var(--ink)}}
+/* sonido: altavoz (silencio) y deslizadores de música y efectos */
+.bson[aria-pressed="true"]{color:var(--coral)}
+.sonido{display:flex;align-items:center;gap:10px;margin-top:12px}
+.sonido .bson,.marca .bson{flex:none;background:var(--sand);box-shadow:none}
+.marca .bson{margin-left:auto}
+.sdes{flex:1;min-width:0;display:grid;gap:0;font-size:12px;font-weight:700;color:var(--sea);text-align:left}
+.sdes input{width:100%;height:28px;margin:0;accent-color:var(--colegio);cursor:pointer}
+.tarjeta.chica .sonido{margin-top:4px}
