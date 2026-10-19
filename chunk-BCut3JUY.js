@@ -1,0 +1,1 @@
+var t=[400,403,404,409,422,423,429];function u(e,r,s){if(!t.includes(e))return s;let n=r?.message;return typeof n==`string`&&n!==``?n:s}export{u as t};
