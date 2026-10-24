@@ -1,1 +1,0 @@
-var o=()=>null;export{o as montar};

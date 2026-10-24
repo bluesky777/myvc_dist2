@@ -1,0 +1,1 @@
+import{a as ke,i as _e,n as Te,r as Y,t as Ne}from"./chunk-2b78inLZ.js";export{ke as leerPalabras,_e as montar,Y as nombreFraccion,Ne as palabras,Te as ruidos};
