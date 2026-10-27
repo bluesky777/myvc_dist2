@@ -1,0 +1,78 @@
+Great job!
+Try again!
+What is it?
+How many legs?
+Can it fly?
+What did it eat?
+What did it say?
+cow
+bull
+dog
+cat
+hen
+rooster
+chick
+frog
+lion
+lioness
+tiger
+jaguar
+elephant
+giraffe
+zebra
+hippo
+crocodile
+sheep
+ram
+goat
+horse
+donkey
+pig
+rabbit
+deer
+bear
+monkey
+sloth
+duck
+peacock
+peahen
+ostrich
+dove
+raven
+owl
+condor
+macaw
+toucan
+Two.
+Four.
+Six.
+Yes, it can.
+No, it can’t.
+Yes, it is.
+It ate grass.
+It ate fish.
+It ate bones.
+It ate flies.
+It ate meat.
+It ate hay.
+It ate leaves.
+It ate corn.
+It ate seeds.
+It ate carrots.
+It ate bananas.
+It ate worms.
+It said moo.
+It said woof.
+It said meow.
+It said cluck.
+It said peep.
+It said ribbit.
+It said roar.
+It said baa.
+It said neigh.
+It said hee-haw.
+It said oink.
+It said quack.
+It said coo.
+It said caw.
+It said hoot.

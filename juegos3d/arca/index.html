@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Two by Two</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grandstander:wght@700;900&family=Lexend:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="juego.css">
+</head>
+<body>
+<div id="gl"></div>
+
+<div id="cargando" class="cargando"><div class="ctit">Two by Two</div><div id="cmsg">Preparando la pradera…</div><div class="cbarra"><i id="cbar"></i></div></div>
+
+<!-- HUD -->
+<div id="hud" class="hud oculto">
+  <div class="cuenta-ani"><span>Animals</span><b id="hCuenta">0 / 12</b><div class="pares" id="hPares"></div></div>
+  <div class="encargo" id="encargo">
+    <span class="noe" aria-hidden="true">Noé</span>
+    <div class="obj"><b id="hObj"></b><small id="hObjEn" lang="en"></small></div>
+    <button class="oir" id="bOirEnc" type="button" aria-label="Escuchar otra vez"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg></button>
+  </div>
+  <div class="hbtns">
+    <button class="hb" id="bVista" type="button" aria-label="Cambiar la cámara (V)" title="Cambiar la cámara (V)"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3.2" fill="currentColor"/></svg><kbd>V</kbd></button>
+    <button class="hb bson" id="bSonido" type="button" aria-pressed="false" aria-label="Silenciar"></button>
+    <button class="hb" id="bPausa" type="button" aria-label="Pausa"><svg viewBox="0 0 24 24" width="20" height="20"><rect x="6" y="5" width="4" height="14" rx="1.5" fill="currentColor"/><rect x="14" y="5" width="4" height="14" rx="1.5" fill="currentColor"/></svg></button>
+  </div>
+</div>
+<div id="aviso" class="aviso"></div>
+<div id="anuncio" class="anuncio" aria-live="polite"><b id="aEs"></b><span id="aEn" lang="en"></span></div>
+<div id="flash" class="flash"></div>
+
+<!-- Controles táctiles y botón de tocar al animal -->
+<div id="palanca" class="palanca oculto" aria-hidden="true"><i id="palancaBola"></i></div>
+<button id="bTocar" class="tocar oculto" type="button"><b>Tocar</b><kbd>E</kbd></button>
+<div id="ayuda" class="ayuda oculto"></div>
+
+<!-- Panel de preguntas -->
+<div id="panel" class="panel oculto" role="dialog" aria-labelledby="pq">
+  <div class="pcab">
+    <span class="ptag" id="pTag"></span>
+    <button class="oir" id="bOirPreg" type="button" aria-label="Escuchar la pregunta"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg></button>
+  </div>
+  <div class="pq" id="pq"></div>
+  <div class="ops" id="ops"></div>
+  <div class="pista" id="pPista" aria-live="polite"></div>
+</div>
+
+<!-- Inicio -->
+<div id="inicio" class="capa oculto">
+  <div class="tarjeta inicio">
+    <div class="marca"><svg viewBox="0 0 40 40" width="38" height="38" aria-hidden="true"><rect width="40" height="40" rx="12" fill="var(--colegio)"/><path d="M6 24h28l-4 7H10z" fill="#fff"/><path d="M12 24v-6h16v6z" fill="var(--ink)"/><path d="M10 18l10-6 10 6z" fill="#fff"/></svg><h1>Two by Two</h1><button class="hb bson" id="bSonidoM" type="button" aria-pressed="false" aria-label="Silenciar"></button></div>
+    <p class="frase" id="frase"></p>
+    <div class="paso">1. ¿Quién eres?</div>
+    <div class="ninos">
+      <button class="nino" data-nino="nino" type="button"><b>Niño</b><span>Boy</span></button>
+      <button class="nino" data-nino="nina" type="button"><b>Niña</b><span>Girl</span></button>
+    </div>
+    <div class="paso">2. Tu grado</div>
+    <div id="optGrados" class="chips"></div>
+    <p class="como" id="como"></p>
+    <button class="jugar" id="bJugar" type="button">Jugar</button>
+    <a class="volver" href="../index.html">Volver a los juegos</a>
+  </div>
+</div>
+
+<div id="pausa" class="capa oculto">
+  <div class="tarjeta chica">
+    <h2>Pausa</h2>
+    <p id="pausaTx">Los animales te esperan.</p>
+    <button class="jugar" id="bSeguir" type="button">Seguir</button>
+    <button class="sec" id="bSalir" type="button">Salir al inicio</button>
+  </div>
+</div>
+
+<div id="fin" class="final oculto">
+  <div class="tarjeta fin">
+    <div class="estrellas" id="fEst"></div>
+    <h2 id="fTit">All the animals are in the ark!</h2>
+    <p class="fsub" id="fSub"></p>
+    <div class="botones">
+      <button class="jugar" id="bOtra" type="button">Jugar otra vez</button>
+      <a class="sec" href="../index.html">Volver a los juegos</a>
+    </div>
+  </div>
+</div>
+
+<script src="../puente.js"></script>
+<script src="datos.js"></script>
+<script src="preguntas.js"></script>
+<script src="sonido.js"></script>
+<script src="juego.js"></script>
+<script>
+/* La tarjeta del menú cabe siempre: si la ventana es baja (o un celular acostado), se encoge entera en vez de
+   cortarse arriba y abajo. */
+(function () {
+  function ajustar() {
+    document.querySelectorAll('.capa > .tarjeta').forEach(function (t) {
+      t.style.transform = '';
+      var k = Math.min(1, (innerHeight - 24) / t.offsetHeight, (innerWidth - 24) / t.offsetWidth);
+      if (k < 1) t.style.transform = 'scale(' + k.toFixed(3) + ')';
+    });
+  }
+  addEventListener('resize', ajustar);
+  new MutationObserver(ajustar).observe(document.body, { subtree: true, attributes: true, attributeFilter: ['class'] });
+  ajustar();
+})();
+</script>
+</body>
+</html>
