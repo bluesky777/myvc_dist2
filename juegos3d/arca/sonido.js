@@ -1,3 +1,4 @@
+/* global module */
 /* Two by Two — sonido sintetizado con WebAudio (0 KB de muestras), sin DOM ni three.
    window.SonidoArca: tocar(efecto), lluvia(0..1), mudo(si), silencio(motivo, si), estado().
    Efectos: clic, brillo, bien, mal, sigue, entra, puerta, trueno, arcoiris, fanfarria.

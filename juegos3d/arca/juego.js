@@ -722,7 +722,6 @@ async function decorarFinca() {
   const ids = ['arbol', 'maiz', 'mango', 'banano', 'mariposa', 'abeja', 'colibri', 'pez', 'heno', 'sacos', 'canasta'];
   const G = {}; (await Promise.all(ids.map(traer))).forEach((g, i) => { G[ids[i]] = g; });
   semilla = 4242;
-  const poco = tactil ? 0.5 : 1;
   if (G.arbol) {
     const l = [];
     for (let k = 0; k < 600 && l.length < (tactil ? 6 : 12); k++) {
@@ -881,7 +880,7 @@ function actualizarClima(dt, t) {
 /* ---------- voz ---------- */
 const Voz = (() => {
   // Lo de Noé se busca primero en voz/en-noe (un hombre mayor), después en voz/en; lo demás, sólo en voz/en.
-  let lista = null, listaNoe = null, audio = null, cola = [];
+  let lista = null, listaNoe = null, audio = null;
   const leer = dir => fetch(BIBLIO + dir + '/index.json', { credentials: 'omit' }).then(r => (r.ok ? r.json() : [])).then(n => new Set(Array.isArray(n) ? n : [])).catch(() => new Set());
   leer('voz/en').then(l => { lista = l; }); leer('voz/en-noe').then(l => { listaNoe = l; });
   const ss = window.speechSynthesis;
@@ -892,7 +891,7 @@ const Voz = (() => {
   const elegirNoe = () => { const v = (ss ? ss.getVoices() : []).filter(x => /^en/i.test(x.lang)); vozNoe = v.find(x => /grandpa/i.test(x.name)) || v.find(x => /\b(fred|ralph|rocko|reed|daniel|arthur|aaron|gordon|alex|male|david|mark|george|guy|james|tom)\b/i.test(x.name)) || null; };
   if (ss) { elegir(); elegirNoe(); ss.onvoiceschanged = () => { elegir(); elegirNoe(); }; }
   let n = 0;
-  function callar() { cola = []; n++; if (audio) { audio.onended = audio.onerror = null; audio.pause(); audio = null; } if (ss) ss.cancel(); }
+  function callar() { n++; if (audio) { audio.onended = audio.onerror = null; audio.pause(); audio = null; } if (ss) ss.cancel(); }
   function sintetizar(texto, fin, deNoe) {
     if (!ss || typeof SpeechSynthesisUtterance === 'undefined') { setTimeout(fin, 600); return; }
     const u = new SpeechSynthesisUtterance(texto); u.lang = 'en-US';
@@ -1015,7 +1014,6 @@ function cambiarVista() {
 
 /* ---------- animales ---------- */
 const animales = [];
-const PROC = 'proc';
 // La ficha del manifiesto de uno de esos nombres (por clave, o por su `nombre` sin tildes: «oso-de-anteojos»).
 const sinTilde = t => String(t).normalize('NFD').replace(/[̀-ͯ]/g, '');
 function fichaDe(ids) {

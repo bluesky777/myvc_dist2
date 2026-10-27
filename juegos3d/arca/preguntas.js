@@ -1,3 +1,4 @@
+/* global module */
 /* Two by Two — las preguntas, sin DOM ni three (UMD: <script> en el juego, require en Node).
    armar(D, especie, grado, azar) → { tipo, texto, ops: [..3], correcta, pista }.
    frases(D, quien) → el inglés que puede decir el juego, una vez cada frase; quien = 'noe' sólo lo de Noé:
