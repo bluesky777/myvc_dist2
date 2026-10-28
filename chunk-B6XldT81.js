@@ -1,1 +1,0 @@
-import{ot as Le}from"./chunk-CbtPUO1T.js";var e=`No guardado`;function n(o){return String(o??``).trim()===e}var a=`El servidor no cambió nada: el valor ya era ése, o la fila no existe en este año.`;function t(){return Le(o=>{if(n(o))throw{mensaje:a};return o})}function l(o){return o.pipe(t())}export{t as i,l as n,n as r,a as t};

@@ -1,1 +1,0 @@
-import{Si as wi,hi as ue}from"./chunk-CbtPUO1T.js";var e=class a{apuntado=wi(null);mensaje=this.apuntado.asReadonly();apuntar(t){this.apuntado.set(t)}limpiar(){this.apuntado.set(null)}static ɵfac=function(i){return new(i||a)};static ɵprov=ue({token:a,factory:a.ɵfac,providedIn:`root`})};export{e as t};

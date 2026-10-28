@@ -1,0 +1,1 @@
+import{In as bi,pi as ue}from"./chunk-BlVyccyr.js";var o=class e{_year=bi(null);year=this._year.asReadonly();poner(n){this._year.set(n)}get(){return this._year()}static ɵfac=function(t){return new(t||e)};static ɵprov=ue({token:e,factory:e.ɵfac,providedIn:`root`})};export{o as t};

@@ -1,0 +1,1 @@
+import{d as C,pi as ue}from"./chunk-BlVyccyr.js";import{t as h}from"./chunk-Csv-VqQx.js";import{t as i}from"./chunk-Ba9-Pdre.js";var n=class r{api=C(i);cache=h(()=>this.api.listar());contratados(){return this.cache.obtener()}static ɵfac=function(i){return new(i||r)};static ɵprov=ue({token:r,factory:r.ɵfac,providedIn:`root`})};export{n as t};

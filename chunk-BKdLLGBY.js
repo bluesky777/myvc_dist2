@@ -1,0 +1,1 @@
+import{_t as Pr,d as C,pi as ue}from"./chunk-BlVyccyr.js";var r=`casb.micolevirtual.com`;var a=class o{documento=C(Pr);esSimonBolivar(){return this.documento.location.hostname===r}static ɵfac=function(c){return new(c||o)};static ɵprov=ue({token:o,factory:o.ɵfac,providedIn:`root`})};export{a as t};

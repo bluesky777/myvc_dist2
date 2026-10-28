@@ -1,1 +1,0 @@
-import{d as C,hi as ue}from"./chunk-CbtPUO1T.js";import{t as c}from"./chunk-Dnt52SmB.js";var p=`promovidos`;var i=class o{api=C(c);calcularGrupo(r){return this.api.put(`${p}/calcular-grupo`,r)}static ɵfac=function(n){return new(n||o)};static ɵprov=ue({token:o,factory:o.ɵfac,providedIn:`root`})};export{i as t};

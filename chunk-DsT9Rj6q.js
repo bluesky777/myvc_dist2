@@ -1,0 +1,1 @@
+import{In as bi,pi as ue}from"./chunk-BlVyccyr.js";var e=class a{apuntado=bi(null);mensaje=this.apuntado.asReadonly();apuntar(t){this.apuntado.set(t)}limpiar(){this.apuntado.set(null)}static ɵfac=function(i){return new(i||a)};static ɵprov=ue({token:a,factory:a.ɵfac,providedIn:`root`})};export{e as t};

@@ -1,0 +1,1 @@
+import{$ as Lb}from"./chunk-BlVyccyr.js";import{t as r}from"./chunk-DA7eT0LC.js";var p=class e{transform(r$1){return r$1?r.imagenes+`perfil/`+r$1:``}static ɵfac=function(n){return new(n||e)};static ɵpipe=Lb({name:`perfil`,type:e,pure:!0})};export{p as t};
