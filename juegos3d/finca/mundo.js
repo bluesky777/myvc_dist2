@@ -105,7 +105,7 @@ function crear(cont, o) {
   }
 
   /* ---------- el terreno ---------- */
-  const suelo = (() => {
+  (() => {
     const g = new T.PlaneGeometry(140, 140, 70, 70); g.rotateX(-Math.PI / 2);
     const p = g.attributes.position, col = new Float32Array(p.count * 3), c = new T.Color();
     for (let i = 0; i < p.count; i++) {

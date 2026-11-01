@@ -213,7 +213,7 @@ function crear(cont, o) {
     g.traverse(x => { if (x.isMesh) x.castShadow = true; });
     return g;
   }
-  let bolas = [], canasta = null, tuerca = null, tubo = null, nivelAct = null, piezasAct = [], grupos = [], mecG = [];
+  let bolas = [], canasta = null, tuerca = null, tubo = null, nivelAct = null, grupos = [], mecG = [];
 
   function vaciar(gr) { while (gr.children.length) { const c = gr.children[0]; gr.remove(c); c.traverse(m => { if (m.geometry) m.geometry.dispose(); }); } }
   /** El nivel: muros, canasta, tuerca, la pelota y las pesas en su sitio de salida. */
@@ -264,7 +264,7 @@ function crear(cont, o) {
   }
   /** Las piezas puestas (las fijas del nivel primero, como en la física). */
   function piezas(lista) {
-    vaciar(piezasG); piezasAct = lista.slice(); grupos = []; mecG = [];
+    vaciar(piezasG); grupos = []; mecG = [];
     lista.forEach(p => { const g = armarPieza(p); piezasG.add(g); grupos.push(g); if (p.t === 'palanca' || p.t === 'polea') mecG.push(g); });
     reposo();
   }

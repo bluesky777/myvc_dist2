@@ -1,3 +1,4 @@
+/* global module */
 /* Máquina Loca — las preguntas de la sala (las de la lección las manda la lección).
    Cada tema: preguntas { p, opciones (la buena primero: el juego las baraja), g (desde qué grado), por (por qué) }.
    Las de inglés: palabras con MP3 grabado en la Biblioteca (voz/en/<slug>.mp3); sin MP3, la palabra escrita. */

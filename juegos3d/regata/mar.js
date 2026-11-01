@@ -42,7 +42,7 @@ const LETRAS = ['N', 'E', 'S', 'O'];
 
 function lienzo(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; return [c, c.getContext('2d')]; }
 function textura(c) { const t = new T.CanvasTexture(c); t.encoding = T.sRGBEncoding; t.anisotropy = 2; return t; }
-const EMOJI_DELANTE = /^((?:\p{Extended_Pictographic}|\p{Regional_Indicator}|[0-9#*]️?⃣|[‍️\u{1F3FB}-\u{1F3FF}])+)\s*/u;
+const EMOJI_DELANTE = /^((?:\p{Extended_Pictographic}|\p{Regional_Indicator}|[0-9#*]\uFE0F?\u20E3|\u200D|\uFE0F|[\u{1F3FB}-\u{1F3FF}])+)\s*/u;
 /** «🐄 vaca» → {emoji: '🐄', texto: 'vaca'} (el emoji de delante va grande en el letrero). */
 function partir(t) { const m = String(t).match(EMOJI_DELANTE); return m ? { emoji: m[1], texto: String(t).slice(m[0].length) } : { emoji: '', texto: String(t) }; }
 const FUENTE = '"Baloo 2", system-ui, sans-serif', EMOJI = '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
@@ -356,7 +356,6 @@ function crear(div, op) {
     rivales = conRivales ? VELEROS.filter(a => a !== e).map((a, i) => { const v = velero(a, ['rayas', 'lisa', 'rayas'][i]); const t = cartel(a.emoji + ' ' + a.nombre, 'rgba(255,253,247,0.92)', '#1d2b53'); t.scale.multiplyScalar(0.62); t.position.set(0, 5.5, 0); v.g.add(t); v.tag = t; return { v, e: a }; }) : [];
     return rivales.map(r => r.e);
   }
-  const tmpV = new T.Vector3();
   function poseVelero(v, b, dt) {
     const y = ola(b.x, b.z, tiempo), [fx, fz] = dir(b.rumbo);
     v.g.position.set(b.x, y, b.z); v.g.rotation.y = -b.rumbo * RAD;

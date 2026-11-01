@@ -55,7 +55,7 @@ const AROS = [
 function facetas(g) { const n = g.index ? g.toNonIndexed() : g; n.computeVertexNormals(); return n; }
 function lienzo(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; return [c, c.getContext('2d')]; }
 function textura(c, rep) { const t = new T.CanvasTexture(c); t.encoding = T.sRGBEncoding; if (rep) { t.wrapS = t.wrapT = T.RepeatWrapping; t.repeat.set(rep, rep); } t.anisotropy = 2; return t; }
-const EMOJI_DELANTE = /^((?:\p{Extended_Pictographic}|\p{Regional_Indicator}|[0-9#*]️?⃣|[‍️\u{1F3FB}-\u{1F3FF}])+)\s*/u;
+const EMOJI_DELANTE = /^((?:\p{Extended_Pictographic}|\p{Regional_Indicator}|[0-9#*]\uFE0F?\u20E3|\u200D|\uFE0F|[\u{1F3FB}-\u{1F3FF}])+)\s*/u;
 /** «🐄 vaca» → {emoji: '🐄', texto: 'vaca'} (el emoji de delante va grande en el aro). */
 function partir(t) { const m = String(t).match(EMOJI_DELANTE); return m ? { emoji: m[1], texto: String(t).slice(m[0].length) } : { emoji: '', texto: String(t) }; }
 

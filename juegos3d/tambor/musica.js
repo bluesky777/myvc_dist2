@@ -115,7 +115,7 @@ function motor() {
       const g2 = ctx.createGain(); g2.gain.value = 0.25; env(g, t, 0.002, 0.33 * v, 0.7);
       o.connect(fl); o2.connect(g2); g2.connect(fl); fl.connect(g); g.connect(d); o.start(t); o2.start(t); o.stop(t + 0.8); o2.stop(t + 0.8);
     },
-    bandola(d, t, v, nota) { const f = mtof(nota); [1, 1.004].forEach(k => { const o = osc(d, t, f * k, 'sawtooth', 0.09 * v, 0.002, 0.28); }); osc(d, t, f * 2, 'sine', 0.06 * v, 0.002, 0.2); },
+    bandola(d, t, v, nota) { const f = mtof(nota); [1, 1.004].forEach(k => { osc(d, t, f * k, 'sawtooth', 0.09 * v, 0.002, 0.28); }); osc(d, t, f * 2, 'sine', 0.06 * v, 0.002, 0.2); },
     rasgueo(d, t, v, notas, corto) {
       notas.forEach((n, i) => {
         const f = mtof(n), o = ctx.createOscillator(), fl = ctx.createBiquadFilter(), g = ctx.createGain(), ti = t + i * 0.012;

@@ -1,3 +1,4 @@
+/* global module */
 /* Máquina Loca — la física: un motor 2D propio, pequeño y determinista (el mismo en el juego, en la «Pista» y en la
    comprobación de los niveles, en el navegador y en node).
    - El tablero es una rejilla de 16 × 10 casillas de 1 unidad (x a la derecha, y hacia arriba; el banco está en y = 0).

@@ -1,3 +1,4 @@
+/* global module */
 /* Átomo a Átomo — la química (sin pantalla: se prueba en Node con scratchpad/atomo/prueba.mjs).
    - ELEM: los elementos con su valencia (los enlaces que hace), sus electrones de valencia, el color CPK de las escenas
      `molecula` y `reaccion` de la Biblioteca (app2 biblioteca/escenas/molecula.ts y reaccion.ts: los mismos hex), el

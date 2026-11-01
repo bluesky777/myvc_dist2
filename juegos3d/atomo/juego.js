@@ -32,7 +32,6 @@ const nombreEl = s => Q.ELEM[s].nombre.toLowerCase();
 const plural = (n, uno, varios) => n + ' ' + (n === 1 ? uno : varios);
 const nAt = c => Object.values(c).reduce((a, b) => a + b, 0);
 const sinEmoji = t => String(t).replace(/^[^A-Za-zÀ-ÿ0-9¿¡«$(]+/u, '').trim() || String(t);
-const emojiDe = t => { const m = String(t).match(/^([^A-Za-zÀ-ÿ0-9¿¡«$(]+)\s/u); return m ? m[1].trim() : ''; };
 
 /* ---------- modo lección: lo que manda la lección (FORMATO.md §3.9) ---------- */
 const CFG = LJ && LJ.activo && LJ.cfg ? LJ.cfg : null;
@@ -151,8 +150,7 @@ function tareasLeccion() {
   if (LEC.geometria) for (let i = ts.length - 1; i >= 0; i--) { const m = ts[i].obj && ts[i].obj.mol; const pf = m && AC.preguntaForma(m); if (pf) ts.splice(i + 1, 0, { tipo: 'pregunta', q: pf, item: true, conMol: true }); }
   // las preguntas, repartidas entre los pedidos; luego las reacciones
   const out = [];
-  let k = 0;
-  ts.forEach((t, i) => { out.push(t); if (t.tipo === 'armar' && pre.length && (i % 2 === 1)) out.push(pre.shift()); k++; });
+  ts.forEach((t, i) => { out.push(t); if (t.tipo === 'armar' && pre.length && (i % 2 === 1)) out.push(pre.shift()); });
   LEC.reacciones.forEach((r, i) => { out.push({ tipo: 'balancear', r, item: true }); if (pre.length && i % 2 === 1) out.push(pre.shift()); });
   return out.concat(pre);
 }

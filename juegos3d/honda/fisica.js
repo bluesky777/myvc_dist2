@@ -1,3 +1,4 @@
+/* global module */
 /* Honda Estelar — la física (la misma en el juego, en la línea punteada y en la comprobación de los niveles).
    El plano es el de la órbita: x hacia adelante (de la honda a las lunas), y hacia arriba; el mundo va de -W a W y de
    -H a H. La nave sale de `sal` con la dirección (grados, 0 = adelante, positivo = hacia arriba) y la fuerza (1 a 10) y

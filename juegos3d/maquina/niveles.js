@@ -1,3 +1,4 @@
+/* global module */
 /* Máquina Loca — los niveles (los 3 talleres) y su comprobación.
    Un nivel: { id, taller, nombre, idea (lo que enseña, una frase), bola: {x, y, vx?, vy?, tipo: balon|canica},
    canasta: [x, y] (el centro del fondo), muros: [[x1, y1, x2, y2, grosor?]], pesas?: [[x, y, vx?, vy?]],

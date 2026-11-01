@@ -30,7 +30,7 @@ const LUNAS = HE.LUNAS || [{ color: '#ff922b', forma: 'círculo', glifo: '●' }
 const NAVES = HE.NAVES || [{ id: 'condor', nombre: 'Cóndor', franja: '#e03131' }];
 const MIS = (HN && HN.misiones) || [];
 const COLOR = ['naranja', 'azul', 'verde', 'morado'];
-const EMO = /^((?:\p{Extended_Pictographic}|\p{Regional_Indicator}|[\u{1F3FB}-\u{1F3FF}‍️⃣#*0-9])+)\s*/u;
+const EMO = /^((?:\p{Extended_Pictographic}|\p{Regional_Indicator}|[\u{1F3FB}-\u{1F3FF}#*0-9]|\u200D|\uFE0F|\u20E3)+)\s*/u;
 const partir = t => { t = String(t).trim(); const m = t.match(EMO); return m && m[1].replace(/[#*0-9]/g, '') ? { emoji: m[1], texto: t.slice(m[0].length) } : { emoji: '', texto: t }; };
 
 /* ---------- modo lección (FORMATO.md §3.9) ---------- */

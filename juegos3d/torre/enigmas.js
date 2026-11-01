@@ -1,3 +1,4 @@
+/* global module */
 /* Torre de los Enigmas — los generadores (sin DOM ni three: se prueban con node).
    window.Enigmas.generar(familia, nivel, {idioma: 'es'|'en', rng}) → enigma, o null si no salió (se pide otro).
    Un enigma: {familia, tipo, pregunta, preguntaEn?, visual, opciones: [pieza], correcta, explica, voz?: [en…],

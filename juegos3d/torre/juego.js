@@ -11,13 +11,12 @@
 (function () {
 'use strict';
 const $ = id => document.getElementById(id);
-const E = window.Enigmas, LJ = window.LeccionJuego, J3 = window.Juegos3D || {};
+const E = window.Enigmas, LJ = window.LeccionJuego;
 const CLAVE = 'juegos3d.torre';
 const leer = () => { try { return JSON.parse(localStorage.getItem(CLAVE)) || {}; } catch (e) { return {}; } };
 const prefs = leer(); if (!prefs.records || typeof prefs.records !== 'object') prefs.records = {};
 const guardar = () => { if (LEC) return; try { localStorage.setItem(CLAVE, JSON.stringify(prefs)); } catch (e) { /* sin almacenamiento */ } };
 const barajar = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
-const pick = a => a[Math.floor(Math.random() * a.length)];
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const BIBLIO = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8765/' : 'https://biblioteca.micolevirtual.com/';

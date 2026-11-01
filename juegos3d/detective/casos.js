@@ -1,3 +1,4 @@
+/* global module */
 /* Detective de Pistas — los casos: quiénes, las categorías, las pistas en español y en inglés, el generador y el
    verificador. Sin DOM: se prueba con node (module.exports) y en la página queda window.Casos.
 

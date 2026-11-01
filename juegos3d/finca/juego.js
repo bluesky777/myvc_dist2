@@ -24,9 +24,9 @@ const barajar = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { c
 const BIBLIO = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8765/' : 'https://biblioteca.micolevirtual.com/';
 const reducir = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const pesos = FC.pesos;
-const EMO = /^((?:\p{Extended_Pictographic}|\p{Regional_Indicator}|[\u{1F3FB}-\u{1F3FF}‍️⃣#*0-9])+)\s*/u;
+const EMO = /^((?:\p{Extended_Pictographic}|\p{Regional_Indicator}|[\u{1F3FB}-\u{1F3FF}#*0-9]|\u200D|\uFE0F|\u20E3)+)\s*/u;
 const partir = t => { t = String(t).trim(); const m = t.match(EMO); return m && m[1].replace(/[#*0-9]/g, '') ? { emoji: m[1], texto: t.slice(m[0].length) } : { emoji: '', texto: t }; };
-const sinEmoji = t => String(t).replace(/(\p{Extended_Pictographic}|\p{Regional_Indicator}|[\u{1F3FB}-\u{1F3FF}‍️⃣])/gu, '').replace(/\s+/g, ' ').trim();
+const sinEmoji = t => String(t).replace(/(\p{Extended_Pictographic}|\p{Regional_Indicator}|[\u{1F3FB}-\u{1F3FF}]|\u200D|\uFE0F|\u20E3)/gu, '').replace(/\s+/g, ' ').trim();
 const FORMAS = [{ c: '#ffd43b', g: '●', n: 'círculo' }, { c: '#74c0fc', g: '▲', n: 'triángulo' }, { c: '#8ce99a', g: '■', n: 'cuadrado' }, { c: '#e599f7', g: '◆', n: 'rombo' }];
 
 /* ---------- modo lección (FORMATO.md §3.9) ---------- */
@@ -345,7 +345,6 @@ function nuevoDia() {
 }
 
 /* ---------- tocar una cosa de la finca ---------- */
-let ocupado = false;
 function tocar(id) {
   if (S.fase !== 'dia' || S.pausa || !id) return;
   Snd.despertar();
