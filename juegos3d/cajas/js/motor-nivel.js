@@ -20,7 +20,7 @@
       this.p = base; // las R se ignoran (vacío)
       this.def = this.mundo.niveles[this.nIdx];
       this.fis = this.mundo._fis;
-      this.vidas = 3;
+      this.vidas = M.LECCION ? M.LECCION.dif.vidas : 3; // modo lección: según la dificultad
       this.abierta = -1;
       this.fin = false;
       this.bloqueo = false;
@@ -290,7 +290,7 @@
         badge.add([bg, M.texto(this, 0, -1, String(i + 1), { size: 17, color: '#24386E' })]);
         const placa = this.add.container(x, y - 4).setDepth(7).setVisible(false);
         if (cj.oculta) { spr.setVisible(false); brillo.setVisible(false); badge.setVisible(false); }
-        return { i, r: cj.r, c: cj.c, tramo: cj.tramo, oculta: !!cj.oculta, x, y, palabra: cj.palabra, respuesta: cj.respuesta, estado: 'cerrada', spr, brillo, badge, placa, tocando: false };
+        return { i, r: cj.r, c: cj.c, tramo: cj.tramo, oculta: !!cj.oculta, x, y, palabra: cj.palabra, respuesta: cj.respuesta, bocina: !!cj.bocina, estado: 'cerrada', spr, brillo, badge, placa, tocando: false };
       });
     }
 
@@ -298,7 +298,7 @@
       const pl = cj.placa;
       pl.removeAll(true);
       const g = this.add.graphics();
-      const t = M.texto(this, 0, -2, cj.palabra, { size: 28, color: M.ESTILO_PLACA[estilo].texto });
+      const t = M.texto(this, 0, -2, M.LECCION ? M.LECCION.texto(cj, estilo) : cj.palabra, { size: 28, color: M.ESTILO_PLACA[estilo].texto });
       const conCheck = estilo === 'resuelta';
       const w = Math.max(110, Math.min(340, t.width + 44 + (conCheck ? 30 : 0))), h = 54;
       if (t.width > w - 44 - (conCheck ? 30 : 0)) t.setScale((w - 44 - (conCheck ? 30 : 0)) / t.width);
@@ -342,7 +342,8 @@
       if (this.subida) this.aviso(`«${cj.palabra}»: sube hasta la compuerta`, 'info');
       else {
         this.mostrarTarjetas();
-        this.aviso(`Caja ${i + 1}: «${cj.palabra}». ¡Busca su respuesta!`, 'info');
+        this.aviso(M.LECCION ? M.LECCION.aviso(cj, i) : `Caja ${i + 1}: «${cj.palabra}». ¡Busca su respuesta!`, 'info');
+        if (M.LECCION) M.LECCION.tocada(this, cj); // modo lección: suena su MP3
       }
     }
 
@@ -615,7 +616,8 @@
       this.golpeHasta = this.time.now + 450;
       M.sonar(this, 'sfx_hurt');
       this.cameras.main.shake(180, 0.006);
-      const abierta = this.abierta;
+      const dif = M.LECCION && M.LECCION.dif;
+      const abierta = dif && !dif.cierraCaja ? -1 : this.abierta; // lección fácil: la caja sigue abierta
       if (abierta >= 0) this.cerrarCaja(abierta);
       if (tipo === 'caida' || tipo === 'agua') {
         this.cameras.main.flash(200, 255, 255, 255);
@@ -628,7 +630,10 @@
         this.aturdido = 0.35;
       }
       this.parpadeo();
-      if (this.vidas <= 0) {
+      if (this.vidas <= 0 && dif && dif.recupera) { // lección fácil: no se pierde la partida
+        this.vidas = dif.vidas;
+        this.aviso('¡Tienes vidas otra vez! Sigue', 'info');
+      } else if (this.vidas <= 0) {
         this.bloqueo = true;
         this.time.delayedCall(650, () => this.sinVidas());
       } else if (abierta >= 0) {
@@ -704,6 +709,7 @@
 
     reiniciar() { this.scene.restart({ mundo: this.mundo.id, nivel: this.nIdx }); }
     salir() {
+      if (M.LECCION) { this.reiniciar(); return; } // modo lección: no hay menú de mundos
       this.scene.stop('HUD');
       this.scene.start('Menu');
     }
@@ -720,6 +726,8 @@
         if (!toca) { cj.tocando = false; continue; }
         if (cj.tocando) continue;
         cj.tocando = true;
+        // modo lección: volver a tocar una caja ya abierta (o resuelta) la hace sonar otra vez
+        if (M.LECCION && cj.estado !== 'cerrada' && !this.bloqueo) { M.LECCION.tocada(this, cj); continue; }
         if (cj.estado !== 'cerrada' || cj.oculta || this.bloqueo) continue;
         if (this.abierta >= 0) continue; // con una caja abierta, tocar otra no hace nada
         this.abrirCaja(cj.i);
@@ -757,6 +765,7 @@
         this.fxConfeti.explode(18, t.c.x, t.c.y);
         this.resolverCaja(cj.i);
         this.aviso(`¡Bien! ${cj.palabra} = ${cj.respuesta}`, 'ok');
+        if (M.LECCION) { M.LECCION.oir(cj.palabra); M.LECCION.anotar(this, true); } // modo lección: su MP3 y el progreso
         if (this.subida) this.correctaSubida(cj);
         else if (this.cajas.every(c => c.estado === 'resuelta')) this.completar();
       } else {
@@ -764,6 +773,7 @@
         const x0 = t.c.x;
         this.tweens.add({ targets: t.c, x: x0 + 9, duration: 45, yoyo: true, repeat: 3, ease: 'Sine.inOut', onComplete: () => t.c.setX(x0) });
         this.aviso('Esa no es', 'mal');
+        if (M.LECCION) M.LECCION.anotar(this, false);
       }
     }
 

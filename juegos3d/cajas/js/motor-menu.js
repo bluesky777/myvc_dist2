@@ -42,7 +42,8 @@
       // las texturas propias de cada mundo se generan al entrar a él (Nivel.create)
       M.prepararMundos();
       if (!M.mundos().length) console.warn('[cajas] no hay mundos registrados');
-      this.scene.start('Menu');
+      if (M.LECCION) M.LECCION.portada(this); // modo lección (motor-leccion.js): sin menú, «Jugar»
+      else this.scene.start('Menu');
     }
   }
 

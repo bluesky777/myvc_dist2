@@ -1,0 +1,199 @@
+:root {
+  --colegio: #2f9e44;
+  --tinta: #1d2b20;
+  --tinta2: #3d4a3f;
+  --papel: #fffdf5;
+  --borde: #3b5a2a;
+  --bien: #146c2e;
+  --mal: #a3261b;
+  font-family: "Lexend", "Nunito", system-ui, sans-serif;
+  color: var(--tinta);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; -webkit-tap-highlight-color: transparent; touch-action: manipulation; background: linear-gradient(#8cc8ee, #cfe8f5 55%, #7fbf4d 56%); }
+button, input { font: inherit; color: inherit; }
+#gl { position: fixed; inset: 0; }
+#gl canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+.oculto { display: none !important; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+:focus-visible { outline: 4px solid #1d2b20; outline-offset: 3px; box-shadow: 0 0 0 7px #ffd43b; }
+
+.cargando { position: fixed; inset: 0; display: grid; place-content: center; gap: 10px; text-align: center; color: #fff; background: #3b7d2a; z-index: 50; }
+.cargando b { font: 800 34px/1.1 "Baloo 2", "Lexend", sans-serif; }
+
+/* HUD */
+.hud { position: fixed; top: 0; left: 0; right: 0; display: flex; align-items: flex-start; gap: 8px; padding: 10px 12px; pointer-events: none; z-index: 6; }
+.hud > * { pointer-events: auto; }
+.marcador { display: flex; align-items: center; gap: 10px; padding: 5px 12px 5px 8px; border-radius: 18px; background: rgb(255 253 245 / 95%); border: 3px solid var(--borde); box-shadow: 0 4px 0 rgb(0 0 0 / 25%); min-width: 0; }
+.marcador .ico { font-size: 26px; line-height: 1; }
+.marcador b { display: block; font: 800 21px/1.05 "Baloo 2", "Lexend", sans-serif; }
+.marcador small { display: block; font-size: 14px; font-weight: 700; color: var(--tinta2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 46vw; }
+.tareas-b { height: 46px; padding: 0 14px; border-radius: 14px; border: 3px solid var(--borde); background: #fff3bf; font: 800 18px/1 "Baloo 2", sans-serif; cursor: pointer; box-shadow: 0 4px 0 rgb(0 0 0 / 25%); white-space: nowrap; }
+.botones { display: flex; gap: 8px; margin-left: auto; }
+.hb { min-width: 46px; height: 46px; padding: 0 10px; border-radius: 14px; border: 3px solid var(--borde); background: var(--papel); font-size: 21px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 0 rgb(0 0 0 / 25%); }
+.hb .rot { font-size: 14px; font-weight: 700; }
+.hb[aria-pressed="true"] { background: #ffe8a3; }
+
+/* las tareas: a la izquierda en pantallas grandes; en las chicas, se abren con 📋 */
+.tareas { position: fixed; z-index: 5; left: 12px; top: 74px; width: 250px; max-height: calc(100vh - 170px); overflow: auto; padding: 8px 12px 10px; border-radius: 18px; background: rgb(255 253 245 / 94%); border: 3px solid var(--borde); box-shadow: 0 6px 18px rgb(0 0 0 / 25%); }
+.tareas h2 { margin: 0 0 4px; font: 800 18px/1.1 "Baloo 2", sans-serif; }
+.tareas ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+.tareas li { padding: 3px 8px; border-radius: 10px; font-size: 15px; font-weight: 700; background: #f1f6ec; border: 2px solid transparent; }
+.tareas li.ahora { border-color: #b08800; background: #fff3bf; }
+.tareas li.ahora::before { content: "👉 "; }
+.tareas li.hecha { color: #4c6b4f; background: #e6f4e3; text-decoration: line-through; text-decoration-thickness: 2px; }
+@media (max-width: 899px), (max-height: 560px) { .tareas:not(.abierta) { display: none; } .tareas { top: 62px; } }
+@media (min-width: 900px) and (min-height: 561px) { .tareas:not(.oculto) { display: block !important; } .tareas-b { display: none; }
+  /* la carta, en el hueco a la derecha de la lista */
+  .carta { left: calc(50% + 135px); width: min(640px, calc(100vw - 300px)); }
+  .carta.compacta { left: 270px; } }
+
+/* las etiquetas de la finca (botones encima de cada cosa) */
+.etqs { position: fixed; inset: 0; pointer-events: none; z-index: 3; }
+.sin3d .etqs { position: fixed; inset: auto 8px 90px 8px; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; pointer-events: auto; }
+.etq { position: absolute; left: 0; top: 0; pointer-events: auto; display: inline-flex; align-items: center; gap: 4px; min-height: 44px; padding: 2px 10px 2px 6px; border-radius: 999px;
+  background: rgb(255 253 245 / 93%); border: 2px solid var(--borde); font-size: 15px; font-weight: 700; color: var(--tinta); cursor: pointer; white-space: nowrap; box-shadow: 0 3px 0 rgb(0 0 0 / 22%); }
+.sin3d .etq { position: static; transform: none !important; }
+.etq .e { font-size: 22px; line-height: 1; }
+.etq .s { font-size: 20px; line-height: 1; }
+.etq .s:empty { display: none; }
+.etq.pide { border-color: #b08800; background: #fffbe6; }
+.etq.pide .s { animation: none; }
+.etq.pista { border-color: var(--bien); box-shadow: 0 0 0 4px #8ce99a, 0 3px 0 rgb(0 0 0 / 22%); }
+.etq.pista::after { content: "👈 ¡aquí!"; margin-left: 2px; font-size: 13px; }
+.etq.fuera { opacity: 0; pointer-events: none; }
+.etq:focus-visible { z-index: 2; }
+
+/* lo que dice el granjero */
+.dice { position: fixed; z-index: 5; left: 12px; bottom: 12px; max-width: min(520px, calc(100vw - 150px)); display: flex; align-items: center; gap: 8px; padding: 6px 8px 6px 10px; border-radius: 20px 20px 20px 6px; background: var(--papel); border: 3px solid var(--borde); box-shadow: 0 6px 18px rgb(0 0 0 / 25%); }
+.dice .cara { font-size: 30px; line-height: 1; }
+.dice p { margin: 0; font-weight: 700; font-size: 17px; line-height: 1.25; }
+.mini { flex: none; width: 44px; height: 44px; border-radius: 12px; border: 2px solid var(--borde); background: #eef7ea; font-size: 20px; cursor: pointer; }
+
+/* la carta: preguntas y palabras */
+.carta { position: fixed; z-index: 7; left: 50%; transform: translateX(-50%); top: 68px; width: min(640px, calc(100vw - 20px)); display: flex; flex-direction: column; gap: 6px;
+  padding: 8px 14px 10px; border-radius: 20px; background: rgb(255 253 245 / 97%); border: 4px solid var(--borde); box-shadow: 0 10px 30px rgb(0 0 0 / 30%); text-align: center; }
+.carta.compacta { flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: center; left: 0; right: 0; margin: 0 auto; transform: none; width: fit-content; max-width: min(640px, calc(100vw - 20px)); padding: 6px 12px; gap: 6px 10px; }
+.carta.compacta .tipo, .carta.compacta .ops { display: none; }
+.carta.compacta .feed { flex-basis: 100%; }
+.carta.bien { border-color: var(--bien); }
+.carta.mal { border-color: var(--mal); }
+.carta .tipo { margin: 0; font-size: 14px; font-weight: 800; color: var(--tinta2); }
+.cfila { display: flex; align-items: center; justify-content: center; gap: 10px; }
+.carta h2 { margin: 0; font: 800 clamp(19px, 2.8vw, 26px)/1.15 "Baloo 2", "Lexend", sans-serif; overflow-wrap: anywhere; }
+.bocina { flex: none; width: 56px; height: 56px; border-radius: 50%; border: 3px solid var(--borde); background: #fff3bf; font-size: 28px; cursor: pointer; box-shadow: 0 4px 0 rgb(0 0 0 / 22%); }
+.palabra { margin: 0; font: 800 32px/1.1 "Baloo 2", "Lexend", sans-serif; color: #0b5394; letter-spacing: .02em; }
+.ops { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.ops:empty { display: none; }
+.op-r { display: inline-flex; align-items: center; gap: 8px; min-height: 52px; max-width: 100%; padding: 4px 16px 4px 6px; border-radius: 999px; border: 3px solid var(--borde); background: #fff; font-weight: 700; font-size: 18px; cursor: pointer; box-shadow: 0 4px 0 rgb(0 0 0 / 22%); text-align: left; }
+.op-r .num { flex: none; display: inline-grid; place-items: center; min-width: 50px; height: 38px; padding: 0 8px; border-radius: 999px; background: var(--c); border: 2px solid var(--borde); font: 800 18px/1 "Baloo 2", sans-serif; white-space: nowrap; }
+.op-r .emo { font-size: 28px; line-height: 1; }
+.op-r .tx { overflow-wrap: anywhere; }
+.op-r.buena { background: #d3f9d8; border-color: var(--bien); }
+.op-r.buena .tx::after { content: " ✔"; color: var(--bien); }
+.op-r.mala { background: #ffe3e3; border-color: var(--mal); }
+.op-r.mala .tx::after { content: " ✘"; color: var(--mal); }
+.op-r.tachada { opacity: .45; text-decoration: line-through; }
+.op-r:disabled { cursor: default; }
+.cbar { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.cbar:not(:has(button:not(.oculto))) { display: none; }
+.bsec { min-height: 44px; padding: 4px 14px; border-radius: 999px; border: 3px solid var(--borde); background: #eef7ea; font-weight: 700; font-size: 16px; cursor: pointer; }
+.bsec small { font-weight: 600; color: var(--tinta2); }
+.feed { margin: 0; font-weight: 800; font-size: 16px; }
+.feed:empty { display: none; }
+.feed.bien { color: var(--bien); }
+.feed.mal { color: var(--mal); }
+
+.dormir { position: fixed; z-index: 8; right: 14px; bottom: 14px; min-height: 64px; padding: 6px 26px; border-radius: 999px; border: 0; background: #283a8c; color: #fff; font: 800 26px/1 "Baloo 2", sans-serif; cursor: pointer; box-shadow: 0 6px 0 #18245c; }
+.flota { position: fixed; z-index: 9; right: 18px; top: 70px; padding: 4px 14px; border-radius: 999px; background: #fff3bf; border: 3px solid #b08800; font: 800 22px/1 "Baloo 2", sans-serif; color: #5c4400; pointer-events: none; }
+@media (prefers-reduced-motion: no-preference) { body:not(.calma) .flota { animation: flota 1.6s ease-out forwards; } }
+@keyframes flota { from { transform: translateY(10px); opacity: 0; } 20% { transform: none; opacity: 1; } 80% { opacity: 1; } to { transform: translateY(-30px); opacity: 0; } }
+
+/* capas de la sala */
+.capa { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 14px; background: rgb(20 40 20 / 45%); }
+.tarjeta { width: min(820px, 100%); max-height: calc(100vh - 28px); overflow: auto; padding: 18px 22px; border-radius: 24px; background: var(--papel); border: 4px solid var(--borde); box-shadow: 0 16px 48px rgb(0 0 0 / 40%); }
+.tarjeta.chica { width: min(560px, 100%); text-align: center; }
+.tarjeta h1 { margin: 0 0 4px; font: 800 clamp(26px, 4vw, 36px)/1.1 "Baloo 2", "Lexend", sans-serif; }
+.frase { margin: 4px 0 8px; font-size: 16px; line-height: 1.45; color: var(--tinta2); }
+.teclas { font-size: 14px; }
+.paso-t { margin: 10px 0 6px; font-weight: 800; font-size: 16px; }
+.fila-b { display: flex; flex-wrap: wrap; gap: 8px; }
+.fila-b.grande { justify-content: center; }
+.op { min-height: 44px; padding: 6px 14px; border-radius: 14px; border: 3px solid #c9d8c0; background: #fff; font-weight: 700; font-size: 16px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.op small { font-weight: 600; color: var(--tinta2); font-size: 13px; }
+.op[aria-pressed="true"] { border-color: var(--borde); background: #e6f4e3; box-shadow: 0 0 0 3px var(--colegio) inset; }
+.op[aria-pressed="true"]::before { content: "✔"; color: var(--bien); }
+.op.grande { flex-direction: column; min-width: 150px; padding: 12px 18px; }
+.op.grande .emo { font-size: 48px; line-height: 1; }
+.op.grande b { font: 800 24px/1 "Baloo 2", sans-serif; }
+.check { display: flex; gap: 10px; align-items: flex-start; margin: 10px 0 0; font-size: 15px; font-weight: 600; cursor: pointer; }
+.check input { width: 22px; height: 22px; margin: 0; flex: none; accent-color: var(--colegio); }
+.record { margin: 10px 0 0; font-weight: 700; color: #5c4400; }
+.record:empty { display: none; }
+.acciones { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; margin-top: 14px; }
+.jugar { min-height: 52px; padding: 6px 26px; border-radius: 999px; border: 0; background: #1a7f37; color: #fff; font: 800 22px/1 "Baloo 2", sans-serif; cursor: pointer; box-shadow: 0 5px 0 #0f5223; }
+.jugar.chico { min-height: 44px; font-size: 19px; padding: 4px 20px; }
+.volver { color: var(--tinta); font-weight: 700; }
+.rejilla { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; }
+.mis { display: grid; grid-template-columns: auto 1fr; align-items: center; column-gap: 8px; min-height: 64px; padding: 6px 10px; border-radius: 14px; border: 3px solid #c9d8c0; background: #fff; cursor: pointer; text-align: left; }
+.mis .emo { grid-row: span 2; font-size: 32px; }
+.mis b { font-size: 15px; } .mis small { font-size: 13px; font-weight: 700; color: var(--tinta2); }
+.mis.caro { opacity: .75; } .mis:disabled { background: #e6f4e3; cursor: default; }
+button:disabled { cursor: default; }
+
+/* en un iframe bajo (la tarjeta de la lección) o un celular acostado: todo más apretado */
+@media (max-height: 520px) {
+  .hud { padding: 6px 8px; gap: 6px; }
+  .marcador { padding: 2px 10px 2px 6px; border-width: 2px; gap: 6px; }
+  .marcador b { font-size: 16px; } .marcador small { font-size: 12px; } .marcador .ico { font-size: 18px; }
+  .hb, .tareas-b { min-width: 44px; height: 44px; font-size: 18px; border-width: 2px; padding: 0 6px; }
+  .tareas-b { font-size: 16px; padding: 0 10px; }
+  .hb .rot { display: none; }
+  .carta { top: 6px; left: 50%; width: min(560px, calc(100vw - 330px)); min-width: 300px; padding: 4px 10px 6px; border-width: 3px; border-radius: 16px; gap: 3px; }
+  .carta .tipo { font-size: 12px; }
+  .carta h2 { font-size: clamp(15px, 2.4vw, 20px); }
+  .bocina { width: 44px; height: 44px; font-size: 22px; }
+  .palabra { font-size: 22px; }
+  .op-r { min-height: 44px; font-size: 15px; padding: 2px 10px 2px 4px; gap: 5px; border-width: 2px; }
+  .op-r .num { min-width: 40px; height: 30px; font-size: 14px; }
+  .op-r .emo { font-size: 22px; }
+  .bsec { min-height: 40px; font-size: 14px; padding: 2px 10px; border-width: 2px; }
+  .bsec small, .bsec .largo { display: none; }
+  .feed { font-size: 13px; }
+  .dice { bottom: 6px; left: 6px; padding: 3px 6px; border-width: 2px; max-width: calc(100vw - 170px); }
+  .dice .cara { font-size: 22px; } .dice p { font-size: 14px; }
+  .etq { min-height: 40px; font-size: 13px; padding: 1px 8px 1px 4px; }
+  .etq .e { font-size: 18px; } .etq .s { font-size: 17px; }
+  .dormir { min-height: 52px; font-size: 21px; padding: 4px 18px; bottom: 6px; right: 6px; }
+  .tareas { width: 230px; } .tareas li { font-size: 13px; }
+  .tarjeta { padding: 12px 16px; }
+}
+@media (max-height: 520px) { .con-carta .dice { display: none !important; } }
+@media (max-height: 520px) and (max-width: 700px) { .carta { left: 6px; right: 6px; width: auto; min-width: 0; transform: none; top: 56px; } }
+/* las etiquetas con nombre sólo donde caben; en lo chico, el dibujo y lo que pide */
+@media (max-width: 700px), (max-height: 420px) { .etq .n { display: none; } .etq { padding: 1px 6px; } }
+/* el celular de pie con una lección (16:10 de 375 px: unos 234 px de alto) */
+@media (max-height: 300px) {
+  .marcador .ico, #bCalma { display: none; }
+  .marcador b { font-size: 14px; } .marcador small { font-size: 11px; max-width: 30vw; }
+  .hud { padding: 4px; gap: 4px; } .botones { gap: 4px; }
+  .hb, .tareas-b { min-width: 40px; height: 40px; }
+  .carta { top: 48px; left: 4px; right: 4px; width: auto; min-width: 0; transform: none; padding: 2px 6px 4px; }
+  .carta.compacta { left: 0; right: 0; transform: none; width: fit-content; padding: 2px 8px; max-width: calc(100vw - 8px); flex-wrap: nowrap; }
+  .carta.compacta h2 { font-size: 15px; }
+  .dice { max-width: calc(100vw - 12px); }
+  .carta .tipo { display: none; }
+  .bocina { width: 40px; height: 40px; }
+  .op-r { min-height: 40px; }
+  .dice p { font-size: 12px; } .dice .cara { display: none; }
+  .mini { width: 40px; height: 40px; }
+  .etq { min-height: 40px; }
+}
+@media (max-width: 560px) and (min-height: 521px) {
+  .marcador b { font-size: 18px; }
+  .hb .rot { display: none; }
+  .carta { top: 62px; }
+  .bsec small, .bsec .largo { display: none; }
+  .dice { max-width: calc(100vw - 24px); bottom: 10px; }
+  .dormir { bottom: 78px; }
+}

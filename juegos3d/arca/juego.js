@@ -5,7 +5,7 @@
      https://biblioteca.micolevirtual.com/. Lo que no carga tiene respaldo hecho con código (arca, niño, animales).
    - El arca (modelos/arca.glb) se mide al cargar: el lado largo va en x y la rampa es lo que más sobresale por un
      costado; se gira para que la rampa mire a +z (hacia la pradera). Sin GLB, un arca provisional del mismo tamaño.
-   - La voz: <biblioteca>/voz/en/<slug>.mp3 si está en voz/en/index.json; si no, speechSynthesis en-US.
+   - La voz: <biblioteca>/voz/en/<slug>.mp3 si está en voz/en/index.json; si no, silencio (nunca la voz del navegador).
    - Grado: ?grado=0..5 (0 = Transición) o el selector del inicio (se recuerda en juegos3d.arca).
    - MyVC: Turbo Saber no reporta notas a MyVC (sólo usa la API para las salas), así que este tampoco. PENDIENTE: cuando
      exista la ruta `juegos/resultados`, mandar {juego:'arca', grado, estrellas, aciertos, errores, segundos} con
@@ -22,6 +22,41 @@ const CLAVE = 'juegos3d.arca';
 const leerP = () => { try { return JSON.parse(localStorage.getItem(CLAVE)) || {}; } catch (e) { return {}; } };
 const guardarP = o => { try { localStorage.setItem(CLAVE, JSON.stringify(o)); } catch (e) { /* sin almacenamiento */ } };
 const prog = leerP(); if (!prog.estrellas || typeof prog.estrellas !== 'object') prog.estrellas = {};
+/* Modo lección (../leccion.js, Joseth 31 oct: «si voy por el pato, tengo que responder una pregunta aunque no tenga nada
+   que ver con el pato, pero sí con la lección»). ?leccion= trae {titulo?, preguntas?, palabras?, dificultad?}. Sin el
+   inicio de niño/niña y grado y sin el encargo de Noé: CUALQUIER animal que se toque hace una pregunta de la lección; bien
+   contestada, ese animal y su pareja suben solos al arca; mal, se queda y se puede probar con otro. Termina cuando suben
+   N parejas (N = las preguntas, hasta 4 en facil, 5 en media y 6 en normal). Al final «¡Lo lograste!». No guarda nada. */
+const LJ = window.LeccionJuego;
+const LEC = (() => {
+  const ps = LJ && LJ.activo ? LJ.preguntas() : [];
+  return ps.length ? { titulo: LJ.titulo || 'Lo de la lección', preguntas: ps, cola: [], tope: { facil: 4, media: 5, normal: 6 }[LJ.dificultad] || 6 } : null;
+})();
+// Modo lección: las parejas que ya suben o están dentro, y el objetivo de arriba (sin voz: no hay MP3 de este texto).
+const subiendo = () => animales.filter(a => a.estado === 'va' || a.estado === 'dentro').length;
+function objetivoLeccion(anuncio) {
+  const faltan = Math.max(0, Math.ceil((J.total - subiendo()) / 2));
+  const es = faltan ? 'Toca un animal y responde. ' + (faltan === 1 ? 'Falta 1 pareja' : 'Faltan ' + faltan + ' parejas') : '¡Ya suben todos al arca!';
+  $('hObj').textContent = es; $('hObjEn').textContent = LEC.titulo; latir();
+  if (anuncio) anunciar(es, LEC.titulo, 3000);
+}
+// Bien contestada: el animal y su pareja suben solos por la rampa (el rezagado aparece junto al aro).
+function subirPareja(a) {
+  const r = ARCA.rampa, lado = Math.min(1.3, r.ancho / 4);
+  animales.filter(b => b.especie === a.especie && b.estado !== 'dentro' && b.estado !== 'va').forEach((b, k) => {
+    const s = k ? 1 : -1, x = r.cx + s * lado;
+    b.estado = 'va'; b.ruta = [[x, ARO.z], [x, r.zSuelo - 0.5], [x, r.zTope + 0.5], [r.cx + s * lado * 0.5, r.zPuerta - 2.4]];
+    if (Math.hypot(b.x - x, b.z - ARO.z) > 12) { b.x = x + rnd(-1, 1); b.z = ARO.z + 4; }
+  });
+  ARCA.abreMeta = 1;
+  objetivoLeccion(true);
+  Voz.noe(D.frases.entra);
+}
+function preguntaLeccion() {
+  if (!LEC.cola.length) LEC.cola = LJ.barajar(LEC.preguntas);
+  const q = LEC.cola.shift(), idx = LJ.barajar(q.opciones.map((_, i) => i)), bien = q.opciones[q.correcta];
+  return { tipo: 'leccion', texto: q.p, ops: idx.map(i => q.opciones[i]), correcta: idx.indexOf(q.correcta), pista: 'Pista: empieza por «' + String(bien).replace(/^[^A-Za-zÀ-ÿ]+/, '').charAt(0) + '».', oir: q.oir };
+}
 let semilla = 20261026;
 const azar = () => { semilla |= 0; semilla = semilla + 0x6D2B79F5 | 0; let t = Math.imul(semilla ^ semilla >>> 15, 1 | semilla); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
 const az = (a, b) => a + azar() * (b - a);
@@ -878,47 +913,29 @@ function actualizarClima(dt, t) {
 }
 
 /* ---------- voz ---------- */
+// Todo pasa por la cola de ../leccion.js (LJ.cola): un MP3 no corta a otro; lo nuevo espera a que acabe lo que suena
+// («Great job!» termina y después «Into the ark»), y lo que esperó demasiado o ya no viene al caso se salta.
 const Voz = (() => {
   // Lo de Noé se busca primero en voz/en-noe (un hombre mayor), después en voz/en; lo demás, sólo en voz/en.
-  let lista = null, listaNoe = null, audio = null;
+  let lista = null, listaNoe = null;
   const leer = dir => fetch(BIBLIO + dir + '/index.json', { credentials: 'omit' }).then(r => (r.ok ? r.json() : [])).then(n => new Set(Array.isArray(n) ? n : [])).catch(() => new Set());
   leer('voz/en').then(l => { lista = l; }); leer('voz/en-noe').then(l => { listaNoe = l; });
-  const ss = window.speechSynthesis;
-  let voz = null;
-  const elegir = () => { const v = ss ? ss.getVoices() : []; voz = v.find(x => x.lang === 'en-US' && /female|samantha|jenny|aria|google us/i.test(x.name)) || v.find(x => x.lang === 'en-US') || v.find(x => /^en/i.test(x.lang)) || null; };
-  // la voz del navegador para Noé: la masculina más grave que haya (Grandpa en Mac, si está)
-  let vozNoe = null;
-  const elegirNoe = () => { const v = (ss ? ss.getVoices() : []).filter(x => /^en/i.test(x.lang)); vozNoe = v.find(x => /grandpa/i.test(x.name)) || v.find(x => /\b(fred|ralph|rocko|reed|daniel|arthur|aaron|gordon|alex|male|david|mark|george|guy|james|tom)\b/i.test(x.name)) || null; };
-  if (ss) { elegir(); elegirNoe(); ss.onvoiceschanged = () => { elegir(); elegirNoe(); }; }
-  let n = 0;
-  function callar() { n++; if (audio) { audio.onended = audio.onerror = null; audio.pause(); audio = null; } if (ss) ss.cancel(); }
-  function sintetizar(texto, fin, deNoe) {
-    if (!ss || typeof SpeechSynthesisUtterance === 'undefined') { setTimeout(fin, 600); return; }
-    const u = new SpeechSynthesisUtterance(texto); u.lang = 'en-US';
-    if (deNoe) { if (vozNoe || voz) u.voice = vozNoe || voz; u.rate = 0.85; u.pitch = vozNoe ? 0.7 : 0.4; } else { if (voz) u.voice = voz; u.rate = 0.9; u.pitch = 1.05; }
-    let listo = false; const f = () => { if (!listo) { listo = true; fin(); } };
-    u.onend = f; u.onerror = f; setTimeout(f, 1200 + texto.length * 120);
-    ss.speak(u);
-  }
-  function una(texto, fin, deNoe) {
-    const s = PQ.slug(texto);
-    const dir = deNoe && listaNoe && listaNoe.has(s) ? 'voz/en-noe/' : lista && lista.has(s) ? 'voz/en/' : null;
-    if (dir) {
-      const a = new Audio(BIBLIO + dir + s + '.mp3'); audio = a;
-      let listo = false; const f = () => { if (!listo) { listo = true; if (audio === a) audio = null; fin(); } };
-      a.onended = f; a.onerror = () => { if (!listo) { listo = true; sintetizar(texto, fin, deNoe); } };
-      a.play().catch(() => { if (!listo) { listo = true; sintetizar(texto, fin, deNoe); } });
-    } else sintetizar(texto, fin, deNoe);
-  }
+  // Regla de Joseth: en inglés jamás la voz del navegador. Sin MP3 grabado, silencio (el texto sigue en pantalla) y se graba.
+  const urls = (s, deNoe) => () => (deNoe && listaNoe && listaNoe.has(s) ? [BIBLIO + 'voz/en-noe/' + s + '.mp3'] : lista && lista.has(s) ? [BIBLIO + 'voz/en/' + s + '.mp3'] : []);
+  // `textos` en fila detrás de lo que suena; `alAcabar` tras el último (si se saltan, no se llama). Sólo vale en la
+  // partida en que se pidió y sin pausa.
   function decir(textos, alAcabar, deNoe) {
-    callar();
     textos = [].concat(textos).filter(Boolean);
     if (SN.esMudo() || !textos.length) { if (alAcabar) setTimeout(alAcabar, 400); return; }
-    const mio = n;
-    const sig = i => { if (mio !== n) return; if (i >= textos.length) { if (alAcabar) alAcabar(); return; } una(textos[i], () => setTimeout(() => sig(i + 1), 150), deNoe); };
-    sig(0);
+    const gen = J.gen, vigente = () => gen === J.gen && !J.pausa && !SN.esMudo();
+    textos.forEach((t, i) => {
+      const ultimo = i === textos.length - 1, s = PQ.slug(t);
+      const p = LJ.cola.poner({ urls: urls(s, deNoe), clave: (deNoe ? 'noe:' : 'en:') + s, vigente,
+        silencio: ultimo && alAcabar ? 600 + String(t).length * 40 : 0 });
+      if (ultimo && alAcabar) p.then(r => { if (r !== null && vigente()) alAcabar(); });
+    });
   }
-  return { decir, callar, noe: (t, f) => decir(t, f, true) };
+  return { decir, callar: () => LJ.cola.callar(), soltar: () => LJ.cola.soltar(), noe: (t, f) => decir(t, f, true) };
 })();
 
 /* ---------- jugador y cámara ---------- */
@@ -1180,6 +1197,7 @@ function entrar(a) {
   const pareja = animales.filter(b => b.especie === a.especie);
   if (pareja.every(b => b.estado === 'dentro')) {
     if (J.dentro >= J.total) { empezarFinal(); return; }
+    if (LEC) { objetivoLeccion(false); Voz.noe(D.frases.gracias); return; }
     objetivo('entraron', { ms: 2600 });
     const gen = J.gen;
     setTimeout(() => { if (gen === J.gen && (J.fase === 'juego' || J.fase === 'pregunta')) { J.iEnc++; darEncargo(); } }, 2800);
@@ -1293,7 +1311,8 @@ function tocar(a) {
   if (Math.hypot(a.x - jug.x, a.z - jug.z) - a.radio > 6) { aviso('Acércate más', true); return; }
   if (a.estado !== 'pasea' && a.estado !== 'mira') return;
   const quiere = encargoActual();
-  if (a.especie !== quiere || pasoActual() === 'llevar') {
+  if (LEC && subiendo() >= J.total) { aviso('¡Ya están todos! Mira cómo suben.', false, 2200); return; }
+  if (!LEC && (a.especie !== quiere || pasoActual() === 'llevar')) {
     SN.tocar('mal');
     const [es, en] = textos(pasoActual() === 'llevar' ? 'llevar' : 'buscar');
     aviso('Ese no. ' + es, true, 2200); latir(); Voz.noe(en);
@@ -1303,17 +1322,20 @@ function tocar(a) {
   J.fase = 'pregunta'; a.estado = 'pregunta';
   jug.rumbo = Math.atan2(a.x - jug.x, a.z - jug.z); jug.vel = 0;
   if (J.vista === 3) camS.yaw = jug.rumbo;
-  const pq = PQ.armar(D, a.especie, J.grado, undefined, J.mixto[a.especie] ? a.nom.en : undefined);
+  const pq = LEC ? preguntaLeccion() : PQ.armar(D, a.especie, J.grado, undefined, J.mixto[a.especie] ? a.nom.en : undefined);
   J.pregunta = Object.assign(pq, { animal: a, fallos: 0 });
-  const banda = D.bandas[PQ.banda(D, J.grado)];
-  $('pTag').textContent = banda.etiqueta;
+  $('pTag').textContent = LEC ? LEC.titulo : D.bandas[PQ.banda(D, J.grado)].etiqueta;
   $('pq').textContent = pq.texto;
-  $('pPista').textContent = '';
+  $('pPista').textContent = LEC && LJ.dificultad === 'facil' ? pq.pista : ''; // lección fácil: la pista desde el principio
   const ops = $('ops'); ops.innerHTML = '';
   pq.ops.forEach((t, i) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'op'; b.textContent = t; b.addEventListener('click', () => responder(i)); ops.appendChild(b); });
   $('panel').classList.remove('oculto'); $('bTocar').classList.add('oculto'); $('palanca').classList.add('oculto');
   palanca.x = palanca.y = 0; teclas.clear();
-  Voz.decir(pq.texto);
+  $('bOirPreg').classList.toggle('oculto', !!LEC && !pq.oir);
+  // lo que esperaba (Into the ark, Thank you…) ya no viene al caso: la pregunta manda; lo que suena acaba primero
+  Voz.soltar();
+  if (LEC) { if (pq.oir && !SN.esMudo()) LJ.oir(pq.oir, { vigente: () => J.pregunta === pq }); } // lección: suena la palabra (su MP3), no la pregunta
+  else Voz.decir(pq.texto);
 }
 function responder(i) {
   const p = J.pregunta; if (!p || p.listo) return;
@@ -1322,6 +1344,7 @@ function responder(i) {
     p.listo = true; b.classList.add('bien');
     J.aciertos++; if (!p.fallos) J.primera++;
     SN.tocar('bien'); aviso(D.frases.bien);
+    if (LEC) LJ.progreso({ aciertos: J.aciertos, total: J.total / 2, fallos: J.errores, nivel: 'arca' });
     Voz.decir([p.ops[i], D.frases.bien]);
     setTimeout(() => cerrarPregunta(true), 1700);
   } else {
@@ -1329,6 +1352,7 @@ function responder(i) {
     b.classList.add('mal'); b.disabled = true;
     SN.tocar('mal');
     $('pPista').textContent = p.pista;
+    if (LEC) LJ.progreso({ aciertos: J.aciertos, total: J.total / 2, fallos: J.errores, nivel: 'arca' });
     Voz.decir([p.ops[i], D.frases.otraVez]);
   }
 }
@@ -1339,6 +1363,7 @@ function cerrarPregunta(bien) {
   if (!p) return;
   const a = p.animal;
   if (!bien) { a.estado = 'mira'; return; }
+  if (LEC) { subirPareja(a); return; } // lección: sin llevarlos al aro
   const siguen = animales.filter(b => b.estado === 'sigue');
   a.orden = siguen.length; a.estado = 'sigue';
   SN.tocar('sigue');
@@ -1347,6 +1372,7 @@ function cerrarPregunta(bien) {
 }
 // Al pisar el aro: con la pareja, suben solas; con uno solo, Noé recuerda que entran de dos en dos.
 function revisarEntrega() {
+  if (LEC) return; // lección: las parejas suben solas, no hay aro que pisar
   const r = ARCA.rampa, enAro = Math.hypot(jug.x - ARO.x, jug.z - ARO.z) < ARO.r;
   const antes = J.enAro; J.enAro = enAro;
   if (!enAro) return;
@@ -1400,13 +1426,19 @@ function rayo() { const f = $('flash'); f.classList.remove('ver'); void f.offset
 function terminar() {
   J.fase = 'fin';
   const est = J.errores <= 2 ? 3 : J.errores <= 6 ? 2 : 1;
-  const k = 'g' + J.grado; prog.estrellas[k] = Math.max(prog.estrellas[k] || 0, est); prog.grado = J.grado; prog.nino = J.nino; guardarP(prog);
+  if (!LEC) { const k = 'g' + J.grado; prog.estrellas[k] = Math.max(prog.estrellas[k] || 0, est); prog.grado = J.grado; prog.nino = J.nino; guardarP(prog); }
   const svg = on => '<svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6 6.6.8-4.9 4.5 1.3 6.5L12 17l-5.9 3.3 1.3-6.5L2.5 9.3l6.6-.8z" fill="' + (on ? '#ffc23a' : '#e8dcc0') + '" stroke="#15304d" stroke-width="1.2" stroke-linejoin="round"/></svg>';
   $('fEst').innerHTML = [0, 1, 2].map(i => svg(i < est)).join('');
   $('fTit').textContent = D.frases.todos;
   const m = Math.floor(J.segundos / 60), s = J.segundos % 60;
   $('fSub').innerHTML = 'Subiste <b>' + J.total + '</b> animales al arca. Respuestas a la primera: <b>' + J.primera + '</b> de ' + J.total + '. Tiempo: <b>' + m + ':' + (s < 10 ? '0' : '') + s + '</b>.';
-  $('fin').classList.remove('oculto'); $('hud').classList.add('oculto');
+  if (LEC) {
+    $('hud').classList.add('oculto');
+    // en la lección cuenta cada pregunta (una por pareja)
+    LJ.resultado({ aciertos: J.aciertos, total: J.total / 2, fallos: J.errores, nivel: 'arca' });
+    LJ.logrado({ detalle: 'Subiste ' + J.total / 2 + ' parejas al arca. Acertaste a la primera ' + J.primera + ' de ' + J.total / 2 + ' preguntas.',
+      alOtraVez: jugar });
+  } else { $('fin').classList.remove('oculto'); $('hud').classList.add('oculto'); }
   SN.tocar('fanfarria');
   Voz.noe([D.frases.todos, D.frases.final]);
   // PENDIENTE (MyVC): aquí se mandaría el resultado cuando exista la ruta; hoy ningún juego 3D reporta notas.
@@ -1438,10 +1470,12 @@ async function jugar() {
   const b = $('bJugar'); b.disabled = true; b.textContent = 'Cargando…';
   try { await cargarJugador(J.nino); } catch (e) { /* queda el de cajitas */ }
   b.disabled = false; b.textContent = 'Jugar';
-  prog.grado = J.grado; prog.nino = J.nino; guardarP(prog);
+  if (!LEC) { prog.grado = J.grado; prog.nino = J.nino; guardarP(prog); }
   reiniciarMundo();
   const ids = [...new Set(animales.map(a => a.especie))];
-  J.orden = barajar(ids.slice()).slice(0, D.parejas); repartir(); J.iEnc = 0; J.dentro = 0; J.total = 2 * J.orden.length; J.aciertos = 0; J.errores = 0; J.primera = 0; J.t0 = performance.now();
+  const pares = LEC ? Math.max(1, Math.min(LEC.preguntas.length, ids.length, LEC.tope)) : 0;
+  // lección: cerca, más especies de las que hacen falta, para que se pueda elegir cualquiera
+  J.orden = barajar(ids.slice()).slice(0, LEC ? Math.min(ids.length, pares + 3) : D.parejas); repartir(); J.iEnc = 0; J.dentro = 0; J.total = LEC ? 2 * pares : 2 * J.orden.length; J.aciertos = 0; J.errores = 0; J.primera = 0; J.t0 = performance.now();
   // de pie en el camino, a unos 75 m del arca, mirándola
   const c = camino[Math.floor(camino.length * 0.38)];
   jug.x = c[0]; jug.z = c[1]; jug.y = suelo(jug.x, jug.z); jug.rumbo = Math.PI; jug.estela = []; jug.vel = 0;
@@ -1454,7 +1488,8 @@ async function jugar() {
   J.gen = (J.gen || 0) + 1; J.enAro = false;
   ayuda(tactil ? D.comoTactil : D.como, 8000);
   // el primer encargo se ve y se oye de una, después del saludo de Noé
-  objetivo('buscar', { antes: D.frases.bienvenida, ms: 4500 });
+  if (LEC) { objetivoLeccion(true); Voz.noe(D.frases.bienvenida); }
+  else objetivo('buscar', { antes: D.frases.bienvenida, ms: 4500 });
 }
 function pausar(si) {
   if (J.fase !== 'juego' && J.fase !== 'pregunta' && !J.pausa) return;
@@ -1466,7 +1501,14 @@ function alInicio() {
   J.fase = 'menu'; J.pregunta = null;
   ['hud', 'panel', 'bTocar', 'palanca', 'ayuda', 'fin'].forEach(id => $(id).classList.add('oculto'));
   reiniciarMundo(); jug.grupo.visible = false;
-  $('inicio').classList.remove('oculto');
+  if (LEC) portadaLeccion(); else $('inicio').classList.remove('oculto');
+}
+function portadaLeccion() {
+  LJ.portada({
+    juego: 'Two by Two', titulo: LEC.titulo,
+    detalle: 'Ayuda a Noé: toca cualquier animal y contesta su pregunta de la lección. Si aciertas, él y su pareja suben al arca; si no, prueba con otro. ' + (tactil ? D.comoTactil : D.como),
+    alJugar: jugar
+  });
 }
 
 /* ---------- entrada ---------- */
@@ -1533,7 +1575,7 @@ $('bSalir').addEventListener('click', alInicio);
 $('bJugar').addEventListener('click', jugar);
 $('bOtra').addEventListener('click', jugar);
 $('bOirEnc').addEventListener('click', () => { latir(); Voz.noe($('hObjEn').textContent); });
-$('bOirPreg').addEventListener('click', () => { if (J.pregunta) Voz.decir(J.pregunta.texto); });
+$('bOirPreg').addEventListener('click', () => { if (!J.pregunta) return; if (LEC) { if (J.pregunta.oir) LJ.oir(J.pregunta.oir); } else Voz.decir(J.pregunta.texto); });
 function pintarSonido() { document.querySelectorAll('.bson').forEach(b => { b.setAttribute('aria-pressed', SN.esMudo() ? 'true' : 'false'); b.setAttribute('aria-label', SN.esMudo() ? 'Activar el sonido' : 'Silenciar'); }); }
 document.querySelectorAll('.bson').forEach(b => b.addEventListener('click', () => { SN.mudo(!SN.esMudo()); if (SN.esMudo()) Voz.callar(); prog.mudo = SN.esMudo(); guardarP(prog); pintarSonido(); }));
 if (prog.mudo) SN.mudo(true);
@@ -1623,7 +1665,8 @@ async function preparar() {
   progreso(1);
   armarInicio();
   J.fase = 'menu';
-  $('cargando').classList.add('oculto'); $('inicio').classList.remove('oculto');
+  $('cargando').classList.add('oculto');
+  if (LEC) portadaLeccion(); else $('inicio').classList.remove('oculto');
   // el personaje de la última vez, de una vez
   cargarJugador(J.nino).catch(() => {});
   decorarFinca().catch(e => console.warn('Two by Two: decorado', e)).then(poblarResto);
@@ -1645,6 +1688,8 @@ window.__juego = {
   // pone al jugador junto al animal buscado que falte y abre su pregunta
   tocar: () => { const a = animales.find(x => x.especie === encargoActual() && (x.estado === 'pasea' || x.estado === 'mira')); if (!a) return false; jug.x = a.x + 1.5; jug.z = a.z + 1.5; jug.y = suelo(jug.x, jug.z); jug.estela = []; tocar(a); return a.id; },
   responder: i => responder(i),
+  // toca un animal que NO es el del encargo (para probar el modo lección: cualquiera sirve)
+  tocarOtro: () => { const libre = x => x.estado === 'pasea' || x.estado === 'mira'; const a = animales.find(x => libre(x) && x.especie !== encargoActual()) || animales.find(libre); if (!a) return false; jug.x = a.x + 1.5; jug.z = a.z + 1.5; jug.y = suelo(jug.x, jug.z); jug.estela = []; tocar(a); return a.id; },
   // completa la pareja que se busca y la lleva a la rampa
   pareja: () => { const id = encargoActual(); animales.filter(a => a.especie === id && a.estado !== 'dentro').forEach((a, i) => { a.estado = 'sigue'; a.orden = i; }); jug.x = ARO.x; jug.z = ARO.z; jug.estela = []; animales.filter(a => a.especie === id).forEach(a => { a.x = ARO.x + rnd(-2, 2); a.z = ARO.z + 3; }); revisarEntrega(); return id; },
   objetivo: () => ({ paso: J.fase === 'juego' ? pasoActual() : J.fase, texto: $('hObj').textContent, en: $('hObjEn').textContent }),

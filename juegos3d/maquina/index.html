@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Máquina Loca</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Lexend:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="juego.css">
+</head>
+<body>
+<div id="gl" aria-hidden="true"></div>
+<div id="cargando" class="cargando"><b>Máquina Loca</b><span>Abriendo el taller…</span></div>
+
+<!-- en juego: el marcador y los botones de arriba -->
+<div id="hud" class="hud oculto">
+  <div class="marcador" role="status" aria-live="off">
+    <span class="ico" id="hIco" aria-hidden="true">🛠️</span>
+    <div><b id="hNivel"></b><small id="hInfo"></small></div>
+  </div>
+  <div class="botones">
+    <button class="hb" id="bSonido" type="button" aria-pressed="false" title="Sonido (M)"><span aria-hidden="true" id="iSonido">🔊</span><span class="sr" id="tSonido">Silenciar</span></button>
+    <button class="hb" id="bEnergia" type="button" aria-pressed="false" title="Barras de energía (B)"><span aria-hidden="true">⚡</span><span class="rot">Energía</span></button>
+    <button class="hb" id="bCalma" type="button" aria-pressed="false" title="Modo calma (C)"><span aria-hidden="true">🐢</span><span class="rot">Calma</span></button>
+    <button class="hb" id="bMenu" type="button" title="Pausa (Esc)"><span aria-hidden="true">⏸</span><span class="sr">Pausa</span></button>
+  </div>
+</div>
+<p id="narra" class="narra oculto" aria-hidden="true"></p>
+
+<!-- las barras de energía (física de 6.º a 11.º) -->
+<div id="energia" class="energia oculto" aria-hidden="true">
+  <div class="eb"><span class="en">⬆ Altura <b id="eH">0 m</b></span><span class="barra"><i id="eP"></i></span><span class="ev" id="eEp">Ep 0 J</span></div>
+  <div class="eb"><span class="en">💨 Rapidez <b id="eV">0 m/s</b></span><span class="barra c"><i id="eC"></i></span><span class="ev" id="eEc">Ec 0 J</span></div>
+  <div class="eb"><span class="en">Σ Total</span><span class="barra t"><i id="eT"></i></span><span class="ev" id="eEt">0 J</span></div>
+</div>
+
+<!-- la bandeja de abajo: las piezas y los mandos -->
+<div id="bandeja" class="bandeja oculto">
+  <div class="inv" id="inv" role="group" aria-label="Tus piezas: elige una (1 a 9)"></div>
+  <div class="mandos" id="mandos">
+    <div class="grupo" id="gMano" role="group" aria-label="La pieza">
+      <button class="bm" id="bGirarI" type="button" title="Girar a la izquierda (Q)" aria-label="Girar a la izquierda (Q)">⟲<small>Q</small></button>
+      <button class="bm" id="bGirarD" type="button" title="Girar a la derecha (E)" aria-label="Girar a la derecha (E)">⟳<small>E</small></button>
+      <button class="bm" id="bQuitar" type="button" title="Devolver la pieza (Supr)" aria-label="Devolver la pieza a la bandeja (Supr)">🗑<small>Supr</small></button>
+    </div>
+    <div class="grupo pad" id="gPad" role="group" aria-label="Mover el cursor por la rejilla">
+      <button class="bm" id="bIzq" type="button" aria-label="Cursor a la izquierda (flecha)">◀</button>
+      <button class="bm" id="bArr" type="button" aria-label="Cursor arriba (flecha)">▲</button>
+      <button class="bm" id="bAba" type="button" aria-label="Cursor abajo (flecha)">▼</button>
+      <button class="bm" id="bDer" type="button" aria-label="Cursor a la derecha (flecha)">▶</button>
+      <button class="bm poner" id="bPoner" type="button" title="Poner o tomar la pieza (Enter)"><span id="tPoner">Poner</span><small>Enter</small></button>
+    </div>
+    <div class="grupo">
+      <button class="bm" id="bPista" type="button" title="Pista (P)"><span aria-hidden="true">💡</span> <span class="rot">Pista</span><small id="nPista"></small></button>
+      <button class="bandar" id="bAndar" type="button" title="¡Andando! (Espacio)"><span aria-hidden="true">▶</span> ¡Andando!</button>
+    </div>
+  </div>
+  <div class="mandos oculto" id="mandosRun">
+    <button class="bm" id="bLenta" type="button" aria-pressed="false" title="Cámara lenta (L)"><span aria-hidden="true">🐌</span> Cámara lenta <small>L</small></button>
+    <button class="bandar parar" id="bParar" type="button" title="Parar y volver a armar (Espacio)"><span aria-hidden="true">⏹</span> Parar</button>
+  </div>
+  <p class="estado" id="estado" aria-live="polite"></p>
+</div>
+
+<!-- la pregunta (gana piezas especiales) -->
+<section id="carta" class="carta oculto" role="dialog" aria-labelledby="cPreg">
+  <p class="tipo" id="cTipo"></p>
+  <h2 id="cPreg"></h2>
+  <p class="palabra oculto" id="cPalabra" lang="en"></p>
+  <p class="bocina oculto" id="cBocina" aria-hidden="true">🔊 🔊 🔊</p>
+  <div class="cbar">
+    <button class="bsec oculto" id="bOir" type="button"><span aria-hidden="true">🔊</span> Oír<span class="largo"> otra vez</span> <small>(O)</small></button>
+    <button class="bsec oculto" id="bVer" type="button"><span aria-hidden="true">👁</span> Ver<span class="largo"> la palabra</span> <small>(V)</small></button>
+  </div>
+  <div class="ops" id="cOps" role="group" aria-label="Las opciones: 1, 2, 3 o 4"></div>
+  <p class="feed" id="cFeed" aria-live="polite"></p>
+  <button class="jugar oculto" id="bCSeguir" type="button">▶ Seguir</button>
+</section>
+
+<!-- avisos: el nivel que empieza, lo que pasó al andar -->
+<div id="aviso" class="aviso oculto" role="dialog" aria-labelledby="aTit" aria-describedby="aTxt">
+  <p class="estrellas" id="aEst" aria-hidden="true"></p>
+  <h2 id="aTit"></h2>
+  <p class="txt" id="aTxt"></p>
+  <ul class="det" id="aDet"></ul>
+  <div class="acciones" id="aAcc"></div>
+</div>
+
+<div id="anuncio" class="sr" aria-live="polite"></div>
+<div id="alerta" class="sr" aria-live="assertive"></div>
+
+<!-- la sala de juegos: el inicio con todas las opciones -->
+<div id="inicio" class="capa oculto">
+  <div class="tarjeta ancha" role="dialog" aria-labelledby="tTit">
+    <h1 id="tTit"><span aria-hidden="true">⚙️</span> Máquina Loca</h1>
+    <p class="frase">Pon rampas, resortes, palancas, poleas, cintas, ventiladores e imanes para que la pelota llegue a la canasta. Da «¡Andando!» y mira la física: si no funciona, cambia algo y prueba otra vez.</p>
+    <div class="paso-t" id="lTema">1. Las preguntas entre máquina y máquina (cada respuesta buena gana una pieza especial)</div>
+    <div class="fila-b" id="oTema" role="group" aria-labelledby="lTema"></div>
+    <div class="paso-t" id="lGrado">2. Tu grado</div>
+    <div class="fila-b" id="oGrado" role="group" aria-labelledby="lGrado"></div>
+    <p class="nota" id="tModo"></p>
+    <div class="paso-t" id="lNiveles">3. La máquina por la que empiezas</div>
+    <div class="niveles" id="oNiveles" role="group" aria-labelledby="lNiveles"></div>
+    <label class="check"><input type="checkbox" id="oCalma"> Modo calma: poco movimiento, sin confeti</label>
+    <label class="check"><input type="checkbox" id="oEnergia"> Barras de energía mientras anda (altura, rapidez, Ep y Ec)</label>
+    <p class="record" id="tRecord"></p>
+    <div class="acciones">
+      <button class="jugar" id="bJugar" type="button">▶ Al taller</button>
+      <a class="volver" href="../index.html">Volver a los juegos</a>
+    </div>
+  </div>
+</div>
+
+<!-- pausa -->
+<div id="pausa" class="capa oculto">
+  <div class="tarjeta chica" role="dialog" aria-labelledby="pTit">
+    <h1 id="pTit">En pausa</h1>
+    <p class="frase" id="pRes"></p>
+    <p class="frase teclas">1 a 9: elegir pieza · flechas: mover el cursor · Enter: poner o tomar · Q y E: girar · Supr: devolver · P: pista · D: el tablero en palabras · Espacio: ¡Andando! o parar · L: cámara lenta · R: verla otra vez · B: energía · C: calma · M: sonido. Con el ratón: clic en la pieza de la bandeja y clic en el tablero; con el dedo: tocar la pieza, tocar la casilla y tocarla otra vez para ponerla.</p>
+    <div class="acciones">
+      <button class="jugar" id="bReanudar" type="button">▶ Seguir</button>
+      <button class="bsec" id="bVaciar" type="button">↺ Quitar todas mis piezas</button>
+      <button class="bsec" id="bSaltar" type="button">⏭ Saltar esta máquina</button>
+      <button class="bsec" id="bInicio" type="button">Volver al inicio</button>
+    </div>
+  </div>
+</div>
+
+<!-- el final de una partida en la sala -->
+<div id="final" class="capa oculto">
+  <div class="tarjeta chica" role="dialog" aria-labelledby="fTit">
+    <p class="medalla" id="fMedalla" aria-hidden="true">🏆</p>
+    <h1 id="fTit">¡Taller terminado!</h1>
+    <p class="frase" id="fRes"></p>
+    <div class="acciones">
+      <button class="jugar" id="bOtraVez" type="button">↻ Otra partida</button>
+      <button class="bsec" id="bCambiar" type="button">Cambiar de máquina o de tema</button>
+      <a class="volver" href="../index.html">Volver a los juegos</a>
+    </div>
+  </div>
+</div>
+
+<script src="../puente.js"></script>
+<script src="../leccion.js"></script>
+<script src="fisica.js"></script>
+<script src="niveles.js"></script>
+<script src="contenido.js"></script>
+<script src="taller.js"></script>
+<script src="juego.js"></script>
+</body>
+</html>

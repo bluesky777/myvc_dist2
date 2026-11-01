@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mi Finca</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Lexend:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="juego.css">
+</head>
+<body>
+<div id="gl" aria-hidden="true"></div>
+<div id="cargando" class="cargando"><b>Mi Finca</b><span>Despertando a los animales…</span></div>
+
+<!-- las cosas de la finca: etiquetas encima de cada una; son botones (el teclado y el lector de pantalla las recorren) -->
+<div id="etqs" class="etqs oculto" role="group" aria-label="Qué hay en la finca: toca una cosa para trabajar en ella"></div>
+
+<!-- en juego -->
+<div id="hud" class="hud oculto">
+  <div class="marcador" role="status" aria-live="off">
+    <span class="ico" aria-hidden="true">☀️</span>
+    <div><b id="hDia"></b><small id="hPesos"></small></div>
+  </div>
+  <button class="tareas-b" id="bTareas" type="button" aria-expanded="false" aria-controls="tareas" title="Las tareas de hoy (T)"><span aria-hidden="true">📋</span> <span id="hTareas">0/0</span></button>
+  <div class="botones">
+    <button class="hb oculto" id="bTienda" type="button" title="La tienda (K)"><span aria-hidden="true">🛒</span><span class="rot">Tienda</span></button>
+    <button class="hb" id="bSonido" type="button" aria-pressed="false" title="Sonido (M)"><span aria-hidden="true" id="iSonido">🔊</span><span class="sr" id="tSonido">Silenciar</span></button>
+    <button class="hb" id="bCalma" type="button" aria-pressed="false" title="Modo calma (C)"><span aria-hidden="true">🐢</span><span class="rot">Calma</span></button>
+    <button class="hb" id="bMenu" type="button" title="Pausa (Esc)"><span aria-hidden="true">⏸</span><span class="sr">Pausa</span></button>
+  </div>
+</div>
+
+<!-- las tareas del día -->
+<section id="tareas" class="tareas oculto" aria-labelledby="tTareas">
+  <h2 id="tTareas">Tareas de hoy</h2>
+  <ul id="lTareas"></ul>
+</section>
+
+<!-- lo que dice el granjero (también suena, si hay MP3) -->
+<div id="dice" class="dice oculto" aria-live="polite">
+  <span class="cara" aria-hidden="true">🧑🏽‍🌾</span>
+  <p id="dTxt"></p>
+  <button class="mini" id="bDice" type="button" title="Oír otra vez"><span aria-hidden="true">🔊</span><span class="sr">Oír otra vez</span></button>
+</div>
+
+<!-- la pregunta de la visita, o «escucha y toca» -->
+<section id="carta" class="carta oculto" aria-labelledby="cPreg">
+  <p class="tipo" id="cTipo"></p>
+  <div class="cfila">
+    <h2 id="cPreg"></h2>
+    <button class="bocina" id="bOir" type="button" title="Oír otra vez (O)"><span aria-hidden="true">🔊</span><span class="sr">Oír otra vez</span></button>
+  </div>
+  <p class="palabra oculto" id="cPalabra" lang="en"></p>
+  <div class="ops" id="cOps" role="group" aria-label="Las respuestas: 1, 2, 3 o 4"></div>
+  <div class="cbar">
+    <button class="bsec oculto" id="bVer" type="button"><span aria-hidden="true">👁</span> Ver<span class="largo"> la palabra</span> <small>(V)</small></button>
+    <button class="bsec oculto" id="bPista" type="button"><span aria-hidden="true">💡</span> Pista <small id="nPista"></small></button>
+    <button class="jugar chico oculto" id="bSeguir" type="button">▶ Seguir</button>
+  </div>
+  <p class="feed" id="cFeed" aria-live="polite"></p>
+</section>
+
+<!-- fin del día -->
+<button id="bDormir" class="dormir oculto" type="button"><span aria-hidden="true">🌙</span> A dormir</button>
+
+<div id="anuncio" class="sr" aria-live="polite"></div>
+
+<!-- la sala de juegos: el inicio con todas las opciones -->
+<div id="inicio" class="capa oculto">
+  <div class="tarjeta" role="dialog" aria-labelledby="tTit">
+    <h1 id="tTit"><span aria-hidden="true">🧑🏽‍🌾</span> Mi Finca</h1>
+    <p class="frase">Siembra, riega y cosecha; dales comida a los animales, recoge lo que dan y véndelo en el mercado. Con los pesos, tu finca crece. Las visitas traen preguntas.</p>
+    <div class="paso-t" id="lMateria">1. Qué practicas</div>
+    <div class="fila-b" id="oMateria" role="group" aria-labelledby="lMateria"></div>
+    <div class="paso-t" id="lGrado">2. Tu grado</div>
+    <div class="fila-b" id="oGrado" role="group" aria-labelledby="lGrado"></div>
+    <div class="paso-t" id="lQuien">3. Tu granjero</div>
+    <div class="fila-b" id="oQuien" role="group" aria-labelledby="lQuien"></div>
+    <label class="check"><input type="checkbox" id="oCalma"> Modo calma: poco movimiento (el granjero aparece donde va)</label>
+    <p class="record" id="tFinca"></p>
+    <div class="acciones">
+      <button class="jugar" id="bEmpezar" type="button">▶ A la finca</button>
+      <button class="bsec oculto" id="bNueva" type="button">Empezar una finca nueva</button>
+      <a class="volver" href="../index.html">Volver a los juegos</a>
+    </div>
+  </div>
+</div>
+
+<!-- elegir qué sembrar -->
+<div id="sembrar" class="capa oculto">
+  <div class="tarjeta chica" role="dialog" aria-labelledby="sTit">
+    <h1 id="sTit"><span aria-hidden="true">🌱</span> ¿Qué siembras?</h1>
+    <div class="fila-b grande" id="oSemilla"></div>
+  </div>
+</div>
+
+<!-- la tienda -->
+<div id="tienda" class="capa oculto">
+  <div class="tarjeta" role="dialog" aria-labelledby="kTit">
+    <h1 id="kTit"><span aria-hidden="true">🛒</span> La tienda del pueblo</h1>
+    <p class="frase" id="kPesos"></p>
+    <div class="rejilla" id="oTienda"></div>
+    <div class="acciones"><button class="jugar" id="bTiendaFin" type="button">← Volver a la finca</button></div>
+  </div>
+</div>
+
+<!-- pausa -->
+<div id="pausa" class="capa oculto">
+  <div class="tarjeta chica" role="dialog" aria-labelledby="pTit">
+    <h1 id="pTit">En pausa</h1>
+    <p class="frase" id="pRes"></p>
+    <p class="frase teclas">← →: elegir una cosa de la finca · Enter o Espacio: trabajar en ella · 1 2 3 4: responder · O: oír otra vez · V: ver la palabra · T: tareas · C: calma · M: sonido. También puedes tocar los animales y las parcelas.</p>
+    <div class="acciones">
+      <button class="jugar" id="bReanudar" type="button">▶ Seguir</button>
+      <button class="bsec" id="bInicio" type="button">Volver al inicio</button>
+    </div>
+  </div>
+</div>
+
+<script src="../puente.js"></script>
+<script src="../leccion.js"></script>
+<script src="contenido.js"></script>
+<script src="mundo.js"></script>
+<script src="juego.js"></script>
+</body>
+</html>

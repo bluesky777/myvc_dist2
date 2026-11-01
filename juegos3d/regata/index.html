@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Regata del Viento</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Lexend:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="juego.css">
+</head>
+<body>
+<div id="gl" aria-hidden="true"></div>
+<div id="cargando" class="cargando"><b>Regata del Viento</b><span>Izando las velas…</span></div>
+
+<!-- navegando -->
+<div id="hud" class="hud oculto">
+  <div class="marcador" role="status" aria-live="off">
+    <span class="ico" aria-hidden="true">⛵</span>
+    <div><b id="hBoya">Boya 1 de 9</b><small id="hPuesto"></small></div>
+    <span class="racha oculto" id="hRacha"></span>
+  </div>
+  <div class="pista-regata oculto" id="hPista" aria-hidden="true"><div class="linea"></div></div>
+  <div class="der">
+    <div class="botones">
+      <button class="hb" id="bSonido" type="button" aria-pressed="false" title="Sonido (M)"><span aria-hidden="true" id="iSonido">🔊</span><span class="sr" id="tSonido">Silenciar</span></button>
+      <button class="hb" id="bCalma" type="button" aria-pressed="false" title="Modo calma (C)"><span aria-hidden="true">🐢</span><span>Calma</span></button>
+      <button class="hb" id="bMenu" type="button" title="Pausa (Esc)"><span aria-hidden="true">⏸</span><span class="sr">Pausa</span></button>
+    </div>
+    <!-- la brújula: la flecha grande del viento se pinta en 3D dentro de este hueco -->
+    <button class="brujula" id="bBrujula" type="button" title="¿De dónde viene el viento?">
+      <span class="hueco" id="brujula" aria-hidden="true"></span>
+      <span class="viento" id="tViento">Viento del norte</span>
+    </button>
+  </div>
+</div>
+
+<section id="carta" class="carta oculto" aria-labelledby="cPreg">
+  <h2 id="cPreg"></h2>
+  <p class="palabra oculto" id="cPalabra" lang="en"></p>
+  <div class="cbar">
+    <button class="bsec oculto" id="bOir" type="button"><span aria-hidden="true">🔊</span> Oír<span class="largo"> otra vez</span> <small>(O)</small></button>
+    <button class="bsec oculto" id="bVer" type="button"><span aria-hidden="true">👁</span> Ver<span class="largo"> la palabra</span> <small>(V)</small></button>
+    <button class="bsec oculto" id="bPistaQ" type="button"><span aria-hidden="true">💡</span> Pista <small id="nPista">(P)</small></button>
+  </div>
+  <p class="feed" id="cFeed" aria-live="polite"></p>
+  <!-- el capitán: los consejos -->
+  <div id="consejo" class="consejo oculto" role="note">
+    <span class="loro" aria-hidden="true">🦜</span><p id="kTxt"></p>
+    <button class="bsec oculto" id="bSaltar" type="button">Saltar la práctica</button>
+  </div>
+</section>
+
+<div id="estado" class="estado oculto" aria-hidden="true"><span id="eTxt"></span><span class="vel" id="eVel"></span></div>
+
+<div id="ops" class="ops oculto" role="group" aria-label="Las boyas: elige con 1, 2, 3 o 4 y el piloto te lleva"></div>
+
+<!-- el mando: el timón a la izquierda, la vela y el piloto a la derecha -->
+<div id="mando" class="mando oculto">
+  <div class="timon-m" role="group" aria-label="Timón">
+    <button type="button" data-giro="-1" aria-label="Girar a la izquierda (flecha izquierda)"><span aria-hidden="true">◀</span></button>
+    <span class="timon" id="timon" aria-hidden="true"><svg viewBox="-50 -50 100 100"><circle r="34" fill="none" stroke="#8a5a2b" stroke-width="9"/><circle r="10" fill="#8a5a2b"/><g stroke="#8a5a2b" stroke-width="7" stroke-linecap="round"><line y1="-46" y2="46"/><line x1="-46" x2="46"/><line x1="-33" y1="-33" x2="33" y2="33"/><line x1="33" y1="-33" x2="-33" y2="33"/></g></svg></span>
+    <button type="button" data-giro="1" aria-label="Girar a la derecha (flecha derecha)"><span aria-hidden="true">▶</span></button>
+  </div>
+  <div class="der-m">
+    <button type="button" class="bvela" id="bVela" data-v="abierta"><span aria-hidden="true">⛵</span><span>Vela<small id="tVela">Abierta</small></span></button>
+    <button type="button" class="bpiloto" id="bPiloto" aria-pressed="false" title="Piloto (G)"><span aria-hidden="true">🧭</span><span>Piloto</span></button>
+  </div>
+</div>
+
+<div id="cuenta" class="cuenta oculto" aria-hidden="true"></div>
+<div id="anuncio" class="sr" aria-live="polite"></div>
+
+<!-- la sala de juegos: el inicio con todas las opciones -->
+<div id="inicio" class="capa oculto">
+  <div class="tarjeta" role="dialog" aria-labelledby="tTit">
+    <h1 id="tTit"><span aria-hidden="true">⛵</span> Regata del Viento</h1>
+    <p class="frase">Navega hasta la boya de la respuesta correcta. Contra el viento no se avanza: ve en zigzag. Flechas para el timón y Espacio para la vela, o elige la boya y el piloto te lleva.</p>
+    <div class="paso" id="lMat">1. Qué practicas</div>
+    <div class="fila-b" id="oMat" role="group" aria-labelledby="lMat"></div>
+    <div class="paso" id="lGrado">2. Tu grado</div>
+    <div class="fila-b" id="oGrado" role="group" aria-labelledby="lGrado"></div>
+    <div class="paso" id="lTema">3. El tema</div>
+    <div class="fila-b" id="oTema" role="group" aria-labelledby="lTema"></div>
+    <div class="paso" id="lMar">4. El mar</div>
+    <div class="fila-b" id="oMar" role="group" aria-labelledby="lMar"></div>
+    <div class="pasos2">
+      <div><div class="paso" id="lVelero">5. Tu velero</div>
+      <div class="fila-b" id="oVelero" role="group" aria-labelledby="lVelero"></div></div>
+      <div><div class="paso" id="lVela">6. Tu vela</div>
+      <div class="fila-b" id="oVela" role="group" aria-labelledby="lVela"></div></div>
+    </div>
+    <label class="calma"><input type="checkbox" id="oPractica"> Boya de práctica al empezar: el capitán te enseña a navegar</label>
+    <label class="calma"><input type="checkbox" id="oCalma"> Modo calma: sin carrera ni reloj; el piloto lleva el velero y espera a que elijas</label>
+    <p class="record" id="tRecord"></p>
+    <div class="acciones">
+      <button class="jugar" id="bZarpar" type="button">▶ Zarpar</button>
+      <a class="volver" href="../index.html">Volver a los juegos</a>
+    </div>
+  </div>
+</div>
+
+<!-- pausa -->
+<div id="pausa" class="capa oculto">
+  <div class="tarjeta chica" role="dialog" aria-labelledby="pTit">
+    <h1 id="pTit">En pausa</h1>
+    <p class="frase" id="pRes"></p>
+    <p class="frase teclas">◀ ▶ o A D: timón · Espacio: vela · 1 2 3 4: ir a la boya · G: piloto · O: oír · V: ver · P: pista · C: calma · M: sonido</p>
+    <div class="acciones">
+      <button class="jugar" id="bSeguir" type="button">▶ Seguir navegando</button>
+      <button class="bsec" id="bOtra" type="button">↻ Empezar de nuevo</button>
+      <button class="bsec" id="bInicio" type="button">Volver al inicio</button>
+    </div>
+  </div>
+</div>
+
+<!-- el final en la sala -->
+<div id="final" class="capa oculto">
+  <div class="tarjeta chica" role="dialog" aria-labelledby="fTit">
+    <p class="medalla" id="fMedalla" aria-hidden="true">🏆</p>
+    <h1 id="fTit">¡Llegaste!</h1>
+    <p class="frase" id="fRes"></p>
+    <ul class="podio" id="fPodio" aria-label="Cómo llegaron"></ul>
+    <p class="frase" id="fRepasa"></p>
+    <p class="frase nuevo" id="fNuevo"></p>
+    <div class="acciones">
+      <button class="jugar" id="bOtraVuelta" type="button">↻ Otra regata</button>
+      <button class="bsec" id="bCambiar" type="button">Cambiar el mar o el velero</button>
+      <a class="volver" href="../index.html">Volver a los juegos</a>
+    </div>
+  </div>
+</div>
+
+<script src="../puente.js"></script>
+<script src="../leccion.js"></script>
+<!-- el banco de preguntas por materia y grado es el del Rally; contenido.js le suma los temas de navegar -->
+<script src="../rally/contenido.js"></script>
+<script src="contenido.js"></script>
+<script src="mar.js"></script>
+<script src="juego.js"></script>
+</body>
+</html>

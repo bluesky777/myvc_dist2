@@ -1,0 +1,178 @@
+:root {
+  --colegio: #7b1e3b;
+  --tinta: #1d1440;
+  --tinta2: #3f3768;
+  --papel: #fffaf0;
+  --borde: #2b1d5c;
+  --bien: #146c2e;
+  --mal: #a3261b;
+  --carril: 84px;   /* el alto de los botones grandes de abajo */
+  font-family: "Lexend", "Nunito", system-ui, sans-serif;
+  color: var(--tinta);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: #2a1f4d; -webkit-tap-highlight-color: transparent; touch-action: manipulation; -webkit-user-select: none; user-select: none; }
+button { font: inherit; color: inherit; }
+#gl { position: fixed; inset: 0; }
+#gl canvas { display: block; width: 100%; height: 100%; }
+body.sin3d { background: radial-gradient(circle at 50% 20%, #7b3fa0, #16205c 70%); }
+#pista { position: fixed; inset: 0; z-index: 2; pointer-events: none; }
+.oculto { display: none !important; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+:focus-visible { outline: 4px solid #ffd43b; outline-offset: 3px; box-shadow: 0 0 0 7px var(--tinta); }
+
+.cargando { position: fixed; inset: 0; display: grid; place-content: center; gap: 10px; text-align: center; color: #fff; background: #2a1f4d; z-index: 50; }
+.cargando b { font: 800 34px/1.1 "Baloo 2", "Lexend", sans-serif; }
+
+/* HUD compacto */
+.hud { position: fixed; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; padding: 10px 12px; pointer-events: none; z-index: 5; }
+.hud > * { pointer-events: auto; }
+.marcador { display: flex; align-items: center; gap: 10px; padding: 5px 12px 5px 8px; border-radius: 18px; background: rgb(255 250 240 / 95%); border: 3px solid var(--borde); box-shadow: 0 4px 0 rgb(0 0 0 / 30%); }
+.marcador .ico { font-size: 26px; line-height: 1; }
+.marcador b { display: block; font: 800 20px/1.05 "Baloo 2", "Lexend", sans-serif; }
+.marcador small { display: block; font-size: 14px; font-weight: 700; color: var(--tinta2); }
+.racha { padding: 2px 10px; border-radius: 999px; background: #fff1c2; border: 2px solid #c99a1b; color: #6b4a00; font-weight: 800; font-size: 15px; white-space: nowrap; }
+.botones { display: flex; gap: 8px; }
+.hb { min-width: 46px; height: 46px; padding: 0 10px; border-radius: 14px; border: 3px solid var(--borde); background: var(--papel); font-size: 21px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 0 rgb(0 0 0 / 30%); }
+.hb span { font-size: 14px; font-weight: 700; }
+.hb[aria-pressed="true"] { background: #ffe8a3; box-shadow: inset 0 0 0 2px var(--borde), 0 4px 0 rgb(0 0 0 / 30%); }
+.ritmo-n { position: absolute; top: 64px; right: 12px; margin: 0; padding: 2px 10px; border-radius: 999px; background: rgb(255 250 240 / 88%); border: 2px solid var(--borde); font-weight: 800; font-size: 13px; pointer-events: none; }
+
+/* el pulso que se ve: el círculo que late (con el número del pulso) y los puntos del compás */
+.latido { position: fixed; z-index: 4; left: 14px; top: 76px; display: flex; flex-direction: column; align-items: center; gap: 6px; pointer-events: none; --k: 0; }
+.latido .circ { width: 74px; height: 74px; border-radius: 50%; display: grid; place-items: center; background: #ffe066; border: 4px solid var(--borde);
+  transform: scale(calc(0.82 + var(--k) * 0.3)); box-shadow: 0 0 calc(var(--k) * 26px) calc(var(--k) * 6px) rgb(255 224 102 / 75%), 0 4px 0 rgb(0 0 0 / 30%); }
+.latido.uno .circ { background: #ff8787; border-radius: 30%; }
+.latido .circ span { font: 800 34px/1 "Baloo 2", sans-serif; color: var(--tinta); }
+.latido .puntos { display: flex; gap: 6px; padding: 4px 8px; border-radius: 999px; background: rgb(255 250 240 / 92%); border: 2px solid var(--borde); }
+.latido .puntos i { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--borde); background: #fff; }
+.latido .puntos i.p1 { border-radius: 3px; }
+.latido .puntos i.on { background: var(--tinta); transform: scale(1.2); }
+body.calmo .latido .circ { transform: none; box-shadow: 0 4px 0 rgb(0 0 0 / 30%); outline: calc(var(--k) * 5px) solid #fff; }
+body.sin-compas .latido .puntos, body.sin-compas #lNum { visibility: hidden; }
+
+/* la carta: la pregunta, la palabra, la secuencia */
+.carta { position: fixed; z-index: 4; left: 50%; transform: translateX(-50%); top: 66px; width: min(600px, calc(100vw - 210px)); display: flex; flex-direction: column; gap: 6px;
+  padding: 8px 16px 10px; border-radius: 20px; background: rgb(255 250 240 / 96%); border: 4px solid var(--borde); box-shadow: 0 10px 30px rgb(0 0 0 / 35%); text-align: center; }
+.carta h2 { margin: 0; font: 800 clamp(19px, 2.8vw, 26px)/1.15 "Baloo 2", "Lexend", sans-serif; overflow-wrap: anywhere; }
+.carta .sub { margin: 0; font-weight: 700; color: var(--tinta2); font-size: 16px; }
+.palabra { margin: 0; font: 800 30px/1.1 "Baloo 2", "Lexend", sans-serif; color: #0b5394; letter-spacing: .02em; }
+.era { margin: 0; font-weight: 800; color: var(--mal); font-size: 18px; }
+.cadena { margin: 0; font: 800 32px/1.1 "Baloo 2", sans-serif; letter-spacing: .04em; color: #0b5394; }
+.silabas { display: flex; justify-content: center; align-items: flex-end; gap: 8px; flex-wrap: wrap; }
+.sil { display: inline-flex; align-items: center; gap: 3px; min-width: 52px; justify-content: center; padding: 4px 12px; border-radius: 14px; border: 3px solid #b8b2d6; background: #fff; font: 800 22px/1.1 "Baloo 2", sans-serif; color: var(--tinta2); }
+.sil.fuerte { font-size: 32px; border-color: var(--borde); background: #fff3bf; color: var(--tinta); padding: 4px 14px; }
+.sil i { font-style: normal; font-size: 16px; color: #c92a2a; }
+.sil.ahora { background: #ffd43b; transform: translateY(-4px); box-shadow: 0 4px 0 var(--borde); }
+.sil.ok { border-color: var(--bien); background: #d3f9d8; }
+.sil.ok::after { content: " ✔"; color: var(--bien); font-size: 16px; }
+.sil.x { border-color: var(--mal); background: #ffe3e3; }
+.sil.x::after { content: " ✘"; color: var(--mal); font-size: 16px; }
+.rejilla { display: flex; align-items: stretch; gap: 5px; }
+.carta-paso { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 4px 2px; border-radius: 12px; border: 3px solid #b8b2d6; background: #fff; }
+.carta-paso b { font-size: 26px; line-height: 1.1; }
+.carta-paso span { font-weight: 800; font-size: 13px; line-height: 1.1; overflow-wrap: anywhere; }
+.carta-paso small { font-size: 11px; color: var(--tinta2); font-weight: 600; }
+.carta-paso.ahora { border-color: var(--borde); background: #ffd43b; transform: translateY(-3px); }
+.carta-paso.ok { border-color: var(--bien); background: #d3f9d8; }
+.carta-paso.x { border-color: var(--mal); background: #ffe3e3; }
+.rejilla .barra { flex: none; width: 4px; border-radius: 2px; background: var(--borde); }
+.cbar { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.cbar:not(:has(.bsec:not(.oculto))) { display: none; }
+.bsec { min-height: 44px; padding: 4px 14px; border-radius: 999px; border: 3px solid var(--borde); background: #efeafc; font-weight: 700; font-size: 16px; cursor: pointer; }
+.bsec small { font-weight: 600; color: var(--tinta2); }
+.feed { margin: 0; font-weight: 800; font-size: 18px; }
+.feed:empty { display: none; }
+.feed.bien { color: var(--bien); }
+.feed.mal { color: var(--mal); }
+
+/* los carriles: los botones grandes de abajo (forma, color, texto y tecla: nada sólo por color) */
+.carriles { position: fixed; z-index: 4; left: 50%; transform: translateX(-50%); bottom: max(10px, env(safe-area-inset-bottom)); width: min(var(--pista, 640px), calc(100vw - 16px)); display: grid; grid-template-columns: repeat(var(--n, 3), 1fr); gap: 8px; }
+.carril { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: var(--carril); padding: 6px 6px 8px; border-radius: 20px;
+  background: var(--papel); border: 5px solid var(--c, var(--borde)); box-shadow: 0 7px 0 var(--borde); cursor: pointer; font-weight: 800; font-size: 18px; line-height: 1.1; touch-action: none; }
+.carril .gl { display: grid; place-items: center; min-width: 34px; height: 34px; padding: 0 4px; border-radius: 10px; background: var(--c); color: #fff; font-size: 22px; line-height: 1; }
+.carril .tx { overflow-wrap: break-word; hyphens: auto; -webkit-hyphens: auto; text-align: center; max-width: 100%; }
+.carril.largo { font-size: 15px; }
+.carril .tec { order: -1; font-size: 12px; font-weight: 700; line-height: 1; color: var(--tinta2); min-height: 12px; }
+.carril.grande { font-size: 22px; }
+.carril.grande .gl { width: 44px; height: 44px; border-radius: 50%; }
+.carril.chico .gl { width: 26px; min-width: 26px; height: 26px; border-radius: 50%; font-size: 14px; }
+.carril.on { transform: translateY(5px); box-shadow: 0 2px 0 var(--borde); background: #fff3bf; }
+.carril.suena { background: #fff3bf; outline: 4px dashed var(--borde); outline-offset: -9px; }
+
+.cuenta { position: fixed; inset: 0; z-index: 6; display: grid; place-items: center; pointer-events: none; font: 800 min(26vw, 160px)/1 "Baloo 2", sans-serif; color: #fff; text-shadow: 0 6px 0 var(--borde), 0 0 30px rgb(0 0 0 / 40%); }
+
+/* el inicio, la pausa y el final */
+.capa { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 14px; background: rgb(20 10 40 / 45%); overflow: auto; }
+.tarjeta { width: min(880px, 100%); max-height: calc(100vh - 28px); overflow: auto; padding: 18px 22px; border-radius: 24px; background: var(--papel); border: 4px solid var(--borde); box-shadow: 0 16px 48px rgb(0 0 0 / 40%); }
+.tarjeta.chica { width: min(500px, 100%); text-align: center; }
+.tarjeta h1 { display: flex; align-items: center; gap: 10px; margin: 0 0 4px; font: 800 clamp(26px, 4.5vw, 36px)/1.1 "Baloo 2", "Lexend", sans-serif; }
+.tarjeta.chica h1 { justify-content: center; }
+.frase { margin: 4px 0 8px; font-size: 16px; line-height: 1.4; color: var(--tinta2); }
+.frase.sub { margin-top: -4px; font-weight: 700; color: var(--tinta); }
+.frase:empty { display: none; }
+.frase.nuevo { color: #6b4a00; font-weight: 800; }
+.frase.teclas { font-size: 14px; }
+.paso { margin: 7px 0 4px; font-weight: 800; font-size: 15px; }
+.fila-b { display: flex; flex-wrap: wrap; gap: 6px; }
+.fila-b button { min-height: 44px; padding: 3px 11px; border-radius: 14px; border: 3px solid #cdc6e8; background: #fff; cursor: pointer; font-weight: 700; font-size: 15px; }
+.fila-b button[aria-pressed="true"] { border-color: var(--borde); background: #efe7ff; box-shadow: inset 0 0 0 2px var(--borde); }
+.fila-b button[aria-pressed="true"]::after { content: " ✓"; }
+.fila-b button[aria-disabled="true"] { color: #6c757d; background: #f1f3f5; cursor: not-allowed; }
+.fila-b .grado { min-width: 46px; padding: 4px 8px; }
+.calma { display: flex; gap: 10px; align-items: center; margin: 8px 0 0; font-weight: 600; font-size: 15px; cursor: pointer; }
+.calma input { width: 24px; height: 24px; flex: none; }
+.vol { display: flex; gap: 10px; align-items: center; justify-content: inherit; margin: 10px 0 0; font-weight: 700; font-size: 15px; }
+.tarjeta.chica .vol { justify-content: center; }
+.vol input { width: min(240px, 50vw); height: 30px; accent-color: var(--borde); }
+.record { margin: 10px 0 0; font-weight: 700; color: var(--tinta2); min-height: 1em; }
+.acciones { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 14px; }
+.tarjeta.chica .acciones { justify-content: center; }
+.jugar { min-height: 60px; padding: 8px 30px; border: 0; border-radius: 999px; background: #1a7f37; color: #fff; font: 800 24px/1 "Baloo 2", sans-serif; cursor: pointer; box-shadow: 0 6px 0 #0f5223; }
+.jugar:hover { background: #166b2f; }
+.volver { color: var(--tinta); font-weight: 700; padding: 10px 6px; }
+.medalla { margin: 0; font-size: 50px; line-height: 1; letter-spacing: 4px; }
+
+/* de lado y ancho: la carta a la izquierda de la pista, el círculo que late a la derecha */
+body.lateral .carta { left: 12px; transform: none; top: 74px; width: calc((100vw - var(--pista)) / 2 - 24px); }
+body.lateral .latido { left: auto; right: max(10px, calc((100vw - var(--pista)) / 4 - 48px)); top: 120px; }
+body.lateral .carta h2 { font-size: clamp(17px, 1.9vw, 24px); }
+body.lateral .palabra { font-size: clamp(20px, 2.3vw, 30px); }
+body.lateral .latido .circ { width: 96px; height: 96px; }
+body.lateral .latido .circ span { font-size: 44px; }
+body.lateral .rejilla { flex-wrap: wrap; }
+body.lateral .carta-paso { flex-basis: 40%; }
+body.lateral .rejilla .barra { display: none; }
+
+/* celular de pie: la carta arriba a lo ancho, el círculo pequeño a un lado */
+@media (max-width: 640px) {
+  :root { --carril: 76px; }
+  .marcador b { font-size: 17px; white-space: nowrap; }
+  .marcador .ico { display: none; }
+  .marcador { padding: 4px 10px; gap: 6px; }
+  .marcador small { font-size: 12px; }
+  .hb span:not(.sr) { display: none; }
+  .hb span[aria-hidden] { display: inline; }
+  .ritmo-n { display: none; }
+  .carta { top: 64px; width: calc(100vw - 86px); left: 8px; transform: none; padding: 6px 10px 8px; }
+  .carta .largo { display: none; }
+  .palabra { font-size: 26px; }
+  .latido { top: 66px; left: auto; right: 8px; }
+  .latido .circ { width: 56px; height: 56px; }
+  .latido .circ span { font-size: 26px; }
+  .carril { font-size: 16px; border-radius: 16px; }
+  .carril .tec { display: none; }
+  .carta-paso b { font-size: 22px; }
+}
+@media (max-height: 560px) {
+  :root { --carril: 64px; }
+  body:not(.lateral) .carta { top: 8px; width: min(520px, calc(100vw - 340px)); padding: 4px 10px 6px; gap: 3px; }
+  .carta h2 { font-size: 18px; }
+  .palabra { font-size: 22px; }
+  .latido { top: 70px; }
+  .latido .circ { width: 54px; height: 54px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .carril { transition: transform .06s, box-shadow .06s; }
+  .sil, .carta-paso { transition: transform .1s, background .1s; }
+}

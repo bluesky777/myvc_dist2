@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Átomo a Átomo</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Lexend:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="juego.css">
+</head>
+<body>
+<div id="gl" aria-hidden="true"></div>
+<div id="cargando" class="cargando"><b>Átomo a Átomo</b><span>Ordenando los frascos de átomos…</span></div>
+
+<!-- los átomos de la molécula, como botones encima del 3D (ratón, dedo, teclado y lector de pantalla) -->
+<div id="capa" class="capa-at oculto" role="group" aria-label="La molécula: toca un átomo para elegirlo"></div>
+
+<!-- jugando -->
+<div id="hud" class="hud oculto">
+  <div class="marcador" role="status" aria-live="off">
+    <span class="ico" aria-hidden="true">⚛️</span>
+    <div><b id="hTarea">Pedido 1</b><small id="hEstrellas">0 ⭐</small></div>
+  </div>
+  <div class="botones">
+    <button class="hb" id="bSonido" type="button" aria-pressed="false" title="Sonido (M)"><span aria-hidden="true" id="iSonido">🔊</span><span class="sr" id="tSonido">Silenciar</span></button>
+    <button class="hb" id="bPista" type="button" title="Pista (?)"><span aria-hidden="true">💡</span><span id="tPista">Pista</span></button>
+    <button class="hb oculto" id="bAlbum" type="button" title="Álbum"><span aria-hidden="true">📒</span><span>Álbum</span></button>
+    <button class="hb" id="bMenu" type="button" title="Pausa (Esc)"><span aria-hidden="true">⏸</span><span class="sr">Pausa</span></button>
+  </div>
+</div>
+
+<!-- la comanda: el pedido, la reacción o la pregunta -->
+<section id="carta" class="carta oculto" aria-labelledby="cTit">
+  <p class="etiqueta" id="cEti"></p>
+  <h2 id="cTit"></h2>
+  <div id="cCuerpo"></div>
+  <div class="cbar">
+    <button class="bsec oculto" id="bOir" type="button"><span aria-hidden="true">🔊</span> Oír<span class="largo"> otra vez</span> <small>(E)</small></button>
+    <button class="bsec oculto" id="bVer" type="button"><span aria-hidden="true">👁</span> Ver<span class="largo"> el pedido</span> <small>(V)</small></button>
+  </div>
+  <p class="feed" id="cFeed" aria-live="polite"></p>
+</section>
+
+<!-- abajo: la mesa de armar -->
+<div id="mesa" class="mesa oculto">
+  <p class="lectura" id="lectura" role="status" aria-live="polite"></p>
+  <div class="paleta" id="paleta" role="group" aria-label="Los átomos: elige uno para pegarlo al átomo marcado"></div>
+  <div class="herr" role="group" aria-label="Herramientas">
+    <div class="enlaces" role="radiogroup" aria-label="El enlace nuevo">
+      <button type="button" class="enl" data-o="1" role="radio" aria-checked="true" title="Enlace sencillo (1)"><b aria-hidden="true">–</b><span>sencillo</span></button>
+      <button type="button" class="enl" data-o="2" role="radio" aria-checked="false" title="Enlace doble (2)"><b aria-hidden="true">=</b><span>doble</span></button>
+      <button type="button" class="enl" data-o="3" role="radio" aria-checked="false" title="Enlace triple (3)"><b aria-hidden="true">≡</b><span>triple</span></button>
+    </div>
+    <button type="button" class="herb" id="bDeshacer" title="Deshacer (Z)"><span aria-hidden="true">↶</span><span>Deshacer</span></button>
+    <button type="button" class="herb" id="bQuitar" title="Quitar el átomo marcado (Supr)"><span aria-hidden="true">✂️</span><span>Quitar</span></button>
+    <button type="button" class="herb" id="bVaciar" title="Vaciar la placa"><span aria-hidden="true">🗑</span><span>Vaciar</span></button>
+  </div>
+</div>
+
+<!-- abajo: la balanza -->
+<div id="balanceo" class="mesa oculto">
+  <div class="coefs" id="coefs" role="group" aria-label="Cuántas moléculas de cada sustancia"></div>
+  <p class="cuenta-at" id="cuentaAt" role="status" aria-live="polite"></p>
+  <div class="acc-b"><button type="button" class="jugar chico" id="bComprobar">⚖️ Comprobar</button></div>
+</div>
+
+<!-- abajo: las opciones de una pregunta -->
+<div id="opciones" class="opciones oculto" role="group" aria-label="Elige la respuesta (1, 2, 3 o 4)"></div>
+
+<!-- abajo: seguir -->
+<div id="seguir" class="seguir oculto"><button type="button" class="jugar" id="bSiguiente">Siguiente ▶</button></div>
+
+<div id="anuncio" class="sr" aria-live="polite"></div>
+
+<!-- la sala de juegos: el inicio con todas las opciones -->
+<div id="inicio" class="capa oculto">
+  <div class="tarjeta" role="dialog" aria-labelledby="tTit">
+    <h1 id="tTit"><span aria-hidden="true">⚛️</span> Átomo a Átomo</h1>
+    <p class="frase">Une átomos como fichas: toca un átomo de la molécula y luego el que quieres pegarle. Cada uno tiene sus brazos (las muescas).</p>
+    <p class="frase sub" id="oFrase"></p>
+    <div class="paso" id="lModo">1. Qué haces</div>
+    <div class="fila-b" id="oModo" role="group" aria-labelledby="lModo"></div>
+    <div class="paso" id="lGrado">2. Tu grado</div>
+    <div class="fila-b" id="oGrado" role="group" aria-labelledby="lGrado"></div>
+    <div class="paso" id="lTema">3. El tema</div>
+    <div class="fila-b" id="oTema" role="group" aria-labelledby="lTema"></div>
+    <div class="paso" id="lAyud">4. Tu ayudante</div>
+    <div class="fila-b" id="oAyud" role="group" aria-labelledby="lAyud"></div>
+    <label class="calma" id="lIngles"><input type="checkbox" id="oIngles"> Pedidos en inglés («I need water»): ciencia en inglés</label>
+    <label class="calma"><input type="checkbox" id="oAyudas"> Con ayudas: la molécula del pedido se ve en pequeño, como guía</label>
+    <label class="calma"><input type="checkbox" id="oCalma"> Modo calma: sin giros ni destellos</label>
+    <label class="vol"><span>🔊 Volumen</span> <input type="range" id="oVol" min="0" max="100" step="5" value="80" aria-label="Volumen de los sonidos"></label>
+    <p class="record" id="tRecord"></p>
+    <div class="acciones">
+      <button class="jugar" id="bJugar" type="button">▶ ¡A cocinar!</button>
+      <button class="bsec" id="bVerAlbum" type="button">📒 Mi álbum</button>
+      <a class="volver" href="../index.html">Volver a los juegos</a>
+    </div>
+  </div>
+</div>
+
+<!-- el álbum de moléculas -->
+<div id="album" class="capa oculto">
+  <div class="tarjeta" role="dialog" aria-labelledby="aTit">
+    <h1 id="aTit"><span aria-hidden="true">📒</span> Mi álbum de moléculas</h1>
+    <p class="frase" id="aRes"></p>
+    <ul class="album" id="aLista"></ul>
+    <div class="acciones"><button class="jugar chico" id="bCerrarAlbum" type="button">Cerrar</button></div>
+  </div>
+</div>
+
+<!-- pausa -->
+<div id="pausa" class="capa oculto">
+  <div class="tarjeta chica" role="dialog" aria-labelledby="pTit">
+    <h1 id="pTit">En pausa</h1>
+    <p class="frase" id="pRes"></p>
+    <label class="vol"><span>🔊 Volumen</span> <input type="range" id="pVol" min="0" max="100" step="5" value="80" aria-label="Volumen de los sonidos"></label>
+    <p class="frase teclas">Tab: los átomos · H C N O S P F, L (Cl), B (Br), I: pegar · 1 2 3: el enlace · Z: deshacer · Supr: quitar · ← →: girar · E: oír · V: ver · ?: pista · M: sonido · Esc: pausa</p>
+    <div class="acciones">
+      <button class="jugar" id="bSeguir" type="button">▶ Seguir</button>
+      <button class="bsec" id="bOtra" type="button">↻ Empezar de nuevo</button>
+      <button class="bsec" id="bTerminar" type="button">⏹ Terminar</button>
+      <button class="bsec" id="bInicio" type="button">Volver al inicio</button>
+    </div>
+  </div>
+</div>
+
+<!-- el final en la sala -->
+<div id="final" class="capa oculto">
+  <div class="tarjeta chica" role="dialog" aria-labelledby="fTit">
+    <p class="medalla" id="fEst">⭐⭐⭐</p>
+    <h1 id="fTit">¡Lo lograste!</h1>
+    <p class="frase" id="fRes"></p>
+    <p class="frase" id="fRepasa"></p>
+    <p class="frase nuevo" id="fNuevo"></p>
+    <div class="acciones">
+      <button class="jugar" id="bOtra2" type="button">↻ Otra partida</button>
+      <button class="bsec" id="bCambiar" type="button">Cambiar el tema</button>
+      <a class="volver" href="../index.html">Volver a los juegos</a>
+    </div>
+  </div>
+</div>
+
+<script src="../puente.js"></script>
+<script src="../leccion.js"></script>
+<script src="quimica.js"></script>
+<script src="contenido.js"></script>
+<script src="lab.js"></script>
+<script src="juego.js"></script>
+</body>
+</html>

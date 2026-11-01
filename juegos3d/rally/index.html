@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Rally de los Aros</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Lexend:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="juego.css">
+</head>
+<body>
+<div id="gl" aria-hidden="true"></div>
+<div id="cargando" class="cargando"><b>Rally de los Aros</b><span>Calentando las hélices…</span></div>
+
+<!-- en vuelo -->
+<div id="hud" class="hud oculto">
+  <div class="marcador" role="status" aria-live="off">
+    <span class="ico" aria-hidden="true">🛩️</span>
+    <div><b id="hAro">Aro 1 de 10</b><small id="hPuesto"></small></div>
+    <span class="racha oculto" id="hRacha"></span>
+  </div>
+  <div class="pista-rally oculto" id="hPista" aria-hidden="true"><div class="linea"></div></div>
+  <div class="botones">
+    <button class="hb" id="bSonido" type="button" aria-pressed="false" title="Sonido (M)"><span aria-hidden="true" id="iSonido">🔊</span><span class="sr" id="tSonido">Silenciar</span></button>
+    <button class="hb" id="bCalma" type="button" aria-pressed="false" title="Modo calma (C)"><span aria-hidden="true">🐢</span><span>Calma</span></button>
+    <button class="hb" id="bMenu" type="button" title="Pausa (Esc)"><span aria-hidden="true">⏸</span><span class="sr">Pausa</span></button>
+  </div>
+</div>
+
+<section id="carta" class="carta oculto" aria-labelledby="cPreg">
+  <h2 id="cPreg"></h2>
+  <p class="palabra oculto" id="cPalabra" lang="en"></p>
+  <div class="cbar">
+    <button class="bsec oculto" id="bOir" type="button"><span aria-hidden="true">🔊</span> Oír<span class="largo"> otra vez</span> <small>(O)</small></button>
+    <button class="bsec oculto" id="bVer" type="button"><span aria-hidden="true">👁</span> Ver<span class="largo"> la palabra</span> <small>(V)</small></button>
+    <button class="bsec oculto" id="bPistaQ" type="button"><span aria-hidden="true">💡</span> Pista <small id="nPista">(P)</small></button>
+  </div>
+  <p class="feed" id="cFeed" aria-live="polite"></p>
+</section>
+
+<div id="ops" class="ops oculto" role="group" aria-label="Los aros: elige con 1, 2, 3 o 4 y el avión va solo"></div>
+
+<div id="mando" class="mando oculto" aria-hidden="true">
+  <div class="cruz izq"><button type="button" data-eje="x-" tabindex="-1">◀</button><button type="button" data-eje="x+" tabindex="-1">▶</button></div>
+  <div class="cruz der"><button type="button" data-eje="y+" tabindex="-1">▲</button><button type="button" data-eje="y-" tabindex="-1">▼</button></div>
+</div>
+
+<div id="cuenta" class="cuenta oculto" aria-hidden="true"></div>
+<div id="anuncio" class="sr" aria-live="polite"></div>
+
+<!-- la sala de juegos: el inicio con todas las opciones -->
+<div id="inicio" class="capa oculto">
+  <div class="tarjeta" role="dialog" aria-labelledby="tTit">
+    <h1 id="tTit"><span aria-hidden="true">🛩️</span> Rally de los Aros</h1>
+    <p class="frase">Vuela por dentro del aro de la respuesta correcta. Flechas para volar, o 1, 2, 3 y el avión va solo. Si fallas, ves cuál era y sigues.</p>
+    <div class="paso" id="lMat">1. Qué practicas</div>
+    <div class="fila-b" id="oMat" role="group" aria-labelledby="lMat"></div>
+    <div class="paso" id="lGrado">2. Tu grado</div>
+    <div class="fila-b" id="oGrado" role="group" aria-labelledby="lGrado"></div>
+    <div class="paso" id="lTema">3. El tema</div>
+    <div class="fila-b" id="oTema" role="group" aria-labelledby="lTema"></div>
+    <div class="paso" id="lCielo">4. El cielo</div>
+    <div class="fila-b" id="oCielo" role="group" aria-labelledby="lCielo"></div>
+    <div class="paso" id="lAvion">5. Tu avioneta</div>
+    <div class="fila-b" id="oAvion" role="group" aria-labelledby="lAvion"></div>
+    <label class="calma"><input type="checkbox" id="oCalma"> Modo calma: sin carrera ni reloj; el avión espera en cada aro hasta que elijas</label>
+    <p class="record" id="tRecord"></p>
+    <div class="acciones">
+      <button class="jugar" id="bDespegar" type="button">▶ Despegar</button>
+      <a class="volver" href="../index.html">Volver a los juegos</a>
+    </div>
+  </div>
+</div>
+
+<!-- pausa -->
+<div id="pausa" class="capa oculto">
+  <div class="tarjeta chica" role="dialog" aria-labelledby="pTit">
+    <h1 id="pTit">En pausa</h1>
+    <p class="frase" id="pRes"></p>
+    <p class="frase teclas">Flechas o W A S D: volar · 1 2 3 4: ir solo al aro · O: oír · V: ver · P: pista · C: calma · M: sonido</p>
+    <div class="acciones">
+      <button class="jugar" id="bSeguir" type="button">▶ Seguir volando</button>
+      <button class="bsec" id="bOtra" type="button">↻ Empezar de nuevo</button>
+      <button class="bsec" id="bInicio" type="button">Volver al inicio</button>
+    </div>
+  </div>
+</div>
+
+<!-- el final en la sala -->
+<div id="final" class="capa oculto">
+  <div class="tarjeta chica" role="dialog" aria-labelledby="fTit">
+    <p class="medalla" id="fMedalla" aria-hidden="true">🏆</p>
+    <h1 id="fTit">¡Llegaste!</h1>
+    <p class="frase" id="fRes"></p>
+    <ul class="podio" id="fPodio" aria-label="Cómo llegaron"></ul>
+    <p class="frase" id="fRepasa"></p>
+    <div class="acciones">
+      <button class="jugar" id="bOtraVuelta" type="button">↻ Otra vuelta</button>
+      <button class="bsec" id="bCambiar" type="button">Cambiar el vuelo</button>
+      <a class="volver" href="../index.html">Volver a los juegos</a>
+    </div>
+  </div>
+</div>
+
+<script src="../puente.js"></script>
+<script src="../leccion.js"></script>
+<script src="contenido.js"></script>
+<script src="mundo.js"></script>
+<script src="juego.js"></script>
+</body>
+</html>

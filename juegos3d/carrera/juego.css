@@ -37,8 +37,8 @@ h1,h2,.ctit{font-family:Grandstander,Lexend,sans-serif;font-weight:900;margin:0;
 /* Panel de preguntas */
 .panel{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(760px,100%);z-index:8;background:var(--sand);border-radius:26px 26px 0 0;box-shadow:0 -16px 40px -18px rgba(21,48,77,.55);padding:12px 14px calc(env(safe-area-inset-bottom,0px) + 14px)}
 .pcab{display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:28px}
-.ptag{display:inline-block;background:var(--paper);border-radius:999px;padding:4px 12px;font-size:12px;font-weight:700;color:var(--sea)}
-.ptexto{border:2px solid var(--sea);background:var(--paper);color:var(--sea);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:700}
+.ptag{display:inline-block;background:var(--paper);border-radius:999px;padding:4px 12px;font-size:13px;font-weight:700;color:#0b6f73}
+.ptexto{border:2px solid #0b6f73;background:var(--paper);color:#0b6f73;border-radius:999px;padding:5px 12px;font-size:13px;font-weight:700}
 .pq{font-family:Grandstander;font-weight:900;font-size:clamp(22px,5.6vw,36px);text-align:center;margin:8px 4px 12px;min-height:1.2em}
 .pq.larga{font-family:Lexend;font-weight:700;font-size:clamp(17px,4.4vw,22px);line-height:1.25}
 .ops{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -320,3 +320,51 @@ body.red-tablero .hcod{display:flex;flex-direction:column;align-items:center;bac
 .sdes{flex:1;min-width:0;display:grid;gap:0;font-size:12px;font-weight:700;color:var(--sea);text-align:left}
 .sdes input{width:100%;height:28px;margin:0;accent-color:var(--colegio);cursor:pointer}
 .tarjeta.chica .sonido{margin-top:4px}
+
+/* COMPACTO (Joseth, 31 oct: «a 375 px el panel de preguntas tapa el marcador y las preguntas»): en un espacio chico —
+   el iframe de la lección, un celular— el marcador y los botones van bajitos y el panel en dos filas (la pregunta con
+   «Oír otra vez» al lado; las respuestas en una fila), para que se vean la pista, el marcador y la pregunta a la vez.
+   En pantalla completa o en la sala grande, como arriba. Nada baja de 13 px. */
+@media (max-height:520px),(max-width:480px){
+  .hud{gap:6px;padding:calc(env(safe-area-inset-top,0px) + 6px) 6px 0}
+  .puesto{border-radius:12px;padding:3px 8px 4px 9px;gap:4px}
+  .puesto b{font-size:21px}
+  .hmid{border-radius:12px;padding:3px 9px 6px}
+  .vuelta{font-size:13px;line-height:1.1;margin-bottom:3px}
+  .tira{height:8px}
+  .tira .pt{width:18px;height:18px;margin:-9px 0 0 -9px;font-size:0}
+  .tira .pt.yo{width:22px;height:22px;margin:-11px 0 0 -11px;font-size:0}
+  .hbtns{gap:6px}
+  .hb{width:38px;height:38px;border-radius:12px}
+  .velo{right:6px;bottom:calc(var(--panel,0px) + 6px);padding:3px 9px;border-radius:12px}
+  .velo b{font-size:17px}
+  .velo span,.velo i{font-size:13px}
+  .poder{left:6px;bottom:calc(var(--panel,0px) + 6px);padding:3px 8px 3px 3px;gap:6px;border-radius:14px;border-width:2px}
+  .pico{width:36px;height:36px;border-radius:11px}
+  .pico svg{width:28px;height:28px}
+  .pinfo b,.poder.listo b{font-size:13px}
+  .pips.ayuda{font-size:13px}
+  .feed{top:calc(env(safe-area-inset-top,0px) + 50px)}
+  .aviso{font-size:clamp(24px,6vw,34px);-webkit-text-stroke-width:1.5px;text-shadow:0 3px 0 var(--ink)}
+  .aviso.mal{font-size:15px;padding:6px 14px}
+}
+@media (max-height:520px){
+  .panel{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:8px;padding:6px 8px calc(env(safe-area-inset-bottom,0px) + 8px);border-radius:16px 16px 0 0;width:min(640px,100%)}
+  .pcab{grid-column:2;grid-row:1;min-height:0;gap:4px}
+  .ptag{display:none}
+  .ptexto{padding:3px 10px}
+  .pq,.pq.larga{grid-column:1;grid-row:1;margin:0 0 6px;min-height:0;font-size:clamp(16px,4.6vw,22px);line-height:1.15}
+  .pq.larga{font-size:clamp(14px,3.8vw,17px)}
+  .ops{grid-column:1/-1;grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:6px}
+  .ops.uno{grid-template-columns:none}
+  .op{min-height:42px;border-radius:12px;padding:4px 6px;font-size:clamp(16px,4.4vw,22px);box-shadow:0 3px 0 #e2cfa6}
+  .ops.uno .op,.op.txt{min-height:40px;font-size:14px;line-height:1.2;padding:4px 8px;text-align:center}
+  .op.bien{box-shadow:0 3px 0 #1f7343}
+  .op.mal{box-shadow:0 3px 0 #c4442b}
+}
+/* muy bajito (la lección en un celular): el poder sólo con su dibujo (su nombre lo dice el lector de pantalla) */
+@media (max-height:300px){
+  .poder .pinfo{display:none}
+  .poder{padding:3px}
+  .velo span{display:none}
+}

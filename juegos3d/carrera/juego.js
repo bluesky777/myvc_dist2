@@ -15,6 +15,21 @@ const CLAVE = 'juegos3d.carrera';
 const leerP = () => { try { return JSON.parse(localStorage.getItem(CLAVE)) || {}; } catch (e) { return {}; } };
 const guardarP = o => { try { localStorage.setItem(CLAVE, JSON.stringify(o)); } catch (e) { /* sin almacenamiento */ } };
 const prog = leerP(); if (!prog.marcas || typeof prog.marcas !== 'object') prog.marcas = {};
+/* Modo lección (../leccion.js): ?leccion= trae {titulo?, preguntas?, palabras?}. Sin menú: «Jugar» y a correr contestando
+   lo de la lección (con `oir`, suena su MP3 y hay «Oír otra vez»); al llegar, «¡Lo lograste!». No guarda marcas ni elecciones. */
+const LJ = window.LeccionJuego;
+const LEC = (() => {
+  const ps = LJ && LJ.activo ? LJ.preguntas() : [];
+  return ps.length ? { titulo: LJ.titulo || 'La lección', preguntas: ps.map(q => ({ p: q.p, o: q.opciones, correcta: q.correcta, oir: q.oir })) } : null;
+})();
+// la dificultad (facil, media, normal): cuánto frena un error y qué tan rápido van los compañeros simulados
+const DIF = LEC ? { facil: { freno: 0, cada: [6.5, 11], acierto: [0.35, 0.6] }, media: { freno: 0.5, cada: [5.5, 10], acierto: [0.45, 0.75] },
+  normal: { freno: 1, cada: [4.5, 9], acierto: [0.55, 0.85] } }[LJ.dificultad] : null;
+if (LEC) {
+  D.vueltas.leccion = 1; // una vuelta: va en medio de la lección
+  D.simulacion.leccion = { cada: DIF.cada, acierto: DIF.acierto };
+  if (D.poderes && D.poderes.rapida) D.poderes.rapida.leccion = 5;
+}
 let semilla = 20261004;
 const azarFijo = () => { semilla |= 0; semilla = semilla + 0x6D2B79F5 | 0; let t = Math.imul(semilla ^ semilla >>> 15, 1 | semilla); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
 const rnd = (a, b) => a + Math.random() * (b - a);
@@ -518,7 +533,7 @@ function soltarChispas(pos, n, azul) {
 const CARRILES = [-4.25, -2.55, -0.85, 0.85, 2.55, 4.25, -3.4, 3.4], CARRILES_SALIDA = [-0.85, 0.85, -2.55, 2.55, -4.25, 4.25, -3.4, 3.4];
 const BASE = 8.6, TURBO = 8.5, TOPE_TURBO = 20;
 const J = {
-  fase: 'menu', modo: prog.modo === 'lectura' ? 'lectura' : 'tablas', tabla: prog.tabla || 7,
+  fase: 'menu', modo: LEC ? 'leccion' : prog.modo === 'lectura' ? 'lectura' : 'tablas', tabla: prog.tabla || 7,
   lectura: D.lecturas.some(l => l.id === prog.lectura) ? prog.lectura : D.lecturas[0].id,
   animal: ANIMALES[prog.animal] ? prog.animal : 'zorro',
   corredores: [], yo: null, total: 0, tiempo: 0, aciertos: 0, errores: 0, racha: 0, pausa: false,
@@ -597,7 +612,7 @@ function ajustarSonido(o, guardar) {
 }
 const ALTAVOZ = mudo => '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>' +
   (mudo ? '<path d="M15.5 9.5l5 5m0-5l-5 5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>' : '<path d="M15.5 9a4.2 4.2 0 0 1 0 6M18 6.5a7.6 7.6 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>') + '</svg>';
-function alternarMudo() { ajustarSonido({ mudo: !AJ.mudo }, true); if (!AJ.mudo) suena('clic'); }
+function alternarMudo() { ajustarSonido({ mudo: !AJ.mudo }, true); if (!AJ.mudo) suena('clic'); else if (LJ) LJ.callar(); }
 // El menú y la pausa llevan el altavoz y un deslizador para la música y otro para los efectos; el HUD, sólo el altavoz.
 function construirSonido(caja) {
   caja.innerHTML = (caja.dataset.sonido === 'sin-boton' ? '' : '<button class="hb bson" type="button"></button>') +
@@ -957,23 +972,31 @@ function preguntaLectura(c) {
   const q = c.cola.shift(), idx = barajar(q.o.map((_, i) => i));
   return { texto: q.p, ops: idx.map(i => q.o[i]), correcta: idx.indexOf(q.correcta), larga: true };
 }
+function preguntaLeccion(c) {
+  c = c || J;
+  if (!c.cola.length) c.cola = barajar(LEC.preguntas.slice());
+  const q = c.cola.shift(), idx = barajar(q.o.map((_, i) => i));
+  return { texto: q.p, ops: idx.map(i => q.o[i]), correcta: idx.indexOf(q.correcta), larga: q.p.length > 26 || q.o.some(o => o.length > 12), oir: q.oir };
+}
 function nuevaPregunta(deFuera) {
   if (J.red === 'tablero') return;
   if (J.red === 'alumno' && !deFuera) { J.pregunta = null; return; } // la manda el tablero
-  J.pregunta = deFuera || (J.modo === 'tablas' ? preguntaTabla() : preguntaLectura());
+  J.pregunta = deFuera || (J.modo === 'tablas' ? preguntaTabla() : J.modo === 'leccion' ? preguntaLeccion() : preguntaLectura());
   J.bloqueo = false; J.tPreg = J.tiempo;
   const q = J.pregunta, pq = $('pq'), ops = $('ops');
   pq.textContent = q.texto; pq.classList.toggle('larga', q.larga);
   ops.classList.toggle('uno', q.larga && q.ops.some(o => o.length > 12));
   ops.innerHTML = '';
   q.ops.forEach((o, i) => { const b = document.createElement('button'); b.className = 'op' + (q.larga ? ' txt' : ''); b.textContent = o; b.addEventListener('click', () => responder(i)); ops.appendChild(b); });
+  // la palabra espera a la que suena (un MP3 no corta a otro) y reemplaza a la de una pregunta anterior que aún esperaba
+  if (LEC) { mostrar('bOir', !!q.oir); if (q.oir && !AJ.mudo) LJ.oir(q.oir, { grupo: 'pregunta', vigente: () => J.pregunta === q && !J.pausa && !AJ.mudo }); }
 }
 let avisoT = 0;
 function aviso(txt, mal) { const a = $('aviso'); a.textContent = txt; a.className = 'aviso ver' + (mal ? ' mal' : ''); avisoT = mal ? 1.6 : 1.0; }
 // Turbo por acierto, freno por fallo. Lo usa el jugador solo y, en sala, el tablero con cada alumno.
 function impulso(r, bien) {
   if (bien) { r.racha = (r.racha || 0) + 1; r.turbo = Math.min(TOPE_TURBO, r.turbo + TURBO); if (r.racha % 3 === 0) r.turbo = Math.min(TOPE_TURBO + 5, r.turbo + 5); }
-  else { r.racha = 0; r.lento = 1.0; }
+  else { r.racha = 0; r.lento = DIF && r === J.yo ? DIF.freno : 1.0; } // lección fácil: fallar no frena
 }
 function responder(i) {
   if (J.fase !== 'carrera' || J.pausa || J.bloqueo || !J.pregunta) return;
@@ -985,6 +1008,7 @@ function responder(i) {
   impulso(J.yo, bien);
   if (PZ) PZ.cargar('yo', bien, rapida, puestoDe(J.yo)); // si gana, el oyente pinta el botón y avisa
   mostrarVeredicto(i, bien, q.correcta, rapida);
+  if (LEC) LJ.progreso({ aciertos: J.aciertos, total: J.aciertos + J.errores, fallos: J.errores, nivel: PISTA.id });
   setTimeout(() => { if (J.fase === 'carrera') nuevaPregunta(); }, bien ? 600 : 1400);
 }
 function mostrarVeredicto(i, bien, correcta, rapida) {
@@ -1007,7 +1031,7 @@ function mostrarVeredicto(i, bien, correcta, rapida) {
 /* ---------- interfaz ---------- */
 const mostrar = (id, si) => $(id).classList.toggle('oculto', !si);
 function claveMarca(pid) { return (J.modo === 'tablas' ? 'tabla-' + J.tabla : 'lectura-' + J.lectura) + (pid && pid !== PISTAS[0].id ? '@' + pid : ''); }
-function nombreModo() { return J.modo === 'tablas' ? (J.tabla === 'mezcla' ? 'Tablas mezcladas' : 'Tabla del ' + J.tabla) : lecturaActual().titulo; }
+function nombreModo() { return J.modo === 'leccion' ? LEC.titulo : J.modo === 'tablas' ? (J.tabla === 'mezcla' ? 'Tablas mezcladas' : 'Tabla del ' + J.tabla) : lecturaActual().titulo; }
 function pintarCara(cv, animal) {
   const A = ANIMALES[animal], x = cv.getContext('2d'), s = cv.width / 92; x.setTransform(s, 0, 0, s, 0, 0); x.clearRect(0, 0, 92, 92);
   const piel = hex(A.piel), claro = hex(A.claro);
@@ -1120,11 +1144,26 @@ function irInicio() {
   ['hud', 'velo', 'panel', 'pausa', 'fin', 'leer', 'cuenta', 'bPoder', 'tablero', 'intro'].forEach(id => mostrar(id, false));
   limpiarObjetos(); $('feed').innerHTML = '';
   confeti.forEach(q => { q.m.visible = false; });
-  mostrar('inicio', true); refrescarInicio(); encuadre();
+  if (LEC) { encuadre(); portadaLeccion(); } else { mostrar('inicio', true); refrescarInicio(); encuadre(); }
   semaforo.forEach(m => m.emissive.setHex(0));
-  buscarSalas();
+  if (!LEC) buscarSalas();
 }
-function guardarElecciones() { prog.modo = J.modo; prog.tabla = J.tabla; prog.lectura = J.lectura; prog.animal = J.animal; prog.pista = J.sel.pista; guardarP(prog); }
+function portadaLeccion() {
+  LJ.portada({
+    juego: 'Turbo Saber', titulo: LEC.titulo,
+    detalle: 'Responde bien y tu corredor acelera. Toca la respuesta o pulsa 1, 2, 3 o 4. ¡Llega primero a la meta!',
+    alJugar: jugar
+  });
+}
+function logradoLeccion(puesto, total) {
+  LJ.resultado({ aciertos: J.aciertos, total, fallos: J.errores, nivel: PISTA.id, puesto });
+  LJ.logrado({
+    titulo: '¡Lo lograste!',
+    detalle: 'Llegaste ' + (puesto === 1 ? 'en el primer puesto' : 'en el puesto ' + puesto + ' de ' + J.corredores.length) + '. Acertaste ' + J.aciertos + ' de ' + total + ' preguntas.',
+    alOtraVez: correr
+  });
+}
+function guardarElecciones() { if (LEC) return; prog.modo = J.modo; prog.tabla = J.tabla; prog.lectura = J.lectura; prog.animal = J.animal; prog.pista = J.sel.pista; guardarP(prog); }
 function jugar() {
   if (J.red) dejarRed();
   guardarElecciones();
@@ -1241,8 +1280,10 @@ function terminar() {
   const o = orden(), puesto = o.indexOf(yo) + 1, est = puesto === 1 ? 3 : puesto <= 3 ? 2 : 1;
   const clave = claveMarca(PISTA.id), prev = prog.marcas[clave];
   const nueva = !prev || yo.llegada < prev.tiempo;
-  prog.marcas[clave] = { tiempo: nueva ? +yo.llegada.toFixed(1) : prev.tiempo, puesto: prev ? Math.min(prev.puesto, puesto) : puesto, estrellas: Math.max(prev ? prev.estrellas : 0, est), carreras: (prev ? prev.carreras || 0 : 0) + 1 };
-  guardarP(prog);
+  if (!LEC) { // la lección no deja marcas en el juego
+    prog.marcas[clave] = { tiempo: nueva ? +yo.llegada.toFixed(1) : prev.tiempo, puesto: prev ? Math.min(prev.puesto, puesto) : puesto, estrellas: Math.max(prev ? prev.estrellas : 0, est), carreras: (prev ? prev.carreras || 0 : 0) + 1 };
+    guardarP(prog);
+  }
   J.resultado = { puesto, estrellas: est, tiempo: yo.llegada, nueva, aciertos: J.aciertos, errores: J.errores };
   ['hud', 'velo', 'panel', 'cuenta', 'bPoder'].forEach(id => mostrar(id, false));
   limpiarObjetos(); $('feed').innerHTML = '';
@@ -1258,6 +1299,7 @@ function terminar() {
   suena('meta'); suena('podio', { puesto: tp || puesto, campeon: tp === 1 });
   lanzarConfeti(podio.position);
   camOrbita = 0;
+  if (LEC) { encuadre(); logradoLeccion(puesto, total); return; }
   mostrar('fin', true); encuadre();
 }
 /* ---------- torneo: tres carreras, puntos por puesto (como en los karts), tabla acumulada y podio final ---------- */
@@ -1823,7 +1865,7 @@ addEventListener('keydown', e => { if (V && e.key === 'Escape') salirVista(false
 /* ---------- controles ---------- */
 function pausar() {
   if (J.fase !== 'carrera' || J.pausa || J.red === 'tablero') return;
-  J.pausa = true;
+  J.pausa = true; if (LJ) LJ.callar();
   $('pausaTx').textContent = J.red ? 'La carrera sigue: tus compañeros no se detienen.' : 'La carrera te espera. Nadie avanza mientras tanto.';
   $('bSalir').textContent = J.red ? 'Salir de la sala' : 'Salir al inicio';
   mostrar('pausa', true);
@@ -2132,7 +2174,13 @@ const motor = {
 };
 
 /* ---------- arranque ---------- */
-prepararPuerta();
+if (!LEC) prepararPuerta();
+else { // «Oír otra vez» junto al rótulo de la pregunta (sólo en las que suenan)
+  const b = document.createElement('button'); b.type = 'button'; b.id = 'bOir'; b.className = 'ptexto oculto';
+  b.innerHTML = '<span aria-hidden="true">🔊</span> Oír otra vez';
+  b.addEventListener('click', () => { if (J.pregunta && J.pregunta.oir && !AJ.mudo) LJ.oir(J.pregunta.oir); });
+  $('bTexto').after(b);
+}
 construirInicio();
 $('cargando').remove();
 irInicio();

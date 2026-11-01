@@ -25,6 +25,7 @@
       for (let i = 0; i < M.MAX_VIDAS; i++) this.corazones.push(this.add.image(46 + i * 44, 44, 'tiles', 'hud_heart').setScale(0.66));
       this.iconoLibro = this.add.image(44, 92, 'm_libro').setScale(0.5);
       this.txtLibros = M.texto(this, 70, 92, '', { size: 24, color: '#FFFFFF', ox: 0 });
+      if (M.LECCION) { this.iconoLibro.setVisible(false); this.txtLibros.setVisible(false); } // en la lección no hay libros
 
       // ---- progreso (centro)
       this.gProg = this.add.graphics();
@@ -59,6 +60,8 @@
       this.gDash = this.add.graphics();
       this.txtDash = M.texto(this, 70, 147, 'Barrido', { size: 19, color: '#FFFFFF', ox: 0 });
       this.icoDash = this.add.image(44, 147, 'm_flecha').setScale(0.55);
+      // en la lección no hay fila de libros: el barrido sube junto a las vidas
+      if (M.LECCION) { this.gDash.y = -46; this.txtDash.y -= 46; this.icoDash.y -= 46; }
       if (n.subida) {
         this.gAltura = this.add.graphics();
         this.txtAltura = M.texto(this, W / 2, 98, '', { size: 21, color: '#FFFFFF' });
@@ -152,7 +155,7 @@
     // ---------- refresco ----------
     refrescar(forzar) {
       const n = this.nivel;
-      const est = n.cajas.map(c => (c.oculta ? 'o' : c.estado[0])).join('');
+      const est = n.cajas.map(c => (c.oculta ? 'o' : c.estado[0]) + (c.vista ? 'v' : '')).join('');
       const firma = [n.vidas, M.estado.libros, est, n.abierta, n.tramo].join('|');
       if (!forzar && firma === this.firma) return;
       this.firma = firma;
@@ -160,7 +163,7 @@
       // vidas
       const slots = Math.max(3, n.vidas);
       this.gVidas.clear();
-      M.panel(this.gVidas, 16, 16, 60 + slots * 44 - 16, 106, { fondo: 0x14213D, alpha: 0.62, r: 16, sombra: false });
+      M.panel(this.gVidas, 16, 16, 60 + slots * 44 - 16, M.LECCION ? 58 : 106, { fondo: 0x14213D, alpha: 0.62, r: 16, sombra: false });
       this.corazones.forEach((h, i) => {
         h.setVisible(i < slots);
         h.setFrame(i < n.vidas ? 'hud_heart' : 'hud_heart_empty');
@@ -210,7 +213,7 @@
       // banner
       if (n.abierta >= 0) {
         const cj = n.cajas[n.abierta];
-        this.txtBanner.setText(`Buscando: ${cj.palabra}`);
+        this.txtBanner.setText(`Buscando: ${M.LECCION ? M.LECCION.texto(cj, 'abierta') : cj.palabra}`); // lección: la caja bocina no la dice
         if (this.txtBanner.width > 520) this.txtBanner.setScale(520 / this.txtBanner.width); else this.txtBanner.setScale(1);
         const tw = this.txtBanner.displayWidth;
         const bw = tw + 56;
@@ -410,10 +413,12 @@
         const m = this.marco(c, 560, 470, 'Pausa');
         const b1 = M.boton(this, W / 2, m.y + 150, 340, 64, 'Continuar', { color: 'verde', nav, onClick: () => this.cerrarModal(true) });
         const b2 = M.boton(this, W / 2, m.y + 234, 340, 64, 'Reiniciar nivel', { color: 'azul', nav, onClick: () => { this.cerrarModal(false); this.nivel.reiniciar(); } });
-        const b3 = M.boton(this, W / 2, m.y + 318, 340, 64, 'Volver a los mundos', { color: 'gris', nav, onClick: () => { this.cerrarModal(false); this.nivel.salir(); } });
-        c.add([b1, b2, b3]);
+        // en el modo lección no hay mundos a los que volver
+        const b3 = M.LECCION ? null : M.boton(this, W / 2, m.y + 318, 340, 64, 'Volver a los mundos', { color: 'gris', nav, onClick: () => { this.cerrarModal(false); this.nivel.salir(); } });
+        const bs = [b1, b2, b3].filter(Boolean);
+        c.add(bs);
         c.add(M.texto(this, W / 2, m.y + 410, 'Flechas: andar · Espacio: saltar · X: pincel · Shift: barrido', { size: 19, color: '#6B7488', fuente: 'n' }));
-        return [b1, b2, b3];
+        return bs;
       }, { tipo: 'pausa' });
     }
 
@@ -518,7 +523,8 @@
         c.add(pj);
         c.add(M.texto(this, W / 2, m.y + 262, `Resolviste ${resueltas} de ${n.cajas.length} cajas.`, { size: 30, color: '#24386E' }));
         c.add(M.texto(this, W / 2, m.y + 304, '¡Casi! Las cajas se cierran y puedes intentarlo otra vez.', { size: 21, color: '#55607A', fuente: 'n' }));
-        const b1 = M.boton(this, W / 2 - 165, m.y + 410, 300, 66, 'Intentar otra vez', { color: 'verde', nav, onClick: () => { this.cerrarModal(false); n.reiniciar(); } });
+        const b1 = M.boton(this, M.LECCION ? W / 2 : W / 2 - 165, m.y + 410, 300, 66, 'Intentar otra vez', { color: 'verde', nav, onClick: () => { this.cerrarModal(false); n.reiniciar(); } });
+        if (M.LECCION) { c.add(b1); return [b1]; } // modo lección: no hay otro mundo que elegir
         const b2 = M.boton(this, W / 2 + 165, m.y + 410, 300, 66, 'Elegir otro mundo', { color: 'azul', nav, onClick: () => { this.cerrarModal(false); n.salir(); } });
         c.add([b1, b2]);
         return [b1, b2];
@@ -535,6 +541,7 @@
       }).setDepth(200);
       this.time.delayedCall(2600, () => conf.stop());
       this.time.delayedCall(6500, () => conf.destroy());
+      if (M.LECCION) { M.LECCION.completado(n); return; } // modo lección: «¡Lo lograste!» y volver a jugar
       this.abrirModal((c, nav) => {
         const pw = 960, ph = 640;
         const m = this.marco(c, pw, ph, null);

@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Tambor Bailarín</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Lexend:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="juego.css">
+</head>
+<body>
+<div id="gl" aria-hidden="true"></div>
+<canvas id="pista" aria-hidden="true"></canvas>
+<div id="cargando" class="cargando"><b>Tambor Bailarín</b><span>Afinando los tambores…</span></div>
+
+<!-- tocando -->
+<div id="hud" class="hud oculto">
+  <div class="marcador" role="status" aria-live="off">
+    <span class="ico" aria-hidden="true">🥁</span>
+    <div><b id="hRonda">Ronda 1</b><small id="hPuntos">0 puntos</small></div>
+    <span class="racha oculto" id="hCombo"></span>
+  </div>
+  <div class="botones">
+    <button class="hb" id="bSonido" type="button" aria-pressed="false" title="Sonido (M)"><span aria-hidden="true" id="iSonido">🔊</span><span class="sr" id="tSonido">Silenciar</span></button>
+    <button class="hb" id="bPrisa" type="button" aria-pressed="false" title="Sin prisa (S): cada nota te espera"><span aria-hidden="true">🐢</span><span>Sin prisa</span></button>
+    <button class="hb" id="bMenu" type="button" title="Pausa (Esc)"><span aria-hidden="true">⏸</span><span class="sr">Pausa</span></button>
+  </div>
+  <p class="ritmo-n" id="hRitmo" aria-hidden="true"></p>
+</div>
+
+<!-- el pulso que se ve: el círculo que late y los puntos del compás -->
+<div id="latido" class="latido oculto" aria-hidden="true">
+  <div class="circ"><span id="lNum"></span></div>
+  <div class="puntos" id="lPuntos"></div>
+</div>
+
+<section id="carta" class="carta oculto" aria-labelledby="cTit">
+  <h2 id="cTit"></h2>
+  <div id="cCuerpo"></div>
+  <div class="cbar">
+    <button class="bsec oculto" id="bOir" type="button"><span aria-hidden="true">🔊</span> Oír<span class="largo"> otra vez</span> <small>(O)</small></button>
+    <button class="bsec oculto" id="bVer" type="button"><span aria-hidden="true">👁</span> Ver<span class="largo"> la palabra</span> <small>(V)</small></button>
+  </div>
+  <p class="feed" id="cFeed" aria-live="polite"></p>
+</section>
+
+<div id="carriles" class="carriles oculto" role="group" aria-label="Los carriles: toca el que corresponde cuando la nota llegue a la línea"></div>
+
+<div id="cuenta" class="cuenta oculto" aria-hidden="true"></div>
+<div id="anuncio" class="sr" aria-live="polite"></div>
+
+<!-- la sala de juegos: el inicio con todas las opciones -->
+<div id="inicio" class="capa oculto">
+  <div class="tarjeta" role="dialog" aria-labelledby="tTit">
+    <h1 id="tTit"><span aria-hidden="true">🥁</span> Tambor Bailarín</h1>
+    <p class="frase">Las notas bajan al ritmo de la música de Colombia: tócalas cuando lleguen a la línea con F, Espacio y J (o las flechas, o los botones grandes).</p>
+    <p class="frase sub" id="oFrase"></p>
+    <div class="paso" id="lMat">1. Qué practicas</div>
+    <div class="fila-b" id="oMat" role="group" aria-labelledby="lMat"></div>
+    <div class="paso" id="lGrado">2. Tu grado</div>
+    <div class="fila-b" id="oGrado" role="group" aria-labelledby="lGrado"></div>
+    <div class="paso" id="lTema">3. El tema</div>
+    <div class="fila-b" id="oTema" role="group" aria-labelledby="lTema"></div>
+    <div class="paso" id="lRitmo">4. La música</div>
+    <div class="fila-b" id="oRitmo" role="group" aria-labelledby="lRitmo"></div>
+    <div class="paso" id="lBail">5. Quién baila</div>
+    <div class="fila-b" id="oBail" role="group" aria-labelledby="lBail"></div>
+    <label class="calma"><input type="checkbox" id="oPrisa"> Sin prisa: cada nota te espera en la línea hasta que la toques</label>
+    <label class="calma"><input type="checkbox" id="oCalma"> Modo calma: sin destellos ni luces que barren</label>
+    <label class="vol"><span>🔊 Volumen</span> <input type="range" id="oVol" min="0" max="100" step="5" value="80" aria-label="Volumen de la música"></label>
+    <p class="record" id="tRecord"></p>
+    <div class="acciones">
+      <button class="jugar" id="bBailar" type="button">▶ ¡A bailar!</button>
+      <a class="volver" href="../index.html">Volver a los juegos</a>
+    </div>
+  </div>
+</div>
+
+<!-- pausa -->
+<div id="pausa" class="capa oculto">
+  <div class="tarjeta chica" role="dialog" aria-labelledby="pTit">
+    <h1 id="pTit">En pausa</h1>
+    <p class="frase" id="pRes"></p>
+    <label class="vol"><span>🔊 Volumen</span> <input type="range" id="pVol" min="0" max="100" step="5" value="80" aria-label="Volumen de la música"></label>
+    <p class="frase teclas">F Espacio J (o D F J K, flechas, 1 2 3 4): tocar · S: sin prisa · O: oír · V: ver · M: sonido · Esc: pausa</p>
+    <div class="acciones">
+      <button class="jugar" id="bSeguir" type="button">▶ Seguir tocando</button>
+      <button class="bsec" id="bOtra" type="button">↻ Empezar de nuevo</button>
+      <button class="bsec" id="bInicio" type="button">Volver al inicio</button>
+    </div>
+  </div>
+</div>
+
+<!-- el final en la sala -->
+<div id="final" class="capa oculto">
+  <div class="tarjeta chica" role="dialog" aria-labelledby="fTit">
+    <p class="medalla" id="fEst">⭐⭐⭐</p>
+    <h1 id="fTit">¡Lo lograste!</h1>
+    <p class="frase" id="fRes"></p>
+    <p class="frase" id="fRepasa"></p>
+    <p class="frase nuevo" id="fNuevo"></p>
+    <div class="acciones">
+      <button class="jugar" id="bOtra2" type="button">↻ Otra canción</button>
+      <button class="bsec" id="bCambiar" type="button">Cambiar el tema o la música</button>
+      <a class="volver" href="../index.html">Volver a los juegos</a>
+    </div>
+  </div>
+</div>
+
+<script src="../puente.js"></script>
+<script src="../leccion.js"></script>
+<!-- las preguntas de la sala por materia y grado son las del Rally -->
+<script src="../rally/contenido.js"></script>
+<script src="contenido.js"></script>
+<script src="musica.js"></script>
+<script src="escena.js"></script>
+<script src="juego.js"></script>
+</body>
+</html>

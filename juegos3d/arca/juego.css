@@ -1,5 +1,5 @@
 :root{--ink:#15304d;--sea:#0e9aa0;--sand:#fff4dc;--paper:#fffdf7;--sun:#ffc23a;--coral:#ff6a4d;--leaf:#2f9e5d;--colegio:#ff6a4d;
-  --sombra:0 10px 28px -14px rgba(21,48,77,.55);--r:22px}
+  --sea-tx:#0b6f73;--sombra:0 10px 28px -14px rgba(21,48,77,.55);--r:22px}
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
 body{overflow:hidden;background:#9ddcf0;color:var(--ink);font-family:Lexend,system-ui,sans-serif;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
@@ -20,7 +20,7 @@ kbd{font:700 11px Lexend,sans-serif;background:var(--ink);color:#fff;border-radi
 .hud{position:fixed;left:0;right:0;top:0;display:flex;gap:10px;align-items:flex-start;padding:calc(env(safe-area-inset-top,0px) + 10px) 12px 0;z-index:5;pointer-events:none}
 .hud>*{pointer-events:auto}
 .cuenta-ani{background:var(--paper);border-radius:18px;padding:6px 12px 8px;box-shadow:var(--sombra);flex:none;display:grid;gap:2px}
-.cuenta-ani span{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--sea)}
+.cuenta-ani span{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--sea-tx)}
 .cuenta-ani b{font-family:Grandstander;font-weight:900;font-size:26px;line-height:1;color:var(--colegio)}
 .pares{display:flex;gap:3px;flex-wrap:wrap;max-width:120px}
 .pares i{width:8px;height:8px;border-radius:50%;background:#e8dcc0}
@@ -29,12 +29,12 @@ kbd{font:700 11px Lexend,sans-serif;background:var(--ink);color:#fff;border-radi
 .encargo .noe{flex:none;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#fff;background:#8a5a2b;border-radius:999px;padding:3px 8px}
 .encargo .obj{flex:1;min-width:0;display:grid;gap:1px}
 .encargo .obj b{font-family:Grandstander;font-weight:900;font-size:clamp(18px,4.4vw,25px);line-height:1.1}
-.encargo .obj small{font-size:clamp(13px,3.4vw,15px);font-weight:600;color:var(--sea)}
+.encargo .obj small{font-size:clamp(13px,3.4vw,15px);font-weight:600;color:var(--sea-tx)}
 /* el anuncio grande del centro: cada vez que cambia el objetivo */
 .anuncio{position:fixed;left:50%;top:30%;z-index:7;transform:translate(-50%,-50%) scale(.85);width:max-content;max-width:min(560px,calc(100% - 32px));background:var(--paper);border:4px solid var(--sun);border-radius:24px;padding:14px 22px;box-shadow:0 18px 40px -16px rgba(21,48,77,.6);display:grid;gap:4px;text-align:center;opacity:0;pointer-events:none;transition:opacity .25s,transform .3s cubic-bezier(.3,1.6,.5,1)}
 .anuncio.ver{opacity:1;transform:translate(-50%,-50%) scale(1)}
 .anuncio b{font-family:Grandstander;font-weight:900;font-size:clamp(24px,6.4vw,36px);line-height:1.1}
-.anuncio span{font-size:clamp(16px,4.2vw,20px);font-weight:700;color:var(--sea)}
+.anuncio span{font-size:clamp(16px,4.2vw,20px);font-weight:700;color:var(--sea-tx)}
 .encargo.nuevo{animation:latido .7s cubic-bezier(.3,1.6,.5,1)}
 @keyframes latido{from{transform:scale(.9)}}
 .oir{flex:none;width:40px;height:40px;border-radius:12px;border:0;background:var(--sand);display:grid;place-items:center;color:var(--ink)}
@@ -44,7 +44,6 @@ kbd{font:700 11px Lexend,sans-serif;background:var(--ink);color:#fff;border-radi
 .bson::before{content:'';width:22px;height:22px;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 9h4l5-4v14l-5-4H4z'/%3E%3Cpath d='M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12' stroke='black' stroke-width='2' fill='none'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 9h4l5-4v14l-5-4H4z'/%3E%3Cpath d='M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12' stroke='black' stroke-width='2' fill='none'/%3E%3C/svg%3E") center/contain no-repeat}
 .bson[aria-pressed=true]::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 9h4l5-4v14l-5-4H4z'/%3E%3Cpath d='M16 9l6 6M22 9l-6 6' stroke='black' stroke-width='2'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 9h4l5-4v14l-5-4H4z'/%3E%3Cpath d='M16 9l6 6M22 9l-6 6' stroke='black' stroke-width='2'/%3E%3C/svg%3E")}
 @media (max-width:560px){.hud{flex-wrap:wrap}.encargo{order:3;flex-basis:100%}.cuenta-ani{flex:1}.pares{max-width:none}}
-
 .aviso{position:fixed;left:50%;top:34%;transform:translate(-50%,-50%) scale(.8);z-index:6;font-family:Grandstander;font-weight:900;font-size:clamp(28px,7vw,48px);color:#fff;-webkit-text-stroke:2px var(--ink);text-shadow:0 5px 0 var(--ink);white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s,transform .25s cubic-bezier(.3,1.6,.5,1)}
 .aviso.ver{opacity:1;transform:translate(-50%,-50%) scale(1)}
 .aviso.mal{font-size:clamp(16px,4.4vw,22px);-webkit-text-stroke:0;text-shadow:none;background:var(--paper);color:var(--ink);padding:10px 18px;border-radius:999px;box-shadow:var(--sombra);font-family:Lexend;font-weight:600;white-space:normal;max-width:calc(100% - 32px);text-align:center}
@@ -65,7 +64,7 @@ kbd{font:700 11px Lexend,sans-serif;background:var(--ink);color:#fff;border-radi
 /* Panel de preguntas */
 .panel{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(760px,100%);z-index:8;background:var(--sand);border-radius:26px 26px 0 0;box-shadow:0 -16px 40px -18px rgba(21,48,77,.55);padding:12px 14px calc(env(safe-area-inset-bottom,0px) + 14px);animation:sube .35s cubic-bezier(.2,1.2,.4,1)}
 .pcab{display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:28px}
-.ptag{display:inline-block;background:var(--paper);border-radius:999px;padding:4px 12px;font-size:12px;font-weight:700;color:var(--sea)}
+.ptag{display:inline-block;background:var(--paper);border-radius:999px;padding:4px 12px;font-size:13px;font-weight:700;color:var(--sea-tx)}
 .pq{font-family:Grandstander;font-weight:900;font-size:clamp(28px,7vw,40px);text-align:center;margin:6px 0 12px}
 .ops{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 .op{min-height:72px;border:0;border-radius:18px;background:var(--paper);box-shadow:0 5px 0 #ead9b4;font-family:Grandstander;font-weight:900;font-size:clamp(18px,4.6vw,26px);padding:8px;line-height:1.1}
@@ -110,3 +109,62 @@ kbd{font:700 11px Lexend,sans-serif;background:var(--ink);color:#fff;border-radi
 .fsub{text-align:center;margin:8px 0 6px;font-size:15px;line-height:1.45}
 .fsub b{color:var(--colegio)}
 @media (prefers-reduced-motion:reduce){.tocar,.encargo.nuevo,.panel,.tarjeta.fin,.flash.ver{animation:none}}
+
+/* HUD compacto (Joseth, 31 oct: «los letreros se ven muy grandes y no dejan ver el escenario»): en un espacio chico —
+   el iframe de la lección, un celular— los letreros van en una sola fila arriba, bajitos, y los botones en columna a la
+   derecha: el centro de la vista queda libre. En pantalla completa o en la sala grande, como arriba. Nada baja de 13 px. */
+@media (max-height:520px),(max-width:480px){
+  .hud{flex-wrap:nowrap;gap:6px;padding:calc(env(safe-area-inset-top,0px) + 6px) 6px 0}
+  .cuenta-ani{flex:none;border-radius:12px;padding:3px 8px 4px;gap:0;justify-items:center}
+  .cuenta-ani span{font-size:13px;letter-spacing:.02em;text-transform:none}
+  .cuenta-ani b{font-size:19px;color:var(--ink)} /* el color del colegio no da AA en letra chica */
+  .pares{display:none}
+  .encargo{order:0;flex:1 1 0;min-width:0;gap:6px;border-radius:12px;padding:3px 3px 3px 9px}
+  .encargo .noe{display:none}
+  .encargo .obj b{font-size:15px;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .encargo .obj small{font-size:13px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .oir{width:34px;height:34px;border-radius:10px}
+  .hbtns{flex-direction:column;gap:6px}
+  .hb{width:38px;height:38px;border-radius:12px}
+  .hb kbd{display:none}
+  .bson::before{width:20px;height:20px}
+  .anuncio{top:50%;border-width:3px;border-radius:18px;padding:8px 14px;max-width:min(420px,calc(100% - 100px))}
+  .anuncio b{font-size:clamp(17px,4.6vw,24px)}
+  .anuncio span{font-size:14px}
+  .aviso{top:50%;font-size:clamp(24px,6vw,34px);-webkit-text-stroke-width:1.5px;text-shadow:0 3px 0 var(--ink)}
+  .aviso.mal{font-size:14px;padding:6px 14px}
+  .ayuda{top:auto;bottom:calc(env(safe-area-inset-bottom,0px) + 8px);max-width:calc(100% - 24px);font-size:13px;padding:5px 10px;border-radius:12px}
+  .palanca{width:96px;height:96px;left:calc(env(safe-area-inset-left,0px) + 10px);bottom:calc(env(safe-area-inset-bottom,0px) + 10px)}
+  .palanca i{width:42px;height:42px;margin:-21px 0 0 -21px}
+  .tocar{right:calc(env(safe-area-inset-right,0px) + 10px);bottom:calc(env(safe-area-inset-bottom,0px) + 12px);padding:10px 16px}
+  .tocar b{font-size:19px}
+}
+/* con palanca, la ayuda va a su derecha (no debajo de ella) */
+@media (max-height:520px) and (pointer:coarse),(max-width:480px) and (pointer:coarse){.ayuda{left:116px;right:52px;transform:none;width:auto;max-width:none}}
+/* panel compacto en un espacio bajo: las opciones en una fila y el botón de oír en la esquina, para que la pregunta
+   y las respuestas quepan sin tapar todo el juego */
+@media (max-height:520px){
+  .panel{padding:6px 10px calc(env(safe-area-inset-bottom,0px) + 8px);border-radius:18px 18px 0 0;width:min(640px,100%)}
+  .pcab{position:absolute;top:4px;right:6px;min-height:0}
+  .ptag{display:none}
+  .pcab .oir{width:34px;height:34px}
+  .pq{font-size:clamp(16px,4.6vw,22px);line-height:1.15;margin:2px 38px 6px}
+  .ops{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:6px}
+  .op{min-height:44px;border-radius:12px;font-size:clamp(14px,4vw,18px);padding:4px 6px;box-shadow:0 3px 0 #ead9b4}
+  .op.bien{box-shadow:0 3px 0 #1f6e40}
+  .pista{min-height:0;margin-top:4px;font-size:13px}
+  .pista:empty{display:none}
+}
+/* muy bajito (la lección en un celular): sólo el objetivo, en una línea; la cuenta, sin rótulo */
+@media (max-height:300px){
+  .cuenta-ani span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  .cuenta-ani{padding:5px 8px}
+  .encargo .obj small{display:none}
+  .encargo .obj b{-webkit-line-clamp:2;font-size:14px}
+  .hbtns{gap:4px}
+  .hb{width:34px;height:34px}
+  .oir{width:30px;height:30px}
+  /* el panel de la pregunta deja libre la columna de botones (pausa y sonido siguen a mano) */
+  .panel{left:0;right:44px;width:auto;transform:none;--tx:0;border-radius:0 16px 0 0}
+}
+
