@@ -108,7 +108,18 @@ kbd{font:700 11px Lexend,sans-serif;background:var(--ink);color:#fff;border-radi
 .tarjeta.fin h2{text-align:center;font-size:clamp(24px,6vw,32px);margin-top:4px}
 .fsub{text-align:center;margin:8px 0 6px;font-size:15px;line-height:1.45}
 .fsub b{color:var(--colegio)}
-@media (prefers-reduced-motion:reduce){.tocar,.encargo.nuevo,.panel,.tarjeta.fin,.flash.ver{animation:none}}
+/* la historia del final: letrero de historieta abajo y «Saltar» arriba a la derecha */
+.historia{position:fixed;left:50%;bottom:max(18px,env(safe-area-inset-bottom));z-index:6;transform:translateX(-50%);width:max-content;max-width:min(640px,calc(100% - 28px));background:var(--paper);border:3px solid var(--ink);border-radius:8px;box-shadow:5px 5px 0 var(--ink);padding:10px 18px 12px;display:grid;gap:3px;text-align:center;pointer-events:none}
+.historia b{font-family:Grandstander,Lexend,sans-serif;font-weight:900;font-size:clamp(20px,5vw,30px);line-height:1.1;color:var(--ink)}
+.historia span{font-size:clamp(14px,3.6vw,17px);font-weight:700;color:var(--sea-tx)}
+.historia.nueva{animation:vineta .35s cubic-bezier(.3,1.5,.5,1)}
+@keyframes vineta{from{transform:translateX(-50%) scale(.9);opacity:0}to{transform:translateX(-50%) scale(1);opacity:1}}
+.saltar{position:fixed;right:16px;top:calc(76px + env(safe-area-inset-top));z-index:7;min-height:44px;border:2px solid var(--ink);border-radius:14px;background:var(--paper);color:var(--ink);font-weight:800;font-size:15px;padding:8px 14px;box-shadow:var(--sombra);display:flex;align-items:center;gap:8px}
+.saltar:focus-visible{outline:3px solid var(--sea);outline-offset:3px}
+@media (pointer:coarse){.saltar kbd{display:none}}
+/* pantalla chica: la columna de botones va a la derecha; «Saltar» baja a la izquierda, bajo el contador */
+@media (max-height:520px),(max-width:480px){.saltar{right:auto;left:12px;top:calc(env(safe-area-inset-top,0px) + 104px);min-height:40px;font-size:14px;padding:6px 12px}}
+@media (prefers-reduced-motion:reduce){.tocar,.encargo.nuevo,.panel,.tarjeta.fin,.flash.ver,.historia.nueva{animation:none}}
 
 /* HUD compacto (Joseth, 31 oct: «los letreros se ven muy grandes y no dejan ver el escenario»): en un espacio chico —
    el iframe de la lección, un celular— los letreros van en una sola fila arriba, bajitos, y los botones en columna a la

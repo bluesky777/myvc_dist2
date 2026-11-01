@@ -10,7 +10,9 @@
    - MyVC: Turbo Saber no reporta notas a MyVC (sólo usa la API para las salas), así que este tampoco. PENDIENTE: cuando
      exista la ruta `juegos/resultados`, mandar {juego:'arca', grado, estrellas, aciertos, errores, segundos} con
      window.Juegos3D.api('POST', …) al terminar (ver terminar()).
-   Depuración: window.__juego (estado, tocar, responder, pareja, ganar, vista, ir). */
+   - Al final, la historia del diluvio en viñetas (ver «final» más abajo); la rampa va suelta del casco y el dentro del arca
+     se arma en código (armarInterior).
+   Depuración: window.__juego (estado, tocar, responder, pareja, ganar, saltar, abrir, vista, cine, _int…). */
 (function () {
 'use strict';
 const D = window.DATOS_ARCA, PQ = window.PreguntasArca, SN = window.SonidoArca;
@@ -433,6 +435,13 @@ function completarRampa(A) {
     cuña.position.set(r.cx, y0 / 2 - 0.2, (desde + hasta) / 2); cuña.rotation.x = Math.atan2(y0, hasta - desde);
     cuña.castShadow = cuña.receiveShadow = true; scene.add(cuña);
   }
+  // La rampa del arca por partes viene pegada al casco: es el mismo mesh «casco» (tools/arca_tripo.py lo junta todo),
+  // con sus propias primitivas de material «rampa» y «liston». Se suelta al mundo (scene.attach guarda dónde está) para
+  // que se quede en el suelo cuando el arca flota en el diluvio y la reciba cuando vuelve a posarse.
+  A.grupo.updateMatrixWorld(true);
+  const sueltas = [];
+  A.grupo.traverse(o => { if (o.isMesh && o.material && /^(rampa|liston)$/.test(o.material.name)) sueltas.push(o); });
+  sueltas.forEach(o => scene.attach(o));
   A.abre = 0; A.abreMeta = 0;
   if (A.nodoPuerta) {
     // La puerta del modelo es corrediza (tools/arca_tripo.py): una hoja gruesa bajo un riel que corre a los dos lados.
@@ -451,7 +460,7 @@ function completarRampa(A) {
   const piv = new THREE.Group(); piv.position.set(r.cx, r.yTope, r.zPuerta + 0.35);
   const p = new THREE.Mesh(new THREE.BoxGeometry(r.ancho * 0.92, r.altoPuerta, 0.35), new THREE.MeshStandardMaterial({ map: texMadera('#8a5a2e', '#7a4f28'), roughness: 0.9 }));
   p.material.map.rotation = Math.PI / 2; p.position.y = r.altoPuerta / 2; p.castShadow = true; piv.add(p);
-  piv.visible = false; scene.add(piv); A.puerta = piv;
+  piv.visible = false; A.grupo.updateMatrixWorld(true); A.grupo.attach(piv); A.puerta = piv;
   A.abierta = Math.PI / 2 + Math.atan(pend) - 0.06;
 }
 function arcaProvisional() {
@@ -474,6 +483,116 @@ function arcaProvisional() {
   const yTope = 3.8, zT = hz * (0.5 + 0.5 * Math.sqrt(yTope / hc));
   const hueco = new THREE.Mesh(new THREE.BoxGeometry(5.6, 5.2, 0.4), M('#24160c')); hueco.position.set(0, yTope + 2.6, zT + 0.15); grupo.add(hueco);
   return { grupo, hx, hz: hz * 0.9, lado: 1, glb: false, rampa: { cx: 0, ancho: 6.2, yTope, zTope: zT, yPie: yTope, zPie: zT, zPuerta: zT, altoPuerta: 5.2 }, rampaPropia: true };
+}
+
+/* El dentro del arca. Lo que tapaba la entrada era el «zaguán» del modelo (tools/arca_tripo.py, material «interior»):
+   una caja de tablas de sólo ~6 m de fondo, cerrada atrás y con luz propia, así que por la puerta abierta se veía una
+   pared plana de tablas horizontales a un paso, como otra puerta cerrada. Se esconde y en su lugar va, en código, un
+   pasillo del tamaño del hueco que da a un establo grande: piso de tablas, paredes, techo con vigas, postes, corrales,
+   paja, pacas y faroles. Cuelga del arca (sube y baja con ella). Sólo para el arca del GLB; la provisional no tiene hueco. */
+function armarInterior(A) {
+  let zag = null;
+  A.grupo.traverse(o => { if (o.isMesh && o.material && o.material.name === 'interior') zag = o; });
+  if (!zag) return;
+  A.grupo.updateMatrixWorld(true);
+  const bb = cajaReal(zag); zag.visible = false;
+  const x0 = bb.min.x, x1 = bb.max.x, y0 = Math.min(bb.min.y, A.rampa.yTope - 0.05), y1 = bb.max.y, zF = bb.max.z;
+  const cx = (x0 + x1) / 2;
+  // El casco de Tripo trae por dentro trozos sueltos (la cubierta, bultos que cuelgan): el establo se mide para que
+  // ninguno quede dentro. Se prueba de mayor a menor (largo, frente, fondo) y el techo baja hasta el primer trozo.
+  const P = [];
+  A.grupo.traverse(o => { if (o.isMesh && o.material && !/^(interior|viga|rampa|liston)$/.test(o.material.name) && !(A.nodoPuerta && esDe(o, A.nodoPuerta))) recorrer(o, v => P.push(v.x, v.y, v.z), 1e6); });
+  // el dintel: lo alto de la hoja de la puerta (el zaguán tiene un margen encima)
+  const yH = A.nodoPuerta ? cajaReal(A.nodoPuerta).max.y : y1 - 0.9, techoMax = y0 + (yH - y0) * 1.3;
+  const prueba = (zR, zB, L) => {
+    let t = techoMax;
+    for (let i = 0; i < P.length; i += 3) {
+      const x = P[i], y = P[i + 1], z = P[i + 2];
+      if (Math.abs(x - cx) > L + 0.3 || z < zB - 0.3 || z > zR + 0.3 || y < y0 + 0.15 || y > t + 0.3) continue;
+      if (y < yH - 0.3) return null;
+      t = y - 0.25;
+    }
+    return t;
+  };
+  let mejor = null;
+  [0.45, 0.4, 0.35, 0.3, 0.25].forEach(fL => [2.5, 3.5, 4.5].forEach(dR => {
+    const L = A.hx * fL, zR = zF - dR;
+    for (let zB = -A.hz * 0.72; zB < zR - 7; zB += 1) {
+      const t = prueba(zR, zB, L); if (t == null) continue;
+      const vol = 2 * L * (zR - zB) * (t - y0);
+      if (!mejor || vol > mejor.vol) mejor = { L, zR, zB, techo: t, vol };
+      break; // el primer fondo que sirve es el más hondo para este largo y frente
+    }
+  }));
+  if (!mejor) { zag.visible = true; console.warn('Two by Two: el casco no deja sitio para el interior; queda el zaguán.'); return; }
+  const { L, zR, zB, techo } = mejor, hondo = zR - zB, alto = techo - y0, yV = Math.max(techo, yH);
+  const G = new THREE.Group(); G.name = 'interior';
+  const tablas = (base, veta, rx, ry, luz) => {
+    const t = texMadera(base, veta); t.repeat.set(rx, ry);
+    return new THREE.MeshLambertMaterial({ map: t, emissive: C('#ffd9a8'), emissiveMap: t, emissiveIntensity: luz, side: THREE.DoubleSide });
+  };
+  const piso = tablas('#9b6b3d', '#8a5d33', 2 * L / 3, hondo / 6, 0.5), pared = tablas('#7a4f2b', '#6b4424', 2 * L / 4, alto / 4, 0.42);
+  const viga = new THREE.MeshLambertMaterial({ color: C('#4a2e17'), emissive: C('#2a170a'), emissiveIntensity: 0.6 });
+  const paja = new THREE.MeshLambertMaterial({ color: C('#e2c35a'), emissive: C('#7a5d1a'), emissiveIntensity: 0.5 });
+  const plano = (w, h, m, x, y, z, rx, ry) => { const o = new THREE.Mesh(new THREE.PlaneGeometry(w, h), m); o.position.set(x, y, z); o.rotation.set(rx || 0, ry || 0, 0); o.receiveShadow = true; G.add(o); return o; };
+  const caja = (w, h, d, m, x, y, z) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); o.position.set(x, y, z); G.add(o); return o; };
+  // el establo: piso, techo, fondo y los dos lados; adelante, la pared con el paso del pasillo
+  plano(2 * L, hondo, piso, cx, y0 + 0.02, (zR + zB) / 2, -Math.PI / 2);
+  plano(2 * L, hondo, pared, cx, techo, (zR + zB) / 2, Math.PI / 2);
+  plano(2 * L, alto, pared, cx, y0 + alto / 2, zB);
+  plano(hondo, alto, pared, cx - L, y0 + alto / 2, (zR + zB) / 2, 0, Math.PI / 2);
+  plano(hondo, alto, pared, cx + L, y0 + alto / 2, (zR + zB) / 2, 0, Math.PI / 2);
+  plano(x0 - (cx - L), alto, pared, (cx - L + x0) / 2, y0 + alto / 2, zR);
+  plano(cx + L - x1, alto, pared, (x1 + cx + L) / 2, y0 + alto / 2, zR);
+  if (techo > yV + 0.01) plano(x1 - x0, techo - yV, pared, cx, (yV + techo) / 2, zR);
+  // el pasillo del hueco al establo
+  plano(x1 - x0, zF - zR + 0.6, piso, cx, y0 + 0.02, (zF + zR) / 2 + 0.3, -Math.PI / 2);
+  plano(x1 - x0, zF - zR + 0.6, pared, cx, yV, (zF + zR) / 2 + 0.3, Math.PI / 2);
+  [x0, x1].forEach(x => plano(zF - zR + 0.6, yV - y0, pared, x, (y0 + yV) / 2, (zF + zR) / 2 + 0.3, 0, Math.PI / 2));
+  // vigas del techo (de lado a lado cada 3,2 m), una viga madre a lo largo y postes
+  for (let x = cx - L + 1.6; x < cx + L; x += 3.2) caja(0.45, 0.55, hondo, viga, x, techo - 0.28, (zR + zB) / 2);
+  caja(2 * L, 0.6, 0.5, viga, cx, techo - 0.75, (zR + zB) / 2);
+  [-12.8, -6.4, 6.4, 12.8].forEach(dx => { if (Math.abs(dx) < L - 0.5) caja(0.5, alto, 0.5, viga, cx + dx, y0 + alto / 2, (zR + zB) / 2); });
+  // corrales al fondo: dos barandas y estacas
+  const zc = zB + 3.2;
+  [0.7, 1.4].forEach(h => caja(2 * L - 1, 0.16, 0.16, viga, cx, y0 + h, zc));
+  for (let x = cx - L + 0.5; x <= cx + L - 0.5; x += 3.2) { caja(0.22, 1.6, 0.22, viga, x, y0 + 0.8, zc); caja(0.16, 0.16, 3.2, viga, x, y0 + 1.4, zB + 1.6); }
+  // paja en el suelo, pacas y un montón
+  semilla = 20261101;
+  const manchas = new THREE.CircleGeometry(1, 10);
+  for (let i = 0; i < 26; i++) { const o = new THREE.Mesh(manchas, paja); const r = az(0.8, 2.2); o.scale.set(r, r * az(0.5, 0.9), 1); o.rotation.set(-Math.PI / 2, 0, az(0, 6.28)); o.position.set(cx + az(-L + 1, L - 1), y0 + 0.04 + i * 0.002, az(zB + 0.8, zR - 1)); G.add(o); }
+  const paca = new THREE.BoxGeometry(1.5, 0.8, 0.95);
+  [[-L + 1.4, zR - 1.2], [-L + 1.4, zR - 2.4], [-L + 3, zR - 1.2], [L - 1.4, zB + 5.2], [L - 3, zB + 5.2], [-4.2, zB + 5.5]].forEach(([dx, z], i) => {
+    const o = new THREE.Mesh(paca, paja); o.position.set(cx + dx, y0 + 0.4, z); o.rotation.y = az(-0.2, 0.2); G.add(o);
+    if (i < 2) { const o2 = o.clone(); o2.position.y += 0.8; o2.rotation.y += 0.15; G.add(o2); }
+  });
+  const monton = new THREE.Mesh(new THREE.SphereGeometry(1, 12, 8), paja); monton.scale.set(2.6, 0.9, 1.8); monton.position.set(cx + L * 0.45, y0, zB + 1.8); G.add(monton);
+  // faroles colgados con su halo
+  const halo = (() => { const c = document.createElement('canvas'); c.width = c.height = 64; const x = c.getContext('2d'), g = x.createRadialGradient(32, 32, 0, 32, 32, 32); g.addColorStop(0, 'rgba(255,220,140,.9)'); g.addColorStop(1, 'rgba(255,180,60,0)'); x.fillStyle = g; x.fillRect(0, 0, 64, 64); return new THREE.CanvasTexture(c); })();
+  const luz = new THREE.MeshBasicMaterial({ color: C('#ffd27a') });
+  [-L * 0.55, 0, L * 0.55].forEach(dx => {
+    const zl = (zR + zB) / 2 + 2.5, yl = techo - 2.2;
+    caja(0.05, 1.4, 0.05, viga, cx + dx, techo - 1.5, zl);
+    caja(0.55, 0.7, 0.55, luz, cx + dx, yl, zl);
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: halo, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })); sp.scale.setScalar(4.5); sp.position.set(cx + dx, yl, zl); G.add(sp);
+  });
+  G.traverse(o => { if (o.isMesh) o.castShadow = false; });
+  A.grupo.attach(G); A.interior = G;
+  console.info('Two by Two: interior del arca (' + (2 * L).toFixed(1) + ' × ' + hondo.toFixed(1) + ' × ' + alto.toFixed(1) + ' m, piso a ' + y0.toFixed(1) + ', dintel a ' + yH.toFixed(1) + ', techo a ' + techo.toFixed(1) + ', fondo en z = ' + zB.toFixed(1) + '; el zaguán del modelo, escondido).');
+}
+function esDe(o, padre) { for (let p = o; p; p = p.parent) if (p === padre) return true; return false; }
+// Dónde se para Noé arriba del arca: la cubierta más baja hacia una punta (fuera de la casa), en el medio del ancho.
+function cubierta(A) {
+  A.grupo.updateMatrixWorld(true);
+  const tope = {};
+  recorrer(A.grupo, v => { if (Math.abs(v.z) < 2.5) { const k = Math.round(v.x / 1.5); tope[k] = Math.max(tope[k] == null ? -1e9 : tope[k], v.y); } }, 60000);
+  let mejor = null;
+  Object.keys(tope).forEach(k => { const x = k * 1.5, f = Math.abs(x) / A.hx; if (f > 0.55 && f < 0.8 && (!mejor || tope[k] < mejor.y)) mejor = { x, y: tope[k] }; });
+  // en medio del tramo bajo (no pegado a la pared de la casa)
+  if (mejor) { const xs = Object.keys(tope).map(k => k * 1.5).filter(x => Math.sign(x) === Math.sign(mejor.x) && Math.abs(x) / A.hx > 0.45 && Math.abs(x) / A.hx < 0.9 && tope[Math.round(x / 1.5)] < mejor.y + 1.2).sort((a, b) => a - b); mejor.x = xs[Math.floor(xs.length / 2)]; mejor.y = tope[Math.round(mejor.x / 1.5)]; }
+  A.cubierta = mejor ? new V3(mejor.x, mejor.y, 0) : new V3(-A.hx * 0.68, ALTO_ARCA * 0.55, 0);
+  A.cubiertaLocal = A.grupo.worldToLocal(A.cubierta.clone());
+  console.info('Two by Two: Noé sale a la cubierta en x = ' + A.cubierta.x.toFixed(1) + ', y = ' + A.cubierta.y.toFixed(1) + '.');
 }
 
 /* ---------- terreno ---------- */
@@ -612,6 +731,7 @@ function fusionar(lista) {
   lista.forEach(g => { p.set(g.attributes.position.array, o * 3); c.set(g.attributes.color.array, o * 3); o += g.attributes.position.count; g.dispose(); });
   const r = new THREE.BufferGeometry(); r.setAttribute('position', new THREE.BufferAttribute(p, 3)); r.setAttribute('color', new THREE.BufferAttribute(c, 3)); r.computeVertexNormals(); return r;
 }
+let montes = null; // la cordillera del fondo (más alta que el diluvio: se hunde mientras sube el agua, ver cuadroFinal)
 function armarMontes() {
   const lista = [], roca = C('#7d8a8f'), roca2 = C('#66757c'), nieve = C('#f3f6f8'), bosque = C('#4f7a46');
   for (let i = 0; i < 18; i++) {
@@ -631,7 +751,8 @@ function armarMontes() {
     }
     g.setAttribute('color', new THREE.BufferAttribute(col, 3)); lista.push(g);
   }
-  const montes = new THREE.Mesh(fusionar(lista), new THREE.MeshLambertMaterial({ vertexColors: true }));
+  montes = new THREE.Mesh(fusionar(lista), new THREE.MeshLambertMaterial({ vertexColors: true }));
+  montes.geometry.computeBoundingBox(); montes.userData.tope = montes.geometry.boundingBox.max.y;
   scene.add(montes);
 }
 function libre(x, z, dCamino, dArca) {
@@ -893,7 +1014,8 @@ function actualizarClima(dt, t) {
     nubes.material.color.copy(mezclar('#ffffff', '#6b737c', n)); nubes.material.emissive.copy(mezclar('#9aa4ad', '#3b4048', n));
     nubesDatos.forEach((b, i) => {
       const s = b.s * suave(b.umbral, b.umbral + 0.1, visibles), c = Math.cos(giro), sn = Math.sin(giro);
-      _d.position.set(b.x * c - b.z * sn, b.y - n * 25, b.x * sn + b.z * c); _d.scale.set(s * 1.4, s * 0.8, s); _d.updateMatrix(); nubes.setMatrixAt(i, _d.matrix);
+      _d.position.set(b.x * c - b.z * sn, b.y - n * 25 + H.yArca, b.x * sn + b.z * c); // con el arca a flote, las nubes suben con ella
+      _d.scale.set(s * 1.4, s * 0.8, s); _d.updateMatrix(); nubes.setMatrixAt(i, _d.matrix);
     });
     nubes.instanceMatrix.needsUpdate = true;
   }
@@ -1000,8 +1122,8 @@ function chocar(x, z) {
 }
 function actualizarCamara(dt) {
   if (camS.cine) {
-    const c = camS.cine; c.t = Math.min(1, c.t + dt / c.dur); const e = suave(0, 1, c.t);
-    cam.position.lerpVectors(c.desde, c.pos, e); camS.mira.lerpVectors(c.mirarDesde, c.mira, e); cam.lookAt(camS.mira);
+    const c = camS.cine; c.t = Math.min(1, c.t + dt / c.dur); const e = suave(0, 1, c.t), dy = c.sigue ? H.yArca : 0;
+    cam.position.lerpVectors(c.desde, c.pos.clone().setY(c.pos.y + dy), e); camS.mira.lerpVectors(c.mirarDesde, c.mira.clone().setY(c.mira.y + dy), e); cam.lookAt(camS.mira);
     return;
   }
   const alto = jug.actor ? jug.actor.alto : 1.2;
@@ -1213,7 +1335,7 @@ async function crearNoe() {
     try {
       const g = await cargarGlb(MODELOS + f.archivo), cl = await clipsDe(g, f), a = actorDeGlb(g, f, cl, Number(f.altura) || 1.75);
       const grupo = new THREE.Group(); grupo.add(a.modelo); grupo.position.set(x, suelo(x, z), z); scene.add(grupo); animar(a, 'idle', 1);
-      noe = { actor: a, grupo, x, z, rumbo: 0 };
+      noe = { actor: a, grupo, x, z, rumbo: 0, casa: [x, z] };
       console.info('Two by Two: Noé de ' + f.archivo + ' (' + Object.keys(a.clips).filter(k => a.clips[k]).join(', ') + ')');
       return;
     } catch (e) { console.warn('Two by Two: no cargó Noé (' + (e && e.message || e) + '); sale el cartel.'); }
@@ -1346,7 +1468,7 @@ function responder(i) {
     SN.tocar('bien'); aviso(D.frases.bien);
     if (LEC) LJ.progreso({ aciertos: J.aciertos, total: J.total / 2, fallos: J.errores, nivel: 'arca' });
     Voz.decir([p.ops[i], D.frases.bien]);
-    setTimeout(() => cerrarPregunta(true), 1700);
+    setTimeout(() => { cerrarPregunta(true); capturar(); }, 1700);
   } else {
     p.fallos++; J.errores++;
     b.classList.add('mal'); b.disabled = true;
@@ -1394,35 +1516,210 @@ function revisarEntrega() {
   else if (paso === 'buscar') { const [es, en] = textos('primero'); anunciar('Noé: ' + es, en, 3500); latir(); Voz.noe(en); }
 }
 
-/* ---------- final: la puerta, la lluvia y el arcoíris ---------- */
+/* ---------- final: la historia del diluvio, en viñetas (Génesis 7–9) ----------
+   Al entrar la última pareja el jugador deja de mandar: Noé y el niño suben la rampa y entran; la puerta se cierra;
+   llueve, el agua tapa toda la pradera y los montes y el arca flota (la rampa, suelta del casco, se queda en el suelo);
+   escampa, Noé sale arriba, envía el cuervo y vuelve, envía la paloma y vuelve con la hoja; baja el agua, el arca se
+   posa donde estaba (otra vez sobre su rampa) y sale el arcoíris. Cada paso tiene su letrero (inglés grande y español
+   debajo, de DATOS_ARCA.historia). «Saltar la historia» (o Esc) lleva al final. Con prefers-reduced-motion: cortes de
+   cámara en vez de travellings, sin relámpagos ni vaivén. */
+const QUIETO = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+const CALADO = 5; // m de casco bajo el agua cuando flota
+const H = { paso: null, i: -1, t: 0, yArca: 0, nivel: 76, andan: [], aves: {} };
+const PASOS = ['entran', 'puerta', 'llueve', 'flota', 'escampa', 'arriba', 'cuervo', 'cuervoVuelve', 'paloma', 'palomaVuelve', 'baja', 'tierra', 'arco'];
+const DUR = { entran: 16, puerta: 3, llueve: 3.4, flota: 7, escampa: 3.4, arriba: 3.4, cuervo: 4.2, cuervoVuelve: 3.8, paloma: 4.2, palomaVuelve: 4, baja: 7, tierra: 3, arco: 4.5 };
+// cámara: con QUIETO, corte; `sigue` = sube y baja con el arca
+function toma(pos, mira, dur, sigue) { cine(pos, mira, QUIETO ? 0.01 : dur); camS.cine.sigue = !!sigue; }
+function letrero(paso) {
+  const h = D.historia && D.historia[paso];
+  if (!h) return;
+  const en = D.frases[h.en] || h.en;
+  $('hiEn').textContent = en; $('hiEs').textContent = h.es; $('historia').classList.remove('oculto');
+  $('historia').classList.remove('nueva'); void $('historia').offsetWidth; $('historia').classList.add('nueva');
+  if (h.noe) Voz.noe(en); else Voz.decir(en);
+}
+// Los dos pájaros: el GLB del manifiesto (agrandado: a escala real no se verían junto a un arca de 32 m) o uno de bolitas.
+async function cargarAves() {
+  for (const [id, color] of [['cuervo', '#26282c'], ['paloma', '#f4f1ea']]) {
+    if (H.aves[id]) continue;
+    const f = manifiesto[id];
+    let g = null;
+    try { if (f && f.archivo) g = figura(await cargarGlb(MODELOS + f.archivo), 1.1); } catch (e) { g = null; }
+    if (!g) {
+      g = new THREE.Group(); const c = new THREE.Group(); g.add(c);
+      const cuerpo = new THREE.Mesh(new THREE.SphereGeometry(0.35, 10, 8), M(color)); cuerpo.scale.set(0.8, 0.8, 1.3); cuerpo.position.y = 0.45; c.add(cuerpo);
+      const cab = new THREE.Mesh(new THREE.SphereGeometry(0.2, 10, 8), M(color)); cab.position.set(0, 0.75, 0.35); c.add(cab);
+      const pico = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.2, 6), M(id === 'cuervo' ? '#4a4d52' : '#e89aa6')); pico.rotation.x = Math.PI / 2; pico.position.set(0, 0.73, 0.6); c.add(pico);
+      [-1, 1].forEach(sx => { const ala = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.05, 0.4), M(color)); ala.position.set(sx * 0.4, 0.55, 0); c.add(ala); });
+      scene.add(g);
+    }
+    g.visible = false;
+    if (id === 'paloma') { // la hoja de olivo en el pico (Génesis 8:11), sólo a la vuelta
+      const hoja = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 6), M('#5f9e3a')); hoja.scale.set(0.5, 0.25, 1.4); hoja.position.set(0.05, 0.88, 0.62); hoja.visible = false; g.add(hoja); g.userData.hoja = hoja;
+    }
+    H.aves[id] = g;
+  }
+}
+const cubiertaMundo = () => ARCA.cubierta.clone().setY(ARCA.cubierta.y + H.yArca);
+// vuelo de ida (u: 0→1) o de vuelta (1→0) por una curva: sube por encima de la popa y se pierde sobre el agua
+function volar(g, u, dt, vuelta) {
+  const p0 = cubiertaMundo().add(new V3(0.9, 1.7, 0.7)), lejos = p0.clone().add(new V3(-42, 14, -62)), ctrl = p0.clone().add(new V3(vuelta ? -32 : -4, vuelta ? 20 : 16, vuelta ? -18 : -8));
+  const k = vuelta ? 1 - u : u, q = new V3();
+  q.copy(p0).multiplyScalar((1 - k) * (1 - k)).addScaledVector(ctrl, 2 * k * (1 - k)).addScaledVector(lejos, k * k);
+  const antes = g.position.clone(); g.position.copy(q);
+  const d = q.clone().sub(antes);
+  if (d.lengthSq() > 1e-6) g.rotation.y = Math.atan2(d.x, d.z);
+  const c = g.children[0], aleteo = QUIETO ? 4 : 9;
+  if (c) { c.rotation.z = Math.sin(H.t * aleteo) * 0.22; c.position.y = Math.sin(H.t * aleteo) * 0.08; }
+  g.visible = true;
+}
+function posarAve(g, dx) {
+  const p = cubiertaMundo().add(new V3(dx, 0.05, 1.3));
+  g.position.copy(p); g.rotation.y = 0.4; if (g.children[0]) { g.children[0].rotation.z = 0; g.children[0].position.y = 0; }
+  g.visible = true;
+}
+// Noé y el niño suben por la rampa; al pasar la puerta, adentro (se esconden ya en el establo)
+function andarGuion(w, dt) {
+  const o = w.o;
+  if (w.hecho) return true;
+  if (w.espera > 0) { w.espera -= dt; if (o.actor) animar(o.actor, 'idle', 1); return false; }
+  const p = w.ruta[0];
+  if (!p) { w.hecho = true; o.grupo.visible = false; if (o.actor) animar(o.actor, 'idle', 1); return true; }
+  const dx = p[0] - o.x, dz = p[1] - o.z, d = Math.hypot(dx, dz);
+  if (d < 0.35) { w.ruta.shift(); return false; }
+  o.rumbo += angDif(o.rumbo, Math.atan2(dx, dz)) * Math.min(1, dt * 7);
+  const v = Math.min(w.vel, 1 + d * 3);
+  o.x += Math.sin(o.rumbo) * v * dt; o.z += Math.cos(o.rumbo) * v * dt;
+  o.y = lerp(o.y == null ? suelo(o.x, o.z) : o.y, suelo(o.x, o.z), Math.min(1, dt * 12));
+  o.grupo.position.set(o.x, o.y, o.z); o.grupo.rotation.y = o.rumbo;
+  if (o.actor) { if (o === jug) pasoJugador(o.actor, v); else pasoDe(o.actor, v, 3.5); }
+  return false;
+}
 function empezarFinal() {
-  J.fase = 'final'; J.tf = 0; J.segundos = Math.round((performance.now() - J.t0) / 1000);
+  J.fase = 'final'; J.segundos = Math.round((performance.now() - J.t0) / 1000);
   const [tEs, tEn] = textos('todos'); $('hObj').textContent = tEs; $('hObjEn').textContent = tEn;
   huellas.visible = false; aro.visible = false;
   ['bTocar', 'palanca', 'ayuda'].forEach(id => $(id).classList.add('oculto'));
   marcaArca.visible = false; anillo.visible = false;
-  const r = ARCA.rampa;
-  if (ARCA.abrir) ARCA.abreMeta = 1; else { ARCA.puerta.visible = true; ARCA.puerta.rotation.x = ARCA.abierta; }
-  jug.grupo.visible = true; J.vista = 3;
-  cine(new V3(r.cx + 34, 11, r.zSuelo + 46), new V3(0, 13, 0), 2.6);
-  J.hitos = {};
+  teclas.clear(); palanca.x = palanca.y = 0; jug.vel = 0;
+  $('bSaltar').classList.remove('oculto'); $('anuncio').classList.remove('ver');
+  H.i = -1; H.yArca = 0; H.andan = [];
+  cargarAves().catch(() => {});
+  siguientePaso();
+}
+function siguientePaso() {
+  H.i++; H.paso = PASOS[H.i]; H.t = 0;
+  if (!H.paso) { terminarHistoria(); return; }
+  const r = ARCA.rampa, A = ARCA, cub = ARCA.cubierta, p = H.paso;
+  letrero(p);
+  if (p === 'entran') {
+    // el jugador, si quedó lejos, aparece junto al aro (sin que se vea: la cámara corta a la rampa)
+    if (Math.hypot(jug.x - ARO.x, jug.z - ARO.z) > 16) { jug.x = ARO.x - 2.5; jug.z = ARO.z + 5; jug.y = suelo(jug.x, jug.z); }
+    jug.grupo.visible = true; J.vista = 3;
+    const carril = s => r.cx + s * Math.min(1.3, r.ancho / 4);
+    if (noe && noe.actor) {
+      noe.guion = true; noe.y = suelo(noe.x, noe.z);
+      H.andan.push({ o: noe, vel: 5, espera: 0, ruta: [[carril(1), r.zSuelo + 1.5], [carril(1), r.zTope + 0.5], [carril(0.5), r.zPuerta - 4.5]] });
+    }
+    H.andan.push({ o: jug, vel: 5.4, espera: noe && noe.actor ? 0.8 : 0, ruta: [[carril(-1), Math.max(ARO.z, jug.z - 2)], [carril(-1), r.zSuelo + 1.5], [carril(-1), r.zTope + 0.5], [carril(-0.5), r.zPuerta - 4.5]] });
+    if (A.abrir) A.abreMeta = 1; else { A.puerta.visible = true; A.puerta.rotation.x = A.abierta; }
+    toma(new V3(r.cx + 24, r.yTope + 5, r.zSuelo + 9), new V3(r.cx, r.yTope * 0.6, (r.zTope + r.zSuelo) / 2 + 2), 2.4);
+  } else if (p === 'puerta') {
+    toma(new V3(r.cx + 9, r.yTope + 3, r.zSuelo + 6), new V3(r.cx, r.yTope + 3, r.zPuerta), 1.6);
+    clima.meta.nub = 0.7;
+  } else if (p === 'llueve') {
+    clima.meta.nub = 1; clima.meta.lluvia = QUIETO ? 0.6 : 1;
+    toma(new V3(r.cx + 62, 20, r.zSuelo + 78), new V3(0, 12, 0), 3, true);
+  } else if (p === 'escampa') {
+    clima.meta.lluvia = 0; clima.meta.nub = 0.45;
+  } else if (p === 'arriba') {
+    if (noe && noe.actor) {
+      noeArriba(); noe.ora = false;
+      animarUnaVez(noe.actor, 'wave', 'idle');
+    }
+    toma(new V3(cub.x - 3, cub.y + 5.5, 14), new V3(cub.x, cub.y + 1.6, 0), 2.6, true);
+  } else if (p === 'cuervo') {
+    const vertical = innerWidth < innerHeight; // en el celular parado, Noé queda dentro del cuadro
+    toma(new V3(cub.x + 3, cub.y + 7, 19), new V3(cub.x - (vertical ? 3 : 10), cub.y + (vertical ? 4 : 7), vertical ? -6 : -12), 1.8, true);
+  } else if (p === 'paloma') {
+    if (H.aves.cuervo) posarAve(H.aves.cuervo, 1.8);
+  } else if (p === 'palomaVuelve') {
+    if (H.aves.paloma && H.aves.paloma.userData.hoja) H.aves.paloma.userData.hoja.visible = true;
+  } else if (p === 'baja') {
+    if (H.aves.cuervo) A.grupo.attach(H.aves.cuervo);
+    if (H.aves.paloma) { posarAve(H.aves.paloma, 2.6); A.grupo.attach(H.aves.paloma); }
+    toma(new V3(r.cx + 62, 20, r.zSuelo + 78), new V3(0, 12, 0), 2.4, true);
+  } else if (p === 'tierra') {
+    clima.meta.nub = 0.15;
+  } else if (p === 'arco') {
+    clima.meta.arco = 1; SN.tocar('arcoiris');
+    if (noe && noe.actor) { noe.ora = true; animar(noe.actor, noe.actor.clips.pray ? 'pray' : 'kneel', 1); }
+    toma(new V3(r.cx + 20, 6, r.zSuelo + 70), new V3(10, 30, -120), 4);
+  }
 }
 function cuadroFinal(dt) {
-  J.tf += dt; const t = J.tf, h = J.hitos;
-  const una = (k, fn) => { if (!h[k]) { h[k] = 1; fn(); } };
-  if (ARCA.abrir) { ARCA.abre = 1 - suave(0.4, 2.6, t); ARCA.abrir(ARCA.abre); } else ARCA.puerta.rotation.x = lerp(ARCA.abierta, 0, suave(0.4, 2.6, t));
-  una('golpe', () => setTimeout(() => SN.tocar('puerta'), 2500));
-  if (t > 2.7) una('puerta', () => { Voz.noe(D.frases.puerta); clima.meta.nub = 1; });
-  if (t > 4.5) una('lluvia', () => { clima.meta.lluvia = 1; Voz.noe(D.frases.lluvia); });
-  if (t > 4.5 && t < 11) clima.agua = Math.min(-0.3, clima.agua + dt * 0.08);
-  if (t > 6) una('rayo1', rayo);
-  if (t > 8.6) una('rayo2', rayo);
-  if (t > 11) una('escampa', () => { clima.meta.lluvia = 0; clima.meta.nub = 0.15; });
-  if (t > 13) una('arco', () => { clima.meta.arco = 1; SN.tocar('arcoiris'); Voz.noe(D.frases.arcoiris); if (noe && noe.actor) { noe.ora = true; animar(noe.actor, noe.actor.clips.pray ? 'pray' : 'kneel', 1); } });
-  if (t > 13) una('cineArco', () => cine(new V3(ARCA.rampa.cx + 20, 6, ARCA.rampa.zSuelo + 70), new V3(10, 30, -120), 4));
-  if (t > 17.5) una('fin', terminar);
+  H.t += dt; const t = H.t, p = H.paso, A = ARCA, dur = DUR[p] || 3, f = suave(0, 1, t / dur);
+  if (!p) return;
+  // el agua: sube con la lluvia, tapa todo, se queda y baja; el arca flota sobre ella
+  if (p === 'llueve') clima.agua = lerp(-1, 4, f);
+  else if (p === 'flota') clima.agua = lerp(4, H.nivel, f);
+  else if (p === 'baja') clima.agua = lerp(H.nivel, -1, f);
+  agua.material.opacity = lerp(0.9, 0.97, suave(4, 20, clima.agua));
+  // la cordillera del fondo pasa de 200 m: baja a la par del agua para quedar tapada cuando el agua está arriba
+  if (montes) montes.position.y = -Math.max(0, montes.userData.tope + 4 - H.nivel) * (clima.agua + 1) / (H.nivel + 1);
+  H.yArca = Math.max(0, clima.agua - CALADO);
+  const flota = H.yArca > 0.01 && !QUIETO;
+  A.grupo.position.y = H.yArca + (flota ? Math.sin(reloj3.elapsedTime * 0.9) * 0.25 : 0);
+  A.grupo.rotation.z = flota ? Math.sin(reloj3.elapsedTime * 0.7) * 0.012 : 0;
+  A.grupo.rotation.x = flota ? Math.sin(reloj3.elapsedTime * 0.5 + 1) * 0.008 : 0;
+  let listo = t >= dur;
+  if (p === 'entran') {
+    if (A.abrir) { A.abre = Math.min(1, A.abre + dt * 0.6); A.abrir(suave(0, 1, A.abre)); }
+    let todos = true; H.andan.forEach(w => { if (!andarGuion(w, dt)) todos = false; });
+    listo = (todos && t > 1) || t >= dur;
+    if (listo) H.andan.forEach(w => { w.o.grupo.visible = false; });
+  } else if (p === 'puerta') {
+    if (A.abrir) { A.abre = Math.min(A.abre, 1 - suave(0.2, 2.4, t)); A.abrir(A.abre); } else A.puerta.rotation.x = lerp(A.abierta, 0, suave(0.2, 2.4, t));
+    if (t > 2.2) unaVez('golpe', () => SN.tocar('puerta'));
+  } else if (p === 'llueve') { if (t > 1.2) unaVez('rayo1', rayo); }
+  else if (p === 'flota') { if (t > 3.5) unaVez('rayo2', rayo); }
+  else if (p === 'cuervo' && H.aves.cuervo) volar(H.aves.cuervo, f, dt, false);
+  else if (p === 'cuervoVuelve' && H.aves.cuervo) volar(H.aves.cuervo, f, dt, true);
+  else if (p === 'paloma' && H.aves.paloma) volar(H.aves.paloma, f, dt, false);
+  else if (p === 'palomaVuelve' && H.aves.paloma) volar(H.aves.paloma, f, dt, true);
+  if (listo) siguientePaso();
 }
-function rayo() { const f = $('flash'); f.classList.remove('ver'); void f.offsetWidth; f.classList.add('ver'); destello = 1; setTimeout(() => SN.tocar('trueno'), 350); }
+// Noé en la cubierta, colgado del arca (sube, baja y se mece con ella), mirando hacia la pradera
+function noeArriba() {
+  ARCA.grupo.add(noe.grupo); noe.grupo.visible = true;
+  noe.grupo.position.copy(ARCA.cubiertaLocal); noe.grupo.rotation.set(0, 0.5 - ARCA.grupo.rotation.y, 0);
+}
+function unaVez(k, fn) { H.hitos = H.hitos || {}; if (!H.hitos[k + H.i]) { H.hitos[k + H.i] = 1; fn(); } }
+function terminarHistoria() {
+  H.paso = null;
+  $('bSaltar').classList.add('oculto'); $('historia').classList.add('oculto');
+  terminar();
+}
+// Saltar: todo como queda al final (el arca en tierra, Noé arriba orando, el arcoíris) y la tarjeta de una vez
+function saltarHistoria() {
+  if (J.fase !== 'final') return;
+  Voz.callar();
+  const A = ARCA, r = A.rampa;
+  H.andan.forEach(w => { w.o.grupo.visible = false; }); H.andan = [];
+  clima.agua = -1; H.yArca = 0; A.grupo.position.y = 0; if (montes) montes.position.y = 0; A.grupo.rotation.x = A.grupo.rotation.z = 0; agua.material.opacity = 0.9;
+  if (A.abrir) { A.abre = A.abreMeta = 0; A.abrir(0); } else if (A.puerta) { A.puerta.visible = true; A.puerta.rotation.x = 0; }
+  Object.assign(clima.meta, { nub: 0.15, lluvia: 0, arco: 1 }); clima.nub = 0.15; clima.lluvia = 0; clima.arco = 1;
+  if (noe && noe.actor) {
+    noeArriba(); noe.guion = true; noe.ora = true; animar(noe.actor, noe.actor.clips.pray ? 'pray' : 'kneel', 1);
+  }
+  Object.values(H.aves).forEach(g => { g.visible = false; });
+  cine(new V3(r.cx + 20, 6, r.zSuelo + 70), new V3(10, 30, -120), 0.01);
+  terminarHistoria();
+}
+function rayo() {
+  if (!QUIETO) { const f = $('flash'); f.classList.remove('ver'); void f.offsetWidth; f.classList.add('ver'); destello = 1; } // sin destellos si se pidió menos movimiento
+  setTimeout(() => SN.tocar('trueno'), 350);
+}
 function terminar() {
   J.fase = 'fin';
   const est = J.errores <= 2 ? 3 : J.errores <= 6 ? 2 : 1;
@@ -1463,10 +1760,19 @@ function reiniciarMundo() {
   Object.assign(clima.meta, { nub: 0, lluvia: 0, arco: 0 }); clima.agua = -1;
   if (ARCA.puerta) ARCA.puerta.visible = false;
   if (ARCA.abrir) { ARCA.abre = ARCA.abreMeta = 0; ARCA.abrir(0); }
+  // lo que deja la historia del diluvio: el arca en su sitio, Noé abajo junto a la rampa, sin pájaros ni letrero
+  ARCA.grupo.position.y = 0; ARCA.grupo.rotation.x = ARCA.grupo.rotation.z = 0; H.yArca = 0; if (montes) montes.position.y = 0; H.paso = null; H.andan = []; H.hitos = {};
+  if (agua) agua.material.opacity = 0.9;
+  if (noe && noe.actor) {
+    scene.attach(noe.grupo); noe.guion = false; noe.ora = false; [noe.x, noe.z] = noe.casa;
+    noe.grupo.position.set(noe.x, suelo(noe.x, noe.z), noe.z); noe.grupo.rotation.set(0, noe.rumbo, 0); noe.grupo.visible = true; animar(noe.actor, 'idle', 1);
+  }
+  Object.values(H.aves).forEach(g => { scene.attach(g); g.visible = false; if (g.userData.hoja) g.userData.hoja.visible = false; });
+  $('historia').classList.add('oculto'); $('bSaltar').classList.add('oculto');
   camS.cine = null;
 }
 async function jugar() {
-  SN.despertar();
+  SN.despertar(); capturar();
   const b = $('bJugar'); b.disabled = true; b.textContent = 'Cargando…';
   try { await cargarJugador(J.nino); } catch (e) { /* queda el de cajitas */ }
   b.disabled = false; b.textContent = 'Jugar';
@@ -1514,7 +1820,7 @@ function portadaLeccion() {
 /* ---------- entrada ---------- */
 const AN = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ShiftLeft', 'ShiftRight'];
 addEventListener('keydown', ev => {
-  if (ev.code === 'Escape') { if (J.fase === 'juego' || J.fase === 'pregunta') pausar(!J.pausa); return; }
+  if (ev.code === 'Escape') { if (performance.now() - RATON.soltadoEn < 300) return; if (J.fase === 'final') saltarHistoria(); else if (J.fase === 'juego' || J.fase === 'pregunta') pausar(!J.pausa); return; }
   if (J.pausa) return;
   if (J.fase === 'pregunta' && /^Digit[123]$|^Numpad[123]$/.test(ev.code)) { responder(+ev.code.slice(-1) - 1); return; }
   if (ev.code === 'KeyV') { cambiarVista(); return; }
@@ -1525,7 +1831,41 @@ addEventListener('keyup', ev => teclas.delete(ev.code));
 addEventListener('blur', () => teclas.clear());
 // arrastrar para mirar; un toque corto sobre un animal lo toca
 const lienzo = rd.domElement, arrastres = {};
-lienzo.addEventListener('pointerdown', ev => { if (ev.pointerType === 'touch' && !tactil) { tactil = true; if (J.fase === 'juego') $('palanca').classList.remove('oculto'); } arrastres[ev.pointerId] = { x: ev.clientX, y: ev.clientY, x0: ev.clientX, y0: ev.clientY, t: performance.now() }; try { lienzo.setPointerCapture(ev.pointerId); } catch (e) { /* nada */ } SN.despertar(); });
+/* El ratón mira sin hacer clic, como en Destello (destello-game: Puntero.cs, PunteroReglas.cs, RatonReglas.cs): el
+   puntero se captura (pointer lock) al empezar a jugar o con el primer clic en el escenario, y entonces mover el ratón
+   gira la vista (0,1° por píxel; en Safari, que entrega movimientos más cortos, el doble) y un clic toca al animal de
+   enfrente. Con una tarjeta encima (pregunta, pausa, la historia del final, la tarjeta de fin) va suelto para poder
+   tocar los botones. Esc lo suelta el navegador y, jugando, eso abre la pausa; «Seguir» lo vuelve a capturar. En táctil
+   nunca se captura (se mira arrastrando el dedo) y con el teclado solo se gira con ← →. Si el navegador no lo da, queda
+   mirar arrastrando el ratón, como antes. */
+const RATON = { k: (/^((?!chrome|android).)*safari/i.test(navigator.userAgent) ? 2 : 1) * 0.1 * Math.PI / 180, adrede: false, soltadoEn: 0 };
+const capturado = () => document.pointerLockElement === lienzo;
+function capturar() {
+  if (tactil || capturado() || !lienzo.requestPointerLock) return;
+  try { const pr = lienzo.requestPointerLock(); if (pr && pr.catch) pr.catch(e => console.info('Two by Two: sin captura del ratón (' + (e && e.message) + ')')); } catch (e) { /* sin captura: se mira arrastrando */ }
+}
+function soltarRaton() { if (capturado()) { RATON.adrede = true; document.exitPointerLock(); } }
+document.addEventListener('pointerlockchange', () => {
+  if (capturado()) { lienzo.style.cursor = 'none'; return; }
+  lienzo.style.cursor = '';
+  const adrede = RATON.adrede; RATON.adrede = false; RATON.soltadoEn = performance.now();
+  if (!adrede && J.fase === 'juego' && !J.pausa) pausar(true); // Esc (u otra ventana): la pausa, como en Destello
+});
+document.addEventListener('mousemove', ev => {
+  if (!capturado() || J.pausa || J.fase !== 'juego') return;
+  camS.yaw -= ev.movementX * RATON.k;
+  if (J.vista === 1) camS.fpPitch = clamp(camS.fpPitch - ev.movementY * RATON.k, -1.1, 1.2);
+  else camS.pitch = clamp(camS.pitch + ev.movementY * RATON.k * 0.8, -0.25, 1.15);
+});
+// con una tarjeta encima, el puntero va suelto
+function punteroSegunFase() { if (capturado() && (J.pausa || J.fase === 'pregunta' || J.fase === 'final' || J.fase === 'fin')) soltarRaton(); }
+lienzo.addEventListener('pointerdown', ev => {
+  if (ev.pointerType === 'mouse' && !tactil && J.fase === 'juego' && !J.pausa) {
+    if (capturado()) { if (J.foco) tocar(J.foco); return; }
+    capturar(); // si el navegador no lo da, este mismo clic sirve para arrastrar
+
+  }
+  if (ev.pointerType === 'touch' && !tactil) { tactil = true; if (J.fase === 'juego') $('palanca').classList.remove('oculto'); } arrastres[ev.pointerId] = { x: ev.clientX, y: ev.clientY, x0: ev.clientX, y0: ev.clientY, t: performance.now() }; try { lienzo.setPointerCapture(ev.pointerId); } catch (e) { /* nada */ } SN.despertar(); });
 lienzo.addEventListener('pointermove', ev => {
   const a = arrastres[ev.pointerId]; if (!a) return;
   const dx = ev.clientX - a.x, dy = ev.clientY - a.y; a.x = ev.clientX; a.y = ev.clientY;
@@ -1538,7 +1878,7 @@ lienzo.addEventListener('pointermove', ev => {
 const soltar = ev => {
   const a = arrastres[ev.pointerId]; delete arrastres[ev.pointerId];
   if (!a || ev.type === 'pointercancel') return;
-  if (Math.hypot(ev.clientX - a.x0, ev.clientY - a.y0) < 9 && performance.now() - a.t < 400) tocarEnPantalla(ev.clientX, ev.clientY);
+  if (Math.hypot(ev.clientX - a.x0, ev.clientY - a.y0) < 9 && performance.now() - a.t < 400 && !capturado()) tocarEnPantalla(ev.clientX, ev.clientY); // el clic que captura no toca
 };
 lienzo.addEventListener('pointerup', soltar); lienzo.addEventListener('pointercancel', soltar);
 lienzo.addEventListener('wheel', ev => { if (J.vista === 3) camS.dist = clamp(camS.dist + Math.sign(ev.deltaY) * 0.6, 2.6, 11); ev.preventDefault(); }, { passive: false });
@@ -1570,13 +1910,14 @@ pal.addEventListener('pointerup', soltarPal); pal.addEventListener('pointercance
 $('bTocar').addEventListener('click', () => tocar(J.foco));
 $('bVista').addEventListener('click', cambiarVista);
 $('bPausa').addEventListener('click', () => pausar(true));
-$('bSeguir').addEventListener('click', () => pausar(false));
+$('bSeguir').addEventListener('click', () => { pausar(false); capturar(); });
 $('bSalir').addEventListener('click', alInicio);
 $('bJugar').addEventListener('click', jugar);
 $('bOtra').addEventListener('click', jugar);
 $('bOirEnc').addEventListener('click', () => { latir(); Voz.noe($('hObjEn').textContent); });
 $('bOirPreg').addEventListener('click', () => { if (!J.pregunta) return; if (LEC) { if (J.pregunta.oir) LJ.oir(J.pregunta.oir); } else Voz.decir(J.pregunta.texto); });
 function pintarSonido() { document.querySelectorAll('.bson').forEach(b => { b.setAttribute('aria-pressed', SN.esMudo() ? 'true' : 'false'); b.setAttribute('aria-label', SN.esMudo() ? 'Activar el sonido' : 'Silenciar'); }); }
+$('bSaltar').addEventListener('click', saltarHistoria);
 document.querySelectorAll('.bson').forEach(b => b.addEventListener('click', () => { SN.mudo(!SN.esMudo()); if (SN.esMudo()) Voz.callar(); prog.mudo = SN.esMudo(); guardarP(prog); pintarSonido(); }));
 if (prog.mudo) SN.mudo(true);
 pintarSonido();
@@ -1588,6 +1929,7 @@ let raf = 0, medida = { t: 0, n: 0, hecho: false };
 const _frustum = new THREE.Frustum(), _pv = new THREE.Matrix4(), _esfA = new THREE.Sphere();
 function cuadro(dt) {
   const t = reloj3.elapsedTime;
+  punteroSegunFase();
   tiempoU.value = t;
   if (!J.pausa) {
     if (J.fase === 'menu' || J.fase === 'carga') {
@@ -1596,7 +1938,7 @@ function cuadro(dt) {
       camS.mira.set(0, 12, 0); cam.lookAt(camS.mira);
     } else if (J.fase === 'juego') { moverJugador(dt); buscarFoco(); revisarEntrega(); actualizarCamara(dt); }
     else if (J.fase === 'pregunta') { jug.vel = 0; if (jug.actor) animar(jug.actor, 'idle', 1); jug.grupo.rotation.y = jug.rumbo; actualizarCamara(dt); }
-    else if (J.fase === 'final') { cuadroFinal(dt); if (jug.actor) animar(jug.actor, 'idle', 1); actualizarCamara(dt); }
+    else if (J.fase === 'final') { cuadroFinal(dt); actualizarCamara(dt); }
     else if (J.fase === 'fin') actualizarCamara(dt);
     animales.forEach(a => actualizarAnimal(a, dt, t));
     // brillo y anillo del animal que se puede tocar
@@ -1604,7 +1946,7 @@ function cuadro(dt) {
     animales.forEach(a => ponerBrillo(a, J.fase !== 'juego' ? 0 : a === J.foco ? 0.35 + 0.25 * Math.sin(t * 6) : a.especie === busca && (a.estado === 'pasea' || a.estado === 'mira') ? 0.12 + 0.1 * Math.sin(t * 4) : 0));
     guiar(t);
     if (anillo) { anillo.visible = !!J.foco && J.fase === 'juego'; if (anillo.visible) { const a = J.foco; anillo.position.set(a.x, a.y + 0.06, a.z); anillo.scale.setScalar(a.radio + 0.4 + Math.sin(t * 5) * 0.08); } }
-    if (noe && noe.actor && J.fase !== 'menu' && !noe.ora) { const ang = Math.atan2(jug.x - noe.x, jug.z - noe.z); noe.rumbo += angDif(noe.rumbo, ang) * Math.min(1, dt * 2); noe.grupo.rotation.y = noe.rumbo; }
+    if (noe && noe.actor && J.fase !== 'menu' && !noe.ora && !noe.guion) { const ang = Math.atan2(jug.x - noe.x, jug.z - noe.z); noe.rumbo += angDif(noe.rumbo, ang) * Math.min(1, dt * 2); noe.grupo.rotation.y = noe.rumbo; }
     if (jug.actor && jug.actor.mixer) jug.actor.mixer.update(dt);
     // muchos animales: los lejanos se esconden (menos en tableta), y el esqueleto y la sombra sólo se calculan cerca
     // y los que quedan fuera de cámara también (los de esqueleto no los recorta three: van con frustumCulled = false)
@@ -1615,7 +1957,7 @@ function cuadro(dt) {
       const d = Math.hypot(a.x - cam.position.x, a.z - cam.position.z), importa = a.especie === enc || a.estado === 'sigue' || a.estado === 'va';
       _esfA.center.set(a.x, a.y + a.actor.alto * 0.5, a.z); _esfA.radius = Math.max(a.actor.alto, a.radio * 2) + 0.5;
       const enCamara = _frustum.intersectsSphere(_esfA);
-      a.grupo.visible = enCamara && (d < lejos || importa);
+      a.grupo.visible = enCamara && (d < lejos || importa) && a.y + a.actor.alto > clima.agua; // el diluvio los tapa
       if (a.actor.mixer && a.grupo.visible && (d < cercaAnim || importa)) a.actor.mixer.update(dt);
       const sombra = d < 30;
       if (sombra !== a.sombra) { a.sombra = sombra; a.actor.modelo.traverse(o => { if (o.isMesh) o.castShadow = sombra; }); }
@@ -1655,9 +1997,10 @@ async function preparar() {
     console.info('Two by Two: arca de ' + urlArca + ' (' + (2 * A.hx).toFixed(0) + ' × ' + (2 * A.hz).toFixed(0) + ' m, rampa ' + (A.rampa ? 'del modelo, lado ' + (A.lado > 0 ? '+z' : '−z') : 'hecha aquí: el modelo no la trae') + ').');
   } catch (e) { A = null; console.warn('Two by Two: no cargó el arca ' + urlArca + ' (' + (e && e.message || e) + '); sale el arca provisional.'); }
   if (!A) A = arcaProvisional();
-  ARCA = A; completarRampa(A); scene.add(A.grupo);
+  ARCA = A; completarRampa(A); cubierta(A); armarInterior(A); scene.add(A.grupo);
   progreso(0.35, 'Sembrando la pradera…');
   armarMundo();
+  H.nivel = alturas.reduce((m, h) => Math.max(m, h), -Infinity) + 3; // el diluvio tapa hasta el monte más alto
   progreso(0.45, 'Llamando a los animales…');
   await crearAnimales(especiesDelMundo(), f => progreso(0.45 + f * 0.45));
   await crearNoe();
@@ -1682,6 +2025,8 @@ window.__juego = {
     pregunta: J.pregunta && { texto: J.pregunta.texto, ops: J.pregunta.ops, correcta: J.pregunta.correcta, tipo: J.pregunta.tipo },
     arca: ARCA && { glb: ARCA.glb, lado: ARCA.lado, hx: +ARCA.hx.toFixed(1), hz: +ARCA.hz.toFixed(1), rampa: Object.fromEntries(Object.entries(ARCA.rampa).map(([k, v]) => [k, typeof v === 'number' ? +v.toFixed(2) : v])) },
     animales: animales.map(a => ({ id: a.id, modelo: a.modelo, clips: !!a.actor.mixer, estado: a.estado, x: +a.x.toFixed(1), z: +a.z.toFixed(1) })),
+    raton: capturado(), yaw: +camS.yaw.toFixed(3),
+    historia: { paso: H.paso, t: +H.t.toFixed(1), yArca: +H.yArca.toFixed(1), agua: +clima.agua.toFixed(1), nivel: +H.nivel.toFixed(1), letrero: $('historia').classList.contains('oculto') ? null : $('hiEn').textContent },
     clima: { nub: +clima.nub.toFixed(2), lluvia: +clima.lluvia.toFixed(2), arco: +clima.arco.toFixed(2) }, noe: noe ? (noe.actor ? 'modelo' : 'cartel') : null,
     dpr
   }),
@@ -1695,6 +2040,11 @@ window.__juego = {
   objetivo: () => ({ paso: J.fase === 'juego' ? pasoActual() : J.fase, texto: $('hObj').textContent, en: $('hObjEn').textContent }),
   ganar: () => { animales.forEach(a => { if (J.orden.includes(a.especie) && a.estado !== 'dentro') { a.estado = 'dentro'; a.grupo.visible = false; } }); J.dentro = J.total; hud(); empezarFinal(); },
   vista: () => cambiarVista(),
+  // las tripas, para sondear desde Playwright
+  _int: () => ({ scene, ARCA, cam, terreno, recorrer }),
+  saltar: () => saltarHistoria(),
+  // abre (1) o cierra (0) la puerta del arca
+  abrir: f => { if (ARCA) ARCA.abreMeta = f; return !!(ARCA && ARCA.abrir); },
   // lleva la cámara a un punto mirando a otro (para revisar el arca de cerca): cine([x, y, z], [x, y, z])
   cine: (pos, mira) => cine(new V3(...pos), new V3(...mira), 0.01),
   // pone esa especie como el encargo actual (si está en el mundo)

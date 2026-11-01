@@ -5,7 +5,7 @@
 window.DATOS_ARCA = {
   titulo: 'Two by Two',
   frase: 'Ayuda a Noé: encuentra los animales de dos en dos, responde en inglés y llévalos al arca antes de la lluvia.',
-  como: 'Camina con WASD o las flechas y mira arrastrando el ratón. Acércate a un animal y pulsa E o tócalo. V cambia la cámara.',
+  como: 'Camina con WASD o las flechas. Mueve el ratón para mirar (o gira con ← →); Esc lo suelta. Acércate a un animal y pulsa E o haz clic. V cambia la cámara.',
   comoTactil: 'Camina con la palanca y mira arrastrando el dedo. Acércate a un animal y tócalo.',
 
   /* Cuántas parejas hay en una partida: 6 parejas = «Animals: n / 12». */
@@ -56,7 +56,36 @@ window.DATOS_ARCA = {
     lluvia: 'It’s raining!',
     arcoiris: 'Look! A rainbow!',
     todos: 'All the animals are in the ark!',
-    final: 'Well done!'
+    final: 'Well done!',
+    // la historia del diluvio, al final (las dice la narradora, no Noé)
+    hEntran: 'Noah and you go into the ark.',
+    hFlota: 'Water covers everything. The ark floats!',
+    hEscampa: 'The rain stops. Water is everywhere.',
+    hArriba: 'Noah goes up on top of the ark.',
+    hCuervo: 'Noah sends out a raven.',
+    hCuervoVuelve: 'The raven comes back.',
+    hPaloma: 'Noah sends out a dove.',
+    hPalomaVuelve: 'The dove comes back with a leaf!',
+    hBaja: 'The water goes down.',
+    hTierra: 'The ark is on the land again.'
+  },
+
+  /* Los letreros de la historia del final (Génesis 7–9), uno por viñeta: `en` es la clave de `frases` (lo que se lee y
+     se oye en grande), `es` va debajo; `noe` = lo dice Noé con su voz. */
+  historia: {
+    entran: { en: 'hEntran', es: 'Noé y tú también entran al arca.' },
+    puerta: { en: 'puerta', es: 'La puerta del arca se cierra.', noe: true },
+    llueve: { en: 'lluvia', es: 'Llueve cuarenta días y cuarenta noches.', noe: true },
+    flota: { en: 'hFlota', es: 'El agua lo cubre todo. ¡El arca flota!' },
+    escampa: { en: 'hEscampa', es: 'Deja de llover, pero todo sigue inundado.' },
+    arriba: { en: 'hArriba', es: 'Noé sale arriba del arca.' },
+    cuervo: { en: 'hCuervo', es: 'Noé envía un cuervo.' },
+    cuervoVuelve: { en: 'hCuervoVuelve', es: 'El cuervo regresa.' },
+    paloma: { en: 'hPaloma', es: 'Noé envía una paloma.' },
+    palomaVuelve: { en: 'hPalomaVuelve', es: 'La paloma regresa con una hoja de olivo.' },
+    baja: { en: 'hBaja', es: 'El agua baja.' },
+    tierra: { en: 'hTierra', es: 'El arca vuelve a posarse en la tierra.' },
+    arco: { en: 'arcoiris', es: '¡Mira! El arcoíris: la promesa de Dios.', noe: true }
   },
 
   /* El objetivo de arriba, en español corto (el inglés va al lado, de `frases`). Cambia con cada paso:

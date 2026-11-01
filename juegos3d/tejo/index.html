@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Tejo</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Lexend:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="juego.css">
+</head>
+<body>
+<div id="gl" aria-hidden="true"></div>
+<div id="cargando" class="cargando"><b>Tejo</b><span>Mojando la greda…</span></div>
+
+<!-- en juego -->
+<div id="hud" class="hud oculto">
+  <div class="marcador" role="status" aria-live="off">
+    <span class="ico" aria-hidden="true">🎯</span>
+    <div><b id="hRonda"></b><small id="hPuntos"></small></div>
+  </div>
+  <div class="botones">
+    <button class="hb" id="bSonido" type="button" aria-pressed="false" title="Sonido (M)"><span aria-hidden="true" id="iSonido">🔊</span><span class="sr" id="tSonido">Silenciar</span></button>
+    <button class="hb" id="bAyuda" type="button" aria-pressed="false" title="Modo ayuda: la línea entera (L)"><span aria-hidden="true">📏</span><span class="rot">Ayuda</span></button>
+    <button class="hb" id="bCalma" type="button" aria-pressed="false" title="Modo calma (C)"><span aria-hidden="true">🐢</span><span class="rot">Calma</span></button>
+    <button class="hb" id="bMenu" type="button" title="Pausa (Esc)"><span aria-hidden="true">⏸</span><span class="sr">Pausa</span></button>
+  </div>
+</div>
+
+<!-- la lupa: el cajón visto de frente (lo pinta three en este hueco) -->
+<div id="lupa" class="lupa oculto" aria-hidden="true">
+  <span class="lupa-t">🔍 El cajón de cerca</span>
+  <span class="lupa-l"><span class="yo">★ tú</span> <span class="el">◆ Don Tulio</span></span>
+</div>
+
+<section id="carta" class="carta oculto" aria-labelledby="cPreg">
+  <p class="tipo" id="cTipo"></p>
+  <h2 id="cPreg"></h2>
+  <p class="palabra oculto" id="cPalabra" lang="en"></p>
+  <div class="cbar">
+    <button class="bsec oculto" id="bOir" type="button"><span aria-hidden="true">🔊</span> Oír<span class="largo"> otra vez</span> <small>(O)</small></button>
+    <button class="bsec oculto" id="bVer" type="button"><span aria-hidden="true">👁</span> Ver<span class="largo"> la palabra</span> <small>(V)</small></button>
+  </div>
+  <div class="ops" id="cOps" role="group" aria-label="Las opciones: 1, 2, 3 o 4"></div>
+  <p class="feed" id="cFeed" aria-live="polite"></p>
+  <button class="jugar oculto" id="bTirar" type="button">▶ ¡A tirar!</button>
+</section>
+
+<div id="mando" class="mando oculto" role="group" aria-label="El tiro: ángulo, fuerza, puntería y lanzar">
+  <p class="quien" id="hTejo"></p>
+  <div class="ctl" id="ctlAng">
+    <span class="rot" id="lAng">Ángulo</span>
+    <button class="paso" id="bAngMenos" type="button" aria-label="Más bajo, más rasante (flecha abajo)" title="Flecha abajo">▼</button>
+    <input type="range" id="rAng" min="10" max="60" step="1" value="40" aria-labelledby="lAng">
+    <button class="paso" id="bAngMas" type="button" aria-label="Más alto, más bombeado (flecha arriba)" title="Flecha arriba">▲</button>
+    <output id="oAng" for="rAng" aria-hidden="true">40°</output>
+  </div>
+  <div class="ctl">
+    <span class="rot" id="lFuerza">Fuerza</span>
+    <button class="paso" id="bMenos" type="button" aria-label="Menos fuerza (S)" title="S">−</button>
+    <input type="range" id="rFuerza" min="3" max="18" step="0.01" value="9" aria-labelledby="lFuerza">
+    <button class="paso" id="bMas" type="button" aria-label="Más fuerza (W)" title="W">+</button>
+    <output id="oFuerza" for="rFuerza" aria-hidden="true">9,0</output>
+  </div>
+  <div class="ctl">
+    <span class="rot" id="lLat">Puntería</span>
+    <button class="paso" id="bIzq" type="button" aria-label="Más a la izquierda (flecha izquierda)" title="Flecha izquierda">◀</button>
+    <input type="range" id="rLat" min="-6" max="6" step="0.1" value="0" aria-labelledby="lLat">
+    <button class="paso" id="bDer" type="button" aria-label="Más a la derecha (flecha derecha)" title="Flecha derecha">▶</button>
+    <output id="oLat" for="rLat" aria-hidden="true">0°</output>
+  </div>
+  <button class="blanzar" id="bLanzar" type="button" title="Lanzar (Espacio)"><span aria-hidden="true">🥏</span> ¡Lanzar!</button>
+  <p class="hlinea" id="hLinea" aria-live="polite"></p>
+</div>
+
+<!-- lo que pasó con el tiro, y la cuenta de la ronda -->
+<div id="aviso" class="aviso oculto" role="region" aria-labelledby="aTit">
+  <p class="grande" id="aTit"></p>
+  <p class="txt" id="aTxt"></p>
+  <ul class="det" id="aDet"></ul>
+  <p class="consejo" id="aConsejo"></p>
+  <button class="jugar" id="bSeguir" type="button">▶ Seguir</button>
+</div>
+
+<div id="anuncio" class="sr" aria-live="polite"></div>
+
+<!-- la sala de juegos: el inicio con todas las opciones -->
+<div id="inicio" class="capa oculto">
+  <div class="tarjeta" role="dialog" aria-labelledby="tTit">
+    <h1 id="tTit"><span aria-hidden="true">🎯</span> Tejo</h1>
+    <p class="frase">El deporte nacional de Colombia, que viene de los muiscas. Lanza el tejo con el ángulo y la fuerza justos hasta la greda: dentro del bocín es embocinada (6), si revientas una mecha son 3, las dos a la vez es moñona (9), y el tejo más cerca del bocín se lleva la mano (1). Juegas contra Don Tulio, de Turmequé.</p>
+    <div class="paso-t" id="lTema">1. Qué juegas</div>
+    <div class="fila-b" id="oTema" role="group" aria-labelledby="lTema"></div>
+    <div class="paso-t" id="lGrado">2. Tu grado</div>
+    <div class="fila-b" id="oGrado" role="group" aria-labelledby="lGrado"></div>
+    <div class="paso-t" id="lCancha">3. La cancha</div>
+    <div class="fila-b" id="oCancha" role="group" aria-labelledby="lCancha"></div>
+    <div class="paso-t" id="lPersona">4. Quién lanza</div>
+    <div class="fila-b" id="oPersona" role="group" aria-labelledby="lPersona"></div>
+    <label class="check"><input type="checkbox" id="oAyuda"> Modo ayuda: la línea punteada entera y la marca de dónde cae</label>
+    <label class="check"><input type="checkbox" id="oCalma"> Modo calma: la cámara quieta, chispazos pequeños, sin sacudidas</label>
+    <p class="record" id="tRecord"></p>
+    <div class="acciones">
+      <button class="jugar" id="bJugar" type="button">▶ A jugar</button>
+      <a class="volver" href="../index.html">Volver a los juegos</a>
+    </div>
+  </div>
+</div>
+
+<!-- pausa -->
+<div id="pausa" class="capa oculto">
+  <div class="tarjeta chica" role="dialog" aria-labelledby="pTit">
+    <h1 id="pTit">En pausa</h1>
+    <p class="frase" id="pRes"></p>
+    <p class="frase teclas">↑ ↓: ángulo · W S (o + −): fuerza · ← →: puntería (con Mayús, más rápido) · Espacio: lanzar · 1 2 3 4: responder · O: oír · V: ver · L: ayuda · C: calma · M: sonido.</p>
+    <p class="frase teclas">Puntos: mecha 3 · embocinada 6 · moñona (embocinada y mecha a la vez) 9 · mano (el tejo más cerca del bocín en cada ronda) 1.</p>
+    <div class="acciones">
+      <button class="jugar" id="bReanudar" type="button">▶ Seguir</button>
+      <button class="bsec" id="bInicio" type="button">Volver al inicio</button>
+    </div>
+  </div>
+</div>
+
+<!-- el final de una partida en la sala -->
+<div id="final" class="capa oculto">
+  <div class="tarjeta chica" role="dialog" aria-labelledby="fTit">
+    <p class="medalla" id="fMedalla" aria-hidden="true">🏆</p>
+    <h1 id="fTit">¡Fin del chico!</h1>
+    <p class="frase" id="fRes"></p>
+    <p class="frase" id="fRepasa"></p>
+    <div class="acciones">
+      <button class="jugar" id="bOtraVez" type="button">↻ La revancha</button>
+      <button class="bsec" id="bCambiar" type="button">Cambiar el juego</button>
+      <a class="volver" href="../index.html">Volver a los juegos</a>
+    </div>
+  </div>
+</div>
+
+<script src="../puente.js"></script>
+<script src="../leccion.js"></script>
+<script src="fisica.js"></script>
+<script src="contenido.js"></script>
+<script src="cancha.js"></script>
+<script src="juego.js"></script>
+</body>
+</html>
