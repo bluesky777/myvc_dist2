@@ -1122,7 +1122,9 @@ function chocar(x, z) {
 }
 function actualizarCamara(dt) {
   if (camS.cine) {
-    const c = camS.cine; c.t = Math.min(1, c.t + dt / c.dur); const e = suave(0, 1, c.t), dy = c.sigue ? H.yArca : 0;
+    const c = camS.cine;
+    if (c.fn) c.fn(c.pos, c.mira); // la cámara que sigue a alguien: el destino se recalcula cada cuadro
+    c.t = Math.min(1, c.t + dt / c.dur); const e = suave(0, 1, c.t), dy = c.sigue ? H.yArca : 0;
     cam.position.lerpVectors(c.desde, c.pos.clone().setY(c.pos.y + dy), e); camS.mira.lerpVectors(c.mirarDesde, c.mira.clone().setY(c.mira.y + dy), e); cam.lookAt(camS.mira);
     return;
   }
@@ -1538,6 +1540,57 @@ function letrero(paso) {
   $('historia').classList.remove('nueva'); void $('historia').offsetWidth; $('historia').classList.add('nueva');
   if (h.noe) Voz.noe(en); else Voz.decir(en);
 }
+/* Las alas que baten, como las del fénix (mascota-motor.ts, alasDelFenix): bisagras juntas, pegadas al lomo a la
+   altura de los hombros; el batido es el giro alrededor del eje de adelante y, a medida que el ala baja, se pliega
+   hacia atrás (giro vertical), así de frente se acorta y no se ve el corte. La paloma trae sus alas como nodos
+   (`ala_izq`, `ala_der`, mirando a +z); el cuervo es una sola malla (mirando a +x, alas a lo ancho en z): se le
+   separan las alas en dos mallas que comparten los datos del modelo (sólo cambia qué triángulos dibuja cada una) y se
+   cuelgan de una bisagra en el corte, metida un poco hacia el lomo. */
+const ALETEO = { de: -0.3, a: 0.45, barre: [0.12, 0.75], hz: 3.2 };
+function alasDe(g, id) {
+  const raiz = g.children[0] && g.children[0].children[0];
+  if (!raiz) return null;
+  raiz.updateMatrixWorld(true);
+  if (id === 'paloma') {
+    const alas = ['ala_izq', 'ala_der'].map(n => raiz.getObjectByName(n)).filter(Boolean);
+    if (alas.length !== 2) return null;
+    return alas.map(o => {
+      const signo = o.position.x >= 0 ? 1 : -1;
+      o.position.x *= 0.6; o.position.z -= 0.03; // juntas y detrás del lomo
+      return { o, eje: 'z', bate: signo, pliega: signo, r: o.rotation.clone() };
+    });
+  }
+  let malla = null; raiz.traverse(o => { if (o.isMesh && !malla) malla = o; });
+  if (!malla) return null;
+  const geo = malla.geometry, pos = geo.attributes.position, k = pos.normalized ? 1 / tope(pos.array || (pos.data && pos.data.array)) : 1;
+  const M = malla.matrix, Mi = M.clone().invert(), v = new V3();
+  const idx = geo.index ? geo.index.array : Array.from({ length: pos.count }, (_, i) => i);
+  const P = i => v.set(pos.getX(i) * k, pos.getY(i) * k, pos.getZ(i) * k).applyMatrix4(M).clone();
+  // en el espacio del modelo (alto 0..1, adelante +x, ancho z): ala = triángulo con el centro fuera del cuerpo, entre caderas y hombros
+  const CORTE = 0.2, cuerpo = [], lados = { 1: [], '-1': [] }, raices = { 1: [], '-1': [] };
+  for (let t = 0; t < idx.length; t += 3) {
+    const a = P(idx[t]), b = P(idx[t + 1]), c = P(idx[t + 2]), m = a.add(b).add(c).multiplyScalar(1 / 3);
+    if (Math.abs(m.z) > CORTE && m.y > 0.3 && m.y < 0.85) { const sg = m.z > 0 ? 1 : -1; lados[sg].push(idx[t], idx[t + 1], idx[t + 2]); if (Math.abs(m.z) < CORTE + 0.06) raices[sg].push(m); }
+    else cuerpo.push(idx[t], idx[t + 1], idx[t + 2]);
+  }
+  if (lados[1].length < 30 || lados[-1].length < 30) return null;
+  const sub = lista => { const n = new THREE.BufferGeometry(); Object.keys(geo.attributes).forEach(kk => n.setAttribute(kk, geo.attributes[kk])); n.setIndex(lista); return n; };
+  malla.geometry = sub(cuerpo); malla.frustumCulled = false;
+  return [1, -1].map(sg => {
+    const r = raices[sg], h = r.reduce((s2, p) => s2.add(p), new V3()).multiplyScalar(1 / Math.max(1, r.length));
+    h.z = sg * CORTE * 0.8; h.x -= 0.03; // la bisagra, en el corte, un poco hacia el lomo
+    const enMalla = h.clone().applyMatrix4(Mi), bis = new THREE.Group(), ala = new THREE.Mesh(sub(lados[sg]), malla.material);
+    bis.position.copy(enMalla); ala.position.copy(enMalla).multiplyScalar(-1); ala.frustumCulled = false; ala.castShadow = true;
+    bis.add(ala); malla.add(bis);
+    // mirando a +x: subir la punta de z>0 es girar −x; plegarla hacia atrás (−x) es girar −y
+    return { o: bis, eje: 'x', bate: -sg, pliega: -sg, r: bis.rotation.clone() };
+  });
+}
+function batirAlas(g, ang) {
+  const alas = g.userData.alas; if (!alas) return;
+  const u = suave(0, 1, (ALETEO.a - ang) / (ALETEO.a - ALETEO.de)), pliegue = lerp(ALETEO.barre[0], ALETEO.barre[1], u);
+  alas.forEach(w => { w.o.rotation[w.eje] = w.r[w.eje] + w.bate * ang; w.o.rotation.y = w.r.y + w.pliega * pliegue; });
+}
 // Los dos pájaros: el GLB del manifiesto (agrandado: a escala real no se verían junto a un arca de 32 m) o uno de bolitas.
 async function cargarAves() {
   for (const [id, color] of [['cuervo', '#26282c'], ['paloma', '#f4f1ea']]) {
@@ -1545,6 +1598,11 @@ async function cargarAves() {
     const f = manifiesto[id];
     let g = null;
     try { if (f && f.archivo) g = figura(await cargarGlb(MODELOS + f.archivo), 1.1); } catch (e) { g = null; }
+    if (g) {
+      try { g.userData.alas = alasDe(g, id); } catch (e) { g.userData.alas = null; }
+      if (id === 'cuervo') g.children[0].children[0].rotation.y = -Math.PI / 2; // el cuervo mira a +x: que vuele de frente
+      console.info('Two by Two: ' + id + (g.userData.alas ? ' con alas que baten' : ' sin alas sueltas'));
+    }
     if (!g) {
       g = new THREE.Group(); const c = new THREE.Group(); g.add(c);
       const cuerpo = new THREE.Mesh(new THREE.SphereGeometry(0.35, 10, 8), M(color)); cuerpo.scale.set(0.8, 0.8, 1.3); cuerpo.position.y = 0.45; c.add(cuerpo);
@@ -1569,13 +1627,18 @@ function volar(g, u, dt, vuelta) {
   const antes = g.position.clone(); g.position.copy(q);
   const d = q.clone().sub(antes);
   if (d.lengthSq() > 1e-6) g.rotation.y = Math.atan2(d.x, d.z);
-  const c = g.children[0], aleteo = QUIETO ? 4 : 9;
-  if (c) { c.rotation.z = Math.sin(H.t * aleteo) * 0.22; c.position.y = Math.sin(H.t * aleteo) * 0.08; }
+  // aleteo corto; con movimiento reducido, más lento y más corto
+  const hz = QUIETO ? 1 : ALETEO.hz, amp = QUIETO ? 0.5 : 1, s1 = Math.sin(H.t * hz * 6.283);
+  const ang = lerp(ALETEO.de, ALETEO.a, 0.5 + 0.5 * s1 * amp) * (QUIETO ? 0.7 : 1);
+  const c = g.children[0];
+  if (g.userData.alas) { batirAlas(g, ang); if (c) c.position.y = -s1 * 0.04 * amp; }
+  else if (c) { c.rotation.z = s1 * 0.22 * amp; c.position.y = s1 * 0.08 * amp; }
   g.visible = true;
 }
 function posarAve(g, dx) {
-  const p = cubiertaMundo().add(new V3(dx, 0.05, 1.3));
+  const p = cubiertaMundo().add(new V3(dx, 0.05, -0.5)); // junto a Noé, un paso atrás (de cerca no tapa el cuadro)
   g.position.copy(p); g.rotation.y = 0.4; if (g.children[0]) { g.children[0].rotation.z = 0; g.children[0].position.y = 0; }
+  if (g.userData.alas) g.userData.alas.forEach(w => w.o.rotation.copy(w.r)); // posado: las alas como vienen
   g.visible = true;
 }
 // Noé y el niño suben por la rampa; al pasar la puerta, adentro (se esconden ya en el establo)
@@ -1623,7 +1686,17 @@ function siguientePaso() {
     }
     H.andan.push({ o: jug, vel: 5.4, espera: noe && noe.actor ? 0.8 : 0, ruta: [[carril(-1), Math.max(ARO.z, jug.z - 2)], [carril(-1), r.zSuelo + 1.5], [carril(-1), r.zTope + 0.5], [carril(-0.5), r.zPuerta - 4.5]] });
     if (A.abrir) A.abreMeta = 1; else { A.puerta.visible = true; A.puerta.rotation.x = A.abierta; }
-    toma(new V3(r.cx + 24, r.yTope + 5, r.zSuelo + 9), new V3(r.cx, r.yTope * 0.6, (r.zTope + r.zSuelo) / 2 + 2), 2.4);
+    // de cerca y al lado de los dos, siguiéndolos rampa arriba hasta la puerta
+    toma(new V3(r.cx + 9, 4, r.zSuelo + 6), new V3(r.cx, 1, r.zSuelo), 1.6);
+    camS.cine.fn = (pos, mira) => {
+      const van = H.andan.filter(w => !w.hecho), m = new V3();
+      if (van.length) van.forEach(w => m.add(new V3(w.o.x, w.o.y || 0, w.o.z))); else m.set(r.cx, r.yTope, r.zPuerta);
+      if (van.length) m.multiplyScalar(1 / van.length);
+      m.z = Math.max(m.z, r.zPuerta - 1);
+      mira.set(m.x, m.y + 1.1, m.z - 1.5);
+      const k = innerWidth < innerHeight ? 1.7 : 1; // en el celular parado, más atrás para que quepan los dos
+      pos.set(m.x + 7.5 * k, m.y + 3.2 * k, m.z + 5.5 * k);
+    };
   } else if (p === 'puerta') {
     toma(new V3(r.cx + 9, r.yTope + 3, r.zSuelo + 6), new V3(r.cx, r.yTope + 3, r.zPuerta), 1.6);
     clima.meta.nub = 0.7;
@@ -1637,17 +1710,18 @@ function siguientePaso() {
       noeArriba(); noe.ora = false;
       animarUnaVez(noe.actor, 'wave', 'idle');
     }
-    toma(new V3(cub.x - 3, cub.y + 5.5, 14), new V3(cub.x, cub.y + 1.6, 0), 2.6, true);
+    toma(new V3(cub.x - 2.2, cub.y + 2.5, 6.2), new V3(cub.x, cub.y + 1.25, 0), 1.4, true);
   } else if (p === 'cuervo') {
     const vertical = innerWidth < innerHeight; // en el celular parado, Noé queda dentro del cuadro
-    toma(new V3(cub.x + 3, cub.y + 7, 19), new V3(cub.x - (vertical ? 3 : 10), cub.y + (vertical ? 4 : 7), vertical ? -6 : -12), 1.8, true);
+    // Noé grande delante y, detrás de él, el pájaro que se va sobre el agua
+    toma(new V3(cub.x + 2.4, cub.y + 2.3, 5.6), new V3(cub.x - (vertical ? 0.8 : 2.6), cub.y + (vertical ? 1.8 : 2.6), vertical ? -2 : -5), 1.8, true);
   } else if (p === 'paloma') {
-    if (H.aves.cuervo) posarAve(H.aves.cuervo, 1.8);
+    if (H.aves.cuervo) posarAve(H.aves.cuervo, -1.3);
   } else if (p === 'palomaVuelve') {
     if (H.aves.paloma && H.aves.paloma.userData.hoja) H.aves.paloma.userData.hoja.visible = true;
   } else if (p === 'baja') {
     if (H.aves.cuervo) A.grupo.attach(H.aves.cuervo);
-    if (H.aves.paloma) { posarAve(H.aves.paloma, 2.6); A.grupo.attach(H.aves.paloma); }
+    if (H.aves.paloma) { posarAve(H.aves.paloma, 1.3); A.grupo.attach(H.aves.paloma); }
     toma(new V3(r.cx + 62, 20, r.zSuelo + 78), new V3(0, 12, 0), 2.4, true);
   } else if (p === 'tierra') {
     clima.meta.nub = 0.15;
@@ -2041,7 +2115,7 @@ window.__juego = {
   ganar: () => { animales.forEach(a => { if (J.orden.includes(a.especie) && a.estado !== 'dentro') { a.estado = 'dentro'; a.grupo.visible = false; } }); J.dentro = J.total; hud(); empezarFinal(); },
   vista: () => cambiarVista(),
   // las tripas, para sondear desde Playwright
-  _int: () => ({ scene, ARCA, cam, terreno, recorrer }),
+  _int: () => ({ scene, ARCA, cam, terreno, recorrer, H }),
   saltar: () => saltarHistoria(),
   // abre (1) o cierra (0) la puerta del arca
   abrir: f => { if (ARCA) ARCA.abreMeta = f; return !!(ARCA && ARCA.abrir); },
