@@ -1,0 +1,1 @@
+var l=[1,2,3,4];var r=[1,2,3];var t={1:`Convivencia`,2:`Académico`,3:`Acuerdos`};function u(o,n){return n?.[`nombre_col${o}`]?.trim()||(t[o]??`Observaci\xF3n ${o}`)}function i(o,n){return`per${o}_col${n}`}function s(o,n){return o?r.filter(e=>!!o[i(n,e)]).length:0}export{u as a,s as i,l as n,r,i as t};
