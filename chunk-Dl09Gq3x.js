@@ -1,0 +1,1 @@
+var t=[`clasico`,`cuaderno`,`pizarra`,`comic`,`expedicion`,`cosmos`,`revista`];function s(e){return t.includes(e??``)?e:`clasico`}function o(){if(document.getElementById(`bib-fuentes-estilos`))return;let e=document.createElement(`link`);e.id=`bib-fuentes-estilos`,e.rel=`stylesheet`,e.href=`fuentes/estilos.css`,document.head.appendChild(e)}export{s as n,o as t};
