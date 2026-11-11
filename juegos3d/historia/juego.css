@@ -1,0 +1,66 @@
+/* Historias de la Biblia — juegos3d/historia. Contraste AA, foco visible, botones de 44 px o más. */
+:root{--colegio:#24386e;--ink:#1d2b53;--papel:#fffdf6;--bien:#1a7f37;--mal:#b42318;--sombra:0 10px 30px rgb(0 0 0 / 35%)}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:#20140c;color:var(--ink);font-family:"Lexend",system-ui,sans-serif}
+#gl{position:fixed;inset:0}
+#gl canvas{display:block;width:100%;height:100%}
+.oculto{display:none!important}
+button{font:inherit}
+button:focus-visible,a:focus-visible{outline:4px solid #ffd23f;outline-offset:3px}
+kbd{font:600 .7em "Lexend",system-ui,sans-serif;padding:1px 6px;border-radius:6px;background:rgb(0 0 0 / 12%);margin-left:6px}
+
+.cargando{position:fixed;inset:0;display:grid;place-content:center;gap:14px;text-align:center;background:#2a1a10;color:#fff3e0;z-index:50}
+.ctit{font:900 clamp(30px,6vw,52px)/1.1 "Grandstander",system-ui,sans-serif}
+#cmsg{font-size:18px}
+.cbarra{width:min(360px,80vw);height:14px;border-radius:99px;background:rgb(255 255 255 / 18%);overflow:hidden;margin:auto}
+.cbarra i{display:block;height:100%;width:0;background:#ffb020;transition:width .3s}
+
+.hud{position:fixed;top:12px;left:12px;right:12px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;z-index:10;pointer-events:none}
+.hud>*{pointer-events:auto}
+.reto{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 14px;border-radius:18px;background:rgb(255 253 246 / 94%);box-shadow:var(--sombra);max-width:min(640px,100%)}
+.reto-tit{font-weight:700;font-size:15px}
+.pasos{display:flex;gap:5px;margin:0;padding:0;list-style:none}
+.pasos li{width:22px;height:22px;border-radius:50%;border:3px solid #8a5a2b;background:#fff}
+.pasos li.hecho{background:var(--paso,#e8590c);border-color:#7a2e05}
+.reto-val{font:900 18px "Grandstander",system-ui,sans-serif;min-width:5ch}
+.botones-hud{display:flex;gap:8px}
+.hb{width:48px;height:48px;border:0;border-radius:14px;background:rgb(255 253 246 / 94%);color:var(--ink);box-shadow:var(--sombra);cursor:pointer;display:grid;place-items:center}
+
+.narra{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);width:min(760px,calc(100% - 32px));padding:14px 20px;border-radius:18px;
+  background:rgb(255 253 246 / 96%);box-shadow:var(--sombra);font-size:clamp(17px,2.4vw,21px);line-height:1.4;z-index:12}
+.narra b{display:block;font:700 15px "Lexend",system-ui,sans-serif;color:#7a2e05;margin-bottom:2px}
+.narra b:empty{display:none}
+.saltar{position:fixed;right:16px;bottom:16px;min-height:48px;padding:8px 18px;border:0;border-radius:99px;background:var(--ink);color:#fff;font-weight:700;cursor:pointer;z-index:13}
+.saltar-izq{right:auto;left:16px;background:rgb(29 43 83 / 80%)}
+.narra:not(.oculto)~#bSeguirNarra{bottom:auto;top:76px}
+
+.panel{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);width:min(720px,calc(100% - 24px));max-height:calc(100% - 90px);overflow:auto;
+  padding:16px 18px;border-radius:22px;background:var(--papel);border:4px solid var(--colegio);box-shadow:var(--sombra);z-index:20}
+.pcab{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.ptag{font-weight:700;font-size:14px;color:#55607a}
+.oir{width:44px;height:44px;border:0;border-radius:12px;background:#eef2fb;color:var(--ink);cursor:pointer;display:grid;place-items:center}
+.pq{font:700 clamp(19px,2.8vw,24px)/1.35 "Lexend",system-ui,sans-serif;margin:6px 0 12px}
+.ops{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.op{min-height:56px;padding:10px 14px;border-radius:14px;border:3px solid #c9d3ea;background:#fff;color:var(--ink);font-size:18px;font-weight:600;text-align:left;cursor:pointer;display:flex;gap:10px;align-items:center}
+.op:hover{border-color:var(--colegio)}
+.op .n{flex:none;width:30px;height:30px;border-radius:50%;background:#eef2fb;display:grid;place-items:center;font-weight:700}
+.op.bien{border-color:var(--bien);background:#e7f6ec}
+.op.mal{border-color:var(--mal);background:#fdecea;text-decoration:line-through}
+.op[disabled]{cursor:default}
+.op.tapada{visibility:hidden}
+.pista{min-height:1.4em;margin-top:8px;font-weight:600}
+.pista.bien{color:var(--bien)}.pista.mal{color:var(--mal)}
+
+.capa{position:fixed;inset:0;display:grid;place-items:center;padding:16px;background:rgb(20 12 6 / 60%);z-index:30}
+.tarjeta{width:min(560px,100%);padding:26px;border-radius:24px;background:var(--papel);border:4px solid var(--colegio);box-shadow:var(--sombra);text-align:center}
+.tarjeta h1,.tarjeta h2{margin:0 0 8px;font:900 clamp(28px,5vw,40px)/1.1 "Grandstander",system-ui,sans-serif}
+.frase{font-size:18px;line-height:1.45;margin:8px 0}
+.como{font-size:16px;color:#3b4766;margin:8px 0 0}
+.ok{font-size:54px}
+.jugar{margin-top:18px;min-width:220px;min-height:64px;padding:10px 30px;border:0;border-radius:99px;background:var(--bien);color:#fff;font:800 26px/1 "Grandstander",system-ui,sans-serif;cursor:pointer;box-shadow:0 6px 0 #0f5223}
+.jugar:active{transform:translateY(3px);box-shadow:0 3px 0 #0f5223}
+.botones{display:flex;flex-direction:column;align-items:center;gap:10px}
+.sec{color:var(--ink);font-weight:700}
+
+@media (max-width:560px){.reto-tit{width:100%}.pasos li{width:16px;height:16px;border-width:2px}.ops{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}

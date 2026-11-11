@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Historias de la Biblia</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grandstander:wght@700;900&family=Lexend:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="juego.css">
+<script src="../puente.js"></script>
+</head>
+<body>
+<div id="gl" aria-hidden="true"></div>
+
+<div id="cargando" class="cargando" role="status" aria-live="polite">
+  <div class="ctit" id="cTit">Historias de la Biblia</div>
+  <div id="cmsg">Preparando la escena…</div>
+  <div class="cbarra"><i id="cbar"></i></div>
+</div>
+
+<div id="hud" class="hud oculto">
+  <div class="reto" id="reto">
+    <span class="reto-tit" id="retoTit"></span>
+    <ol class="pasos" id="pasos" aria-label="Avance"></ol>
+    <b class="reto-val" id="retoVal"></b>
+  </div>
+  <div class="botones-hud">
+    <button class="hb" id="bSonido" type="button" aria-pressed="false" aria-label="Silenciar">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path id="sOndas" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/><path id="sMudo" d="M16 9l5 6M21 9l-5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display:none"/></svg>
+    </button>
+    <button class="hb" id="bPausa" type="button" aria-label="Pausa">
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1.5" fill="currentColor"/><rect x="14" y="5" width="4" height="14" rx="1.5" fill="currentColor"/></svg>
+    </button>
+  </div>
+</div>
+
+<div id="narra" class="narra oculto" role="status" aria-live="polite"><b id="narraQuien"></b><span id="narraTx"></span></div>
+<button id="bSeguirNarra" class="saltar oculto" type="button">Seguir <kbd>Enter</kbd></button>
+<button id="bSaltar" class="saltar saltar-izq oculto" type="button">Saltar la historia <kbd>Esc</kbd></button>
+
+<div id="panel" class="panel oculto" role="dialog" aria-modal="false" aria-labelledby="pq">
+  <div class="pcab"><span class="ptag" id="pTag"></span>
+    <button class="oir oculto" id="bOirPreg" type="button" aria-label="Escuchar otra vez">
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <div class="pq" id="pq"></div>
+  <div class="ops" id="ops"></div>
+  <div class="pista" id="pPista" aria-live="polite"></div>
+</div>
+
+<div id="inicio" class="capa oculto">
+  <div class="tarjeta">
+    <h1 id="iTit"></h1>
+    <p class="frase" id="iFrase"></p>
+    <p class="como" id="iComo"></p>
+    <button class="jugar" id="bJugar" type="button">Jugar</button>
+  </div>
+</div>
+
+<div id="pausa" class="capa oculto">
+  <div class="tarjeta">
+    <h2>Pausa</h2>
+    <button class="jugar" id="bSeguir" type="button">Seguir</button>
+  </div>
+</div>
+
+<div id="fin" class="capa oculto">
+  <div class="tarjeta">
+    <div class="ok" aria-hidden="true">🎉</div>
+    <h2 id="fTit"></h2>
+    <p class="frase" id="fSub"></p>
+    <div class="botones">
+      <button class="jugar" id="bOtra" type="button">Jugar otra vez</button>
+      <a class="sec" href="../index.html" id="bVolver">Volver a los juegos</a>
+    </div>
+  </div>
+</div>
+
+<script src="../leccion.js"></script>
+<script src="sonido.js"></script>
+<script src="juego.js"></script>
+</body>
+</html>
