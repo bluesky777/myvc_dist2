@@ -348,7 +348,8 @@ async function responder(i) {
 function preguntas() {
   let ps = LJ.activo && LJ.preguntas ? LJ.preguntas() : [];
   if (!ps.length) ps = (H.preguntas && (H.preguntas[IDIOMA] || H.preguntas.es)) || [];
-  ps = barajar(ps).slice(0, 12).map(p => {
+  // una historia que cuenta en orden (H.enOrden) no baraja sus preguntas: la de la piedra no sale antes de la cruz
+  ps = (H.enOrden ? ps : barajar(ps)).slice(0, 12).map(p => {
     // las opciones se barajan sin perder cuál es la buena
     const orden = barajar(p.opciones.map((_, i) => i));
     return { p: p.p, oir: p.oir, opciones: orden.map(i => p.opciones[i]), correcta: orden.indexOf(p.correcta) };

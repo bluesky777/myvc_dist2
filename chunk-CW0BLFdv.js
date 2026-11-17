@@ -1,0 +1,1 @@
+function r(n){if(!Number.isFinite(n))return 0;let e=Math.max(0,Math.min(100,Math.round(n)));return e===100&&n<100?99:e===0&&n>0?1:e}export{r as t};
