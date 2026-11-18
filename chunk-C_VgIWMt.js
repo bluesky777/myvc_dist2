@@ -1,0 +1,1 @@
+import{En as aC,In as bi,pi as ue}from"./chunk-BlVyccyr.js";var c=class a{permisos=bi({edicion:`myvc`,puedeHablarConMyvc:!0,marca:null}).asReadonly();marca=aC(()=>this.permisos().marca);static ɵfac=function(i){return new(i||a)};static ɵprov=ue({token:a,factory:a.ɵfac})};export{c as t};
