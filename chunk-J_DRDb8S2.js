@@ -1,1 +1,0 @@
-import{t as o}from"./chunk-CbALWFNw2.js";function u(e){return o(e)}function i(e){if(!e||Number.isNaN(e.getTime()))return null;let t=r=>String(r).padStart(2,`0`);return`${e.getFullYear()}-${t(e.getMonth()+1)}-${t(e.getDate())}`}export{u as n,i as t};
