@@ -75,7 +75,7 @@ const MAR = { cerca: 0, lejos: -36 };
 const ABRE = 4.2, ALTO = 5.5, LLANO = 0.35;   // medio ancho del camino, alto de las paredes, alto del mar llano
 const MOISES = [0.6, 1.6];
 const FARAON = [7, 32];
-let A = {}, C = {}, inicial = [], quitaOlas = null, quitaAurigas = null;
+let A = {}, C = {}, inicial = [];
 
 const CIELOS = {
   dia: { cielo: 0x9ccbe8, luz: 0.95, hemi: 0.45, sol: 0xfff0d6 },
@@ -242,12 +242,12 @@ H.montar = async function (ctx) {
     const auriga = await ctx.actor('guardia', { x: 0, z: 60, altura: 1.8, color: 0x8b6a1d });
     C.carros.push({ carro, caballo, auriga });
   }
-  quitaAurigas = ctx.cadaCuadro(() => C.carros.forEach(c => {
+  ctx.cadaCuadro(() => C.carros.forEach(c => {
     const r = c.carro.g.rotation.y;
     c.auriga.g.position.set(c.carro.g.position.x - Math.sin(r) * 0.3, 0.3, c.carro.g.position.z - Math.cos(r) * 0.3);
     c.auriga.g.rotation.y = r; c.auriga.g.visible = c.carro.g.visible;
   }));
-  quitaOlas = ctx.cadaCuadro((dt, t) => {
+  ctx.cadaCuadro((dt, t) => {
     olas(t);
     A.columna.rotation.y += dt * 0.15;
     if (C.viento.visible) C.rayas.forEach(m => { m.position.x -= m.userData.v * dt; if (m.position.x < -30) m.position.x = 30; });
