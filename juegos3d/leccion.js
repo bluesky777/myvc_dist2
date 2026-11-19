@@ -138,6 +138,39 @@
 	 * soltar() quita lo que espera (no lo que suena); callar() además para lo que suena: sólo para el silencio que pide
 	 * el jugador o el juego (mudo, pausa, pestaña oculta, salir). Jamás la voz del navegador.
 	 */
+	/* Los audios en paquetes de 10 (19 nov 2026, el servidor contaba demasiados ficheros): voz/es y voz/es-lector van
+	 * pegados de 10 en 10 en voz/<carpeta>/paquetes/<00000>.mp3, y voz/<carpeta>/paquetes.json dice qué hay en cada
+	 * uno y cuánto mide (myvc_biblioteca, tools/construir.py). Una URL .../voz/es/<nombre>.mp3 se cambia por el trozo
+	 * de su paquete (Range, como un blob:). Sin paquetes.json se usa la URL tal cual; si el nombre no está, null. */
+	var mapasVoz = {}, blobsVoz = {};
+	function mapaVoz(dir) {
+		if (!mapasVoz[dir]) mapasVoz[dir] = fetch(dir + 'paquetes.json', { credentials: 'omit' })
+			.then(function (r) { return r.ok ? r.json() : null; })
+			.then(function (j) {
+				if (!j || !j.p) return null;
+				var m = {};
+				j.p.forEach(function (paq, k) { var o = 0; paq.forEach(function (e) { m[e[0]] = { k: k, o: o, b: e[1] }; o += e[1]; }); });
+				return m;
+			}).catch(function () { return null; });
+		return mapasVoz[dir];
+	}
+	function resolverVoz(url) {
+		var m = /^(.*\/voz\/(?:es|es-lector)\/)([^/]+)\.mp3$/.exec(url || '');
+		if (!m) return Promise.resolve(url);
+		if (blobsVoz[url]) return blobsVoz[url];
+		blobsVoz[url] = mapaVoz(m[1]).then(function (mapa) {
+			if (!mapa) return url;
+			var l = mapa[m[2]];
+			if (!l) return null;
+			var paq = m[1] + 'paquetes/' + ('0000' + l.k).slice(-5) + '.mp3';
+			var cortar = function (r) { return r.arrayBuffer().then(function (b) { return r.status === 206 ? b : b.slice(l.o, l.o + l.b); }); };
+			return fetch(paq, { credentials: 'omit', headers: { Range: 'bytes=' + l.o + '-' + (l.o + l.b - 1) } })
+				.then(function (r) { if (!r.ok) throw r; return cortar(r); })
+				.catch(function () { return fetch(paq, { credentials: 'omit' }).then(function (r) { return r.ok ? cortar(r) : null; }); })
+				.then(function (b) { return b ? URL.createObjectURL(new Blob([b], { type: 'audio/mpeg' })) : null; });
+		}).catch(function () { return null; });
+		return blobsVoz[url];
+	}
 	var cola = (function () {
 		var fila = [], actual = null, respiro = 0;
 		function cerrar(it, r) { if (!it.listo) { it.listo = true; it.fin(r); } }
@@ -164,10 +197,14 @@
 			var probar = function (k) {
 				if (!actual || actual.it !== it) return;
 				if (k >= urls.length) { actual.audio = null; mudo(); return; }
-				var a = new Audio(urls[k]); actual.audio = a;
-				a.onended = function () { if (actual && actual.audio === a) acabar(it, true); };
-				a.onerror = function () { if (actual && actual.audio === a) probar(k + 1); };
-				a.play().catch(function (e) { if (e && e.name === 'NotAllowedError' && actual && actual.audio === a) acabar(it, false); }); // sin MP3 lo resuelve onerror
+				resolverVoz(urls[k]).then(function (u) {  // es / es-lector: el trozo de su paquete
+					if (!actual || actual.it !== it) return;
+					if (!u) { probar(k + 1); return; }
+					var a = new Audio(u); actual.audio = a;
+					a.onended = function () { if (actual && actual.audio === a) acabar(it, true); };
+					a.onerror = function () { if (actual && actual.audio === a) probar(k + 1); };
+					a.play().catch(function (e) { if (e && e.name === 'NotAllowedError' && actual && actual.audio === a) acabar(it, false); }); // sin MP3 lo resuelve onerror
+				});
 			};
 			probar(0);
 		}
