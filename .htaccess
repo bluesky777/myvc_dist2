@@ -91,6 +91,14 @@ AddDefaultCharset utf-8
 </IfModule>
 
 
+# `.mjs` COMO JAVASCRIPT. El trabajador de pdf.js (`pdfjs/pdf.worker.min.mjs`, para
+# «Pasar planillas escaneadas») es un módulo, y el navegador NO arranca un módulo que
+# llegue con otro tipo: un Apache cuyo `mime.types` no conozca `.mjs` lo manda como
+# `application/octet-stream` y el PDF no se abre, sin más error que uno en consola.
+<IfModule mod_mime.c>
+    AddType text/javascript .mjs
+</IfModule>
+
 # ##############################################################################
 # # RENDIMIENTO                                                                #
 # ##############################################################################
