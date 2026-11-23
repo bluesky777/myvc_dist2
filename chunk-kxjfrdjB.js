@@ -1,0 +1,1 @@
+import{a as ke,i as W,n as Re,r as Te,t as Qe}from"./chunk-CscJYMCu.js";export{Te as leerPalabras,Qe as montar,W as nombreFraccion,ke as palabras,Re as ruidos};
