@@ -1,0 +1,1 @@
+import{b as EV,d as C,ni as ro}from"./chunk-BlVyccyr.js";function d(r){let l=C(ro);EV(()=>{r();let e=l.nativeElement.querySelector(`nav`),t=e?.querySelector(`[aria-pressed="true"]`);if(!e||!t||e.scrollWidth<=e.clientWidth)return;let c=t.getBoundingClientRect().left-e.getBoundingClientRect().left;e.scrollLeft+=c-(e.clientWidth-t.offsetWidth)/2})}export{d as t};
