@@ -1,0 +1,1 @@
+var t=l=>`planilla_ultima_${l}`;function r(l,n){try{localStorage.setItem(t(l),String(n))}catch{}}function e(l){if(!l)return null;try{let n=Number(localStorage.getItem(t(l)));return Number.isFinite(n)&&n>0?n:null}catch{return null}}export{r as n,e as t};
