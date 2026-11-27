@@ -1,0 +1,1 @@
+function u(n){e(`requested_alumnos`,n),e(`requested_alumno`,``)}function r(n){e(`requested_alumno`,n?[n]:[]),e(`requested_alumnos`,``)}function d(){e(`requested_alumno`,``),e(`requested_alumnos`,``)}function e(n,o){try{document.cookie=`${n}=`+encodeURIComponent(JSON.stringify(o))+`; path=/`}catch{}}export{r as n,u as r,d as t};
